@@ -129,11 +129,25 @@
                         <td>
                             <div class="action-btns-cell">
                                 <button class="btn-icon" title="Edit Produk"
-                                        onclick="alert('Fitur Edit akan dibuat di Sub-Fase 1.4')">
+                                        data-produk="{{ json_encode([
+                                            'id_produk'     => $p->id_produk,
+                                            'barcode'       => $p->barcode,
+                                            'nama_produk'   => $p->nama_produk,
+                                            'id_kategori'   => $p->id_kategori,
+                                            'satuan'        => $p->satuan,
+                                            'harga_beli'    => $p->harga_beli,
+                                            'harga_jual'    => $p->harga_jual,
+                                            'stok_sekarang' => $p->stok_sekarang,
+                                            'min_stok'      => $p->min_stok,
+                                            'foto_produk'   => $p->foto_produk,
+                                        ]) }}"
+                                        onclick="openEditModal(this)">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
                                 <button class="btn-icon danger" title="Hapus Produk"
-                                        onclick="alert('Fitur Hapus akan dibuat di Sub-Fase 1.4')">
+                                        data-id="{{ $p->id_produk }}"
+                                        data-nama="{{ $p->nama_produk }}"
+                                        onclick="openDeleteModal(this)">
                                     <i class="fa-solid fa-trash"></i>
                                 </button>
                             </div>
@@ -387,6 +401,203 @@
     </div>
 </div>
 
+{{-- ═══════════════════════════════════════════
+     MODAL: EDIT PRODUK
+     ═══════════════════════════════════════════ --}}
+<div class="modal-overlay" id="modalEditProduk">
+    <div class="modal-card">
+
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-pen-to-square"></i> Edit Produk</h3>
+            <button type="button" class="btn-close-modal" onclick="closeEditModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form method="POST"
+              action=""
+              enctype="multipart/form-data"
+              id="formEditProduk"
+              style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
+
+            @csrf
+            @method('PUT')
+
+            <div class="modal-body">
+
+                {{-- Upload Foto Produk --}}
+                <div class="form-group">
+                    <label>Foto Produk (Tampil di POS Kasir)</label>
+                    <div class="image-upload-box" id="editFotoDropzone">
+                        <i class="fa-solid fa-cloud-arrow-up" id="editFotoIcon"></i>
+                        <span id="editFotoText">Klik atau Tarik Foto Baru ke Sini</span>
+                        <small id="editFotoHint">Biarkan kosong jika tidak ingin ganti foto</small>
+                        <img id="editFotoPreviewImg" src="" alt="Preview" style="display: none;">
+                        <input type="file"
+                               name="foto_produk"
+                               id="editFotoInput"
+                               accept="image/jpeg,image/jpg,image/png,image/webp"
+                               class="file-input-hidden"
+                               onchange="previewFotoEdit(this)">
+                    </div>
+                    @error('foto_produk')
+                        <div class="field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                {{-- Row 1: Barcode + Kategori --}}
+                <div class="form-grid-2col">
+                    <div class="form-group">
+                        <label>Kode / SKU Barcode <span class="required">*</span></label>
+                        <div class="input-icon-wrapper">
+                            <i class="fa-solid fa-barcode"></i>
+                            <input type="text"
+                                   name="barcode"
+                                   id="editBarcode"
+                                   placeholder="Contoh: BRS-006"
+                                   required>
+                        </div>
+                        @error('barcode')
+                            <div class="field-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label>Kategori Produk <span class="required">*</span></label>
+
+                        {{-- Mode 1: Dropdown --}}
+                        <div id="editKategoriModeExisting">
+                            <select name="id_kategori" id="editSelectKategori">
+                                <option value="">Pilih Kategori...</option>
+                                @foreach ($kategoriList as $kat)
+                                    <option value="{{ $kat->id_kategori }}">{{ $kat->nama_kategori }}</option>
+                                @endforeach
+                            </select>
+                            <div style="font-size: 10px; margin-top: 4px;">
+                                <a href="#" onclick="switchKategoriModeEdit('new'); return false;"
+                                   style="color: #429198; font-weight: 700; text-decoration: none;">
+                                    <i class="fa-solid fa-plus"></i> Atau tambah kategori baru
+                                </a>
+                            </div>
+                        </div>
+
+                        {{-- Mode 2: Kategori Baru --}}
+                        <div id="editKategoriModeNew" style="display: none;">
+                            <input type="text"
+                                   name="new_kategori"
+                                   id="editInputKategoriBaru"
+                                   placeholder="Misal: Frozen Food">
+                            <div style="font-size: 10px; margin-top: 4px;">
+                                <a href="#" onclick="switchKategoriModeEdit('existing'); return false;"
+                                   style="color: #64748b; font-weight: 700; text-decoration: none;">
+                                    <i class="fa-solid fa-arrow-left"></i> Kembali pilih dari daftar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Row 2: Nama Produk --}}
+                <div class="form-group">
+                    <label>Nama Produk Lengkap <span class="required">*</span></label>
+                    <input type="text" name="nama_produk" id="editNamaProduk" placeholder="Masukkan nama produk..." required>
+                </div>
+
+                {{-- Row 3: Harga Beli + Harga Jual --}}
+                <div class="form-grid-2col">
+                    <div class="form-group">
+                        <label>Harga Beli / Modal (Rp) <span class="required">*</span></label>
+                        <input type="number" name="harga_beli" id="editHargaBeli" placeholder="0" min="0" step="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Harga Jual Kasir (Rp) <span class="required">*</span></label>
+                        <input type="number" name="harga_jual" id="editHargaJual" placeholder="0" min="0" step="100" required>
+                    </div>
+                </div>
+
+                {{-- Row 4: Stok + Satuan --}}
+                <div class="form-grid-2col">
+                    <div class="form-group">
+                        <label>Jumlah Stok <span class="required">*</span></label>
+                        <input type="number" name="stok_sekarang" id="editStok" placeholder="0" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Satuan Barang <span class="required">*</span></label>
+                        <select name="satuan" id="editSatuan" required>
+                            <option value="">Pilih Satuan...</option>
+                            @php
+                                $satuanList = ['Pcs', 'Sak', 'Kg', 'Dus', 'Botol', 'Pouch', 'Kaleng', 'Bungkus', 'Pak', 'Box', 'Liter'];
+                            @endphp
+                            @foreach ($satuanList as $sat)
+                                <option value="{{ $sat }}">{{ $sat }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                {{-- Row 5: Min Stok --}}
+                <div class="form-group">
+                    <label>Batas Minimal Stok <span class="required">*</span></label>
+                    <input type="number" name="min_stok" id="editMinStok" placeholder="5" min="0" required>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeEditModal()">Batal</button>
+                <button type="submit" class="btn-save">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+{{-- ═══════════════════════════════════════════
+     MODAL: KONFIRMASI HAPUS PRODUK
+     ═══════════════════════════════════════════ --}}
+<div class="modal-overlay" id="modalHapusProduk">
+    <div class="modal-card modal-card-sm">
+
+        <div class="modal-header">
+            <h3 style="color: #dc2626;">
+                <i class="fa-solid fa-triangle-exclamation"></i> Konfirmasi Hapus
+            </h3>
+            <button type="button" class="btn-close-modal" onclick="closeDeleteModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <div class="modal-info-box warning">
+                <p style="font-weight: 700; font-size: 12px; margin-bottom: 6px;">
+                    Anda yakin ingin menghapus produk ini?
+                </p>
+                <p style="font-size: 11px;">
+                    Produk: <strong id="deleteNamaProduk">-</strong>
+                </p>
+                <p style="font-size: 10px; margin-top: 8px; opacity: 0.8;">
+                    Tindakan ini tidak bisa dibatalkan. Foto produk juga akan dihapus permanen.
+                </p>
+            </div>
+        </div>
+
+        <form method="POST" action="" id="formHapusProduk" style="display: contents;">
+            @csrf
+            @method('DELETE')
+
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeDeleteModal()">Batal</button>
+                <button type="submit" class="btn-danger">
+                    <i class="fa-solid fa-trash"></i> Ya, Hapus
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -585,5 +796,138 @@
             switchKategoriMode('new');
         });
     @endif
+
+    // ═══════════════════════════════════════════
+    // MODAL EDIT PRODUK
+    // ═══════════════════════════════════════════
+    function openEditModal(btn) {
+        const p = JSON.parse(btn.dataset.produk);
+
+        // Isi field form
+        document.getElementById('editBarcode').value      = p.barcode || '';
+        document.getElementById('editNamaProduk').value   = p.nama_produk || '';
+        document.getElementById('editHargaBeli').value    = p.harga_beli || '';
+        document.getElementById('editHargaJual').value    = p.harga_jual || '';
+        document.getElementById('editStok').value         = p.stok_sekarang || 0;
+        document.getElementById('editMinStok').value      = p.min_stok || 10;
+        document.getElementById('editSatuan').value       = p.satuan || '';
+
+        // Set kategori dropdown
+        const selectKat = document.getElementById('editSelectKategori');
+        selectKat.value = p.id_kategori || '';
+        switchKategoriModeEdit('existing');
+
+        // Set form action
+        document.getElementById('formEditProduk').action = `/produk/${p.id_produk}`;
+
+        // Preview foto existing (kalau ada)
+        const editPreview = document.getElementById('editFotoPreviewImg');
+        const editIcon    = document.getElementById('editFotoIcon');
+        const editText    = document.getElementById('editFotoText');
+        const editHint    = document.getElementById('editFotoHint');
+
+        // Reset input file
+        document.getElementById('editFotoInput').value = '';
+
+        if (p.foto_produk) {
+            editPreview.src = `/storage/${p.foto_produk}`;
+            editPreview.style.display = 'block';
+            editIcon.style.display = 'none';
+            editText.textContent = 'Foto saat ini';
+            editHint.textContent = 'Klik untuk ganti foto (otomatis dikompres ke WebP)';
+        } else {
+            editPreview.src = '';
+            editPreview.style.display = 'none';
+            editIcon.style.display = 'block';
+            editText.textContent = 'Klik atau Tarik Foto Baru ke Sini';
+            editHint.textContent = 'Format: JPG, PNG, WEBP (Maks. 2MB)';
+        }
+
+        // Tampilkan modal
+        document.getElementById('modalEditProduk').classList.add('active');
+    }
+
+    function closeEditModal() {
+        document.getElementById('modalEditProduk').classList.remove('active');
+    }
+
+    function switchKategoriModeEdit(mode) {
+        const existing = document.getElementById('editKategoriModeExisting');
+        const newMode  = document.getElementById('editKategoriModeNew');
+        const selectEl = document.getElementById('editSelectKategori');
+        const inputEl  = document.getElementById('editInputKategoriBaru');
+
+        if (mode === 'new') {
+            existing.style.display = 'none';
+            newMode.style.display = 'block';
+            selectEl.value = '';
+            inputEl.focus();
+        } else {
+            existing.style.display = 'block';
+            newMode.style.display = 'none';
+            inputEl.value = '';
+        }
+    }
+
+    function previewFotoEdit(input) {
+        const preview = document.getElementById('editFotoPreviewImg');
+        const icon    = document.getElementById('editFotoIcon');
+        const text    = document.getElementById('editFotoText');
+        const hint    = document.getElementById('editFotoHint');
+        const box     = document.getElementById('editFotoDropzone');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                icon.style.display = 'none';
+                text.textContent = input.files[0].name;
+                text.style.color = '#16a34a';
+                hint.textContent = '✓ Foto baru siap diupload';
+                hint.style.color = '#16a34a';
+                box.style.borderColor = '#16a34a';
+                box.style.backgroundColor = '#f0fdf4';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // ═══════════════════════════════════════════
+    // MODAL HAPUS PRODUK
+    // ═══════════════════════════════════════════
+    function openDeleteModal(btn) {
+        const id   = btn.dataset.id;
+        const nama = btn.dataset.nama;
+
+        document.getElementById('deleteNamaProduk').textContent = nama;
+        document.getElementById('formHapusProduk').action = `/produk/${id}`;
+
+        document.getElementById('modalHapusProduk').classList.add('active');
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('modalHapusProduk').classList.remove('active');
+    }
+
+    // ═══════════════════════════════════════════
+    // EVENT LISTENER TAMBAHAN
+    // ═══════════════════════════════════════════
+
+    // Tutup Edit modal dengan klik overlay / ESC
+    document.getElementById('modalEditProduk').addEventListener('click', function (e) {
+        if (e.target === this) closeEditModal();
+    });
+
+    document.getElementById('modalHapusProduk').addEventListener('click', function (e) {
+        if (e.target === this) closeDeleteModal();
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeEditModal();
+            closeDeleteModal();
+        }
+    });
 </script>
 @endpush

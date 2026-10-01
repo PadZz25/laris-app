@@ -744,7 +744,80 @@
         }
 
         .btn-save:hover { background-color: #162F32; }
-}
+
+
+        /* Modal ukuran kecil (konfirmasi hapus) */
+        .modal-card-sm {
+            width: 420px !important;
+        }
+
+        /* Tombol Danger (untuk hapus) */
+        .btn-danger {
+            background-color: #dc2626;
+            color: #ffffff;
+            border: none;
+            padding: 9px 20px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+            box-shadow: 0 4px 10px rgba(220, 38, 38, 0.25);
+            transition: background 0.15s, transform 0.15s;
+        }
+
+        .btn-danger:hover {
+            background-color: #b91c1c;
+            transform: translateY(-1px);
+        }
+
+        /* Info box kecil di dalam modal */
+        .modal-info-box {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 11px;
+            color: #475569;
+            border-left: 3px solid #429198;
+            line-height: 1.6;
+        }
+
+        .modal-info-box.warning {
+            background: #fef2f2;
+            border-left-color: #dc2626;
+            color: #991b1b;
+        }
+
+        /* Foto existing di modal edit */
+        .foto-existing {
+            position: relative;
+            display: inline-block;
+            margin-top: 8px;
+        }
+
+        .foto-existing img {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 10px;
+            object-fit: contain;
+            display: block;
+            border: 2px solid #e2e8f0;
+        }
+
+        .foto-existing .badge-existing {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(15, 23, 42, 0.85);
+            color: #ffffff;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
     </style>
 
     @stack('styles')
@@ -760,6 +833,13 @@
             <div class="flash-message flash-success">
                 <i class="fa-solid fa-circle-check"></i>
                 {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="flash-message flash-error">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                {{ session('error') }}
             </div>
         @endif
 
