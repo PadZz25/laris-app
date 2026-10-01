@@ -4,8 +4,8 @@
 @section('page-title', 'Dashboard')
 
 @section('content')
-    <div style="background: #ffffff; border-radius: 16px; padding: 40px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-        <div style="font-size: 60px; color: #429198; margin-bottom: 16px;">
+    <div class="page-scroll">
+        <div style="background: #ffffff; border-radius: 16px; padding: 40px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
             <i class="fa-solid fa-rocket"></i>
         </div>
         <h2 style="font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">

@@ -4,69 +4,197 @@
 @section('page-title', 'Barang & Stok')
 
 @section('content')
-    <div style="background: #ffffff; border-radius: 16px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
 
-        <h2 style="font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 14px;">
-            🧪 Test Data (Sub-Fase 1.1)
-        </h2>
+    {{-- ═══════════════════════════════════════════
+         STATS CARDS
+         ═══════════════════════════════════════════ --}}
+    <section class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-info">
+                <div class="stat-label">Total Jenis Produk</div>
+                <div class="stat-value">{{ $stats['total_jenis'] }} Barang</div>
+            </div>
+            <div class="stat-icon blue"><i class="fa-solid fa-boxes-stacked"></i></div>
+        </div>
 
-        <p style="font-size: 12px; color: #64748b; margin-bottom: 16px;">
-            Kalau tabel di bawah ini muncul dengan data, berarti backend sudah terhubung dengan benar.
-        </p>
+        <div class="stat-card">
+            <div class="stat-info">
+                <div class="stat-label">Stok Menipis</div>
+                <div class="stat-value">{{ $stats['stok_menipis'] }} Produk</div>
+            </div>
+            <div class="stat-icon yellow"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        </div>
 
-        {{-- Stats --}}
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;">
-            <div style="background: #e0f2fe; padding: 12px; border-radius: 10px;">
-                <div style="font-size: 10px; font-weight: 700; color: #0284c7;">TOTAL JENIS</div>
-                <div style="font-size: 20px; font-weight: 800; color: #0f172a;">{{ $stats['total_jenis'] }} Produk</div>
+        <div class="stat-card">
+            <div class="stat-info">
+                <div class="stat-label">Stok Habis</div>
+                <div class="stat-value">{{ $stats['stok_habis'] }} Produk</div>
             </div>
-            <div style="background: #fef9c3; padding: 12px; border-radius: 10px;">
-                <div style="font-size: 10px; font-weight: 700; color: #a16207;">STOK MENIPIS</div>
-                <div style="font-size: 20px; font-weight: 800; color: #0f172a;">{{ $stats['stok_menipis'] }} Produk</div>
+            <div class="stat-icon red"><i class="fa-solid fa-circle-xmark"></i></div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-info">
+                <div class="stat-label">Total Nilai Aset Stok</div>
+                <div class="stat-value">Rp {{ number_format($stats['total_aset'], 0, ',', '.') }}</div>
             </div>
-            <div style="background: #fee2e2; padding: 12px; border-radius: 10px;">
-                <div style="font-size: 10px; font-weight: 700; color: #b91c1c;">STOK HABIS</div>
-                <div style="font-size: 20px; font-weight: 800; color: #0f172a;">{{ $stats['stok_habis'] }} Produk</div>
+            <div class="stat-icon green"><i class="fa-solid fa-vault"></i></div>
+        </div>
+    </section>
+
+    {{-- ═══════════════════════════════════════════
+         CONTROL & FILTER CARD
+         ═══════════════════════════════════════════ --}}
+    <section class="control-card">
+        <div class="control-left">
+            <div class="search-wrapper">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input
+                    type="text"
+                    id="searchInput"
+                    class="search-input"
+                    placeholder="Cari Nama Barang / Kode Barcode..."
+                    oninput="filterProduk()"
+                >
             </div>
-            <div style="background: #dcfce7; padding: 12px; border-radius: 10px;">
-                <div style="font-size: 10px; font-weight: 700; color: #16a34a;">TOTAL ASET</div>
-                <div style="font-size: 20px; font-weight: 800; color: #0f172a;">Rp {{ number_format($stats['total_aset'], 0, ',', '.') }}</div>
+            <div class="category-group" id="categoryPills">
+                <div class="cat-pill active" data-kategori="Semua" onclick="setKategori('Semua', this)">Semua</div>
+                @foreach ($kategoriList as $kat)
+                    <div class="cat-pill" data-kategori="{{ $kat->nama_kategori }}" onclick="setKategori('{{ $kat->nama_kategori }}', this)">
+                        {{ $kat->nama_kategori }}
+                    </div>
+                @endforeach
             </div>
         </div>
 
-        {{-- Tabel Produk --}}
-        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+        <button class="btn-primary" onclick="alert('Fitur Tambah Produk akan dibuat di Sub-Fase 1.3')">
+            <i class="fa-solid fa-plus"></i> Tambah Barang Baru
+        </button>
+    </section>
+
+{{-- ═══════════════════════════════════════════
+     DATA TABLE PRODUK (full-height, scroll di dalam)
+     ═══════════════════════════════════════════ --}}
+<section class="table-card">
+    <div class="table-card-scroll">
+        <table class="data-table" id="produkTable">
             <thead>
-                <tr style="background: #f8fafc;">
-                    <th style="padding: 10px; text-align: left;">Barcode</th>
-                    <th style="padding: 10px; text-align: left;">Nama Produk</th>
-                    <th style="padding: 10px; text-align: left;">Kategori</th>
-                    <th style="padding: 10px; text-align: left;">Satuan</th>
-                    <th style="padding: 10px; text-align: right;">Harga Beli</th>
-                    <th style="padding: 10px; text-align: right;">Harga Jual</th>
-                    <th style="padding: 10px; text-align: center;">Stok</th>
+                <tr>
+                    <th>Kode / SKU</th>
+                    <th>Nama Produk</th>
+                    <th>Kategori</th>
+                    <th>Satuan</th>
+                    <th style="text-align: right;">Harga Beli</th>
+                    <th style="text-align: right;">Harga Jual</th>
+                    <th style="text-align: center;">Sisa Stok</th>
+                    <th style="text-align: center;">Status</th>
+                    <th style="text-align: center;">Aksi</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="produkTbody">
                 @forelse ($produk as $p)
-                    <tr style="border-bottom: 1px solid #f1f5f9;">
-                        <td style="padding: 10px; font-family: monospace;">{{ $p->barcode }}</td>
-                        <td style="padding: 10px; font-weight: 700;">{{ $p->nama_produk }}</td>
-                        <td style="padding: 10px;">{{ $p->kategori->nama_kategori ?? '-' }}</td>
-                        <td style="padding: 10px;">{{ $p->satuan }}</td>
-                        <td style="padding: 10px; text-align: right;">Rp {{ number_format($p->harga_beli, 0, ',', '.') }}</td>
-                        <td style="padding: 10px; text-align: right;">Rp {{ number_format($p->harga_jual, 0, ',', '.') }}</td>
-                        <td style="padding: 10px; text-align: center; font-weight: 800;">{{ $p->stok_sekarang }}</td>
+                    @php
+                        if ($p->isStokHabis()) {
+                            $badgeClass = 'badge-danger';
+                            $badgeIcon = 'fa-xmark';
+                            $badgeText = 'Habis';
+                            $stokColor = '#dc2626';
+                        } elseif ($p->isStokMenipis()) {
+                            $badgeClass = 'badge-warning';
+                            $badgeIcon = 'fa-triangle-exclamation';
+                            $badgeText = 'Restock';
+                            $stokColor = '#ca8a04';
+                        } else {
+                            $badgeClass = 'badge-safe';
+                            $badgeIcon = 'fa-check';
+                            $badgeText = 'Aman';
+                            $stokColor = '#16a34a';
+                        }
+                    @endphp
+                    <tr data-kategori="{{ $p->kategori->nama_kategori ?? 'Tanpa Kategori' }}">
+                        <td><span class="code-badge">{{ $p->barcode ?? '-' }}</span></td>
+                        <td style="font-weight: 800;">{{ $p->nama_produk }}</td>
+                        <td>{{ $p->kategori->nama_kategori ?? '-' }}</td>
+                        <td>{{ $p->satuan ?? '-' }}</td>
+                        <td style="text-align: right;">Rp {{ number_format($p->harga_beli, 0, ',', '.') }}</td>
+                        <td style="text-align: right;">Rp {{ number_format($p->harga_jual, 0, ',', '.') }}</td>
+                        <td style="text-align: center; font-weight: 800; color: {{ $stokColor }};">
+                            {{ $p->stok_sekarang }} {{ $p->satuan ?? '' }}
+                        </td>
+                        <td style="text-align: center;">
+                            <span class="badge {{ $badgeClass }}">
+                                <i class="fa-solid {{ $badgeIcon }}"></i> {{ $badgeText }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-btns-cell">
+                                <button class="btn-icon" title="Edit Produk"
+                                        onclick="alert('Fitur Edit akan dibuat di Sub-Fase 1.4')">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button class="btn-icon danger" title="Hapus Produk"
+                                        onclick="alert('Fitur Hapus akan dibuat di Sub-Fase 1.4')">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" style="padding: 20px; text-align: center; color: #94a3b8;">
-                            Tidak ada produk.
+                        <td colspan="9">
+                            <div class="empty-state">
+                                <i class="fa-solid fa-box-open"></i>
+                                Belum ada produk. Klik "Tambah Barang Baru" untuk mulai.
+                            </div>
                         </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
-
     </div>
+
+    {{-- Footer info di dalam card --}}
+    <div class="table-card-footer">
+        Menampilkan <strong id="visibleCount">{{ $produk->count() }}</strong>
+        dari <strong>{{ $produk->count() }}</strong> produk
+    </div>
+</section>
+
 @endsection
+
+@push('scripts')
+<script>
+    let activeKategori = 'Semua';
+
+    function setKategori(kategori, el) {
+        activeKategori = kategori;
+        // Update visual pill
+        document.querySelectorAll('#categoryPills .cat-pill').forEach(p => p.classList.remove('active'));
+        el.classList.add('active');
+        filterProduk();
+    }
+
+    function filterProduk() {
+        const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+        const rows = document.querySelectorAll('#produkTbody tr[data-kategori]');
+        let visible = 0;
+
+        rows.forEach(row => {
+            const rowText = row.innerText.toLowerCase();
+            const rowKat = row.dataset.kategori;
+
+            const matchSearch = keyword === '' || rowText.includes(keyword);
+            const matchKat = activeKategori === 'Semua' || rowKat === activeKategori;
+
+            if (matchSearch && matchKat) {
+                row.style.display = '';
+                visible++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        document.getElementById('visibleCount').textContent = visible;
+    }
+</script>
+@endpush

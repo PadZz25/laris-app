@@ -12,40 +12,19 @@ class ProdukController extends Controller
     /**
      * Halaman index: daftar semua produk + stats.
      */
-    public function index(Request $request)
+    public function index()
     {
-        // ─────────────────────────────────────────────
-        // Query dasar produk + relasi kategori
-        // ─────────────────────────────────────────────
-        $query = Produk::with('kategori');
-
-        // Filter by search (nama produk / barcode)
-        if ($search = $request->input('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('nama_produk', 'like', "%{$search}%")
-                  ->orWhere('barcode', 'like', "%{$search}%");
-            });
-        }
-
-        // Filter by kategori
-        if ($kategoriId = $request->input('kategori')) {
-            $query->where('id_kategori', $kategoriId);
-        }
-
-        $produk = $query->orderBy('id_produk', 'asc')->get();
-
-        // ─────────────────────────────────────────────
-        // Stats untuk kartu ringkasan di atas tabel
-        // ─────────────────────────────────────────────
-        $stats = [
-            'total_jenis'    => Produk::count(),
-            'stok_menipis'   => Produk::stokMenipis()->count(),
-            'stok_habis'     => Produk::stokHabis()->count(),
-            'total_aset'     => Produk::selectRaw('SUM(stok_sekarang * harga_beli) as total')->value('total') ?? 0,
-        ];
-
-        // Semua kategori untuk filter dropdown / pill
+            // Load semua produk + relasi kategori (client-side filter)
+        $produk = Produk::with('kategori')->orderBy('id_produk')->get();
         $kategoriList = KategoriProduk::orderBy('nama_kategori')->get();
+
+        // Stats untuk kartu ringkasan
+        $stats = [
+            'total_jenis'  => Produk::count(),
+            'stok_menipis' => Produk::stokMenipis()->count(),
+            'stok_habis'   => Produk::stokHabis()->count(),
+            'total_aset'   => Produk::selectRaw('SUM(stok_sekarang * harga_beli) as total')->value('total') ?? 0,
+        ];
 
         return view('produk.index', compact('produk', 'stats', 'kategoriList'));
     }

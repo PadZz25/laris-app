@@ -8,7 +8,6 @@
 
     <div class="header-widgets">
         <div class="icon-btn"><i class="fa-regular fa-bell"></i></div>
-
         <div class="time-pill">
             <div>Waktu</div>
             <div class="time-val" id="live-clock">--:--:-- WIB</div>
