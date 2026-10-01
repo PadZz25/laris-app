@@ -67,7 +67,7 @@
             </div>
         </div>
 
-        <button class="btn-primary" onclick="alert('Fitur Tambah Produk akan dibuat di Sub-Fase 1.3')">
+        <button type="button" class="btn-primary" onclick="openModalTambah()">
             <i class="fa-solid fa-plus"></i> Tambah Barang Baru
         </button>
     </section>
@@ -160,9 +160,169 @@
     </div>
 </section>
 
+{{-- ═══════════════════════════════════════════
+     MODAL: TAMBAH PRODUK BARU
+     ═══════════════════════════════════════════ --}}
+<div class="modal-overlay" id="modalTambahProduk">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-plus-circle"></i> Tambah Barang Baru</h3>
+            <button type="button" class="btn-close-modal" onclick="closeModalTambah()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form method="POST" action="{{ route('produk.store') }}" id="formTambahProduk">
+            @csrf
+
+            {{-- Baris 1: Barcode & Kategori --}}
+            <div class="form-grid-2col">
+                <div class="form-group">
+                    <label>Kode / SKU Barcode <span class="required">*</span></label>
+                    <input type="text"
+                           name="barcode"
+                           value="{{ old('barcode') }}"
+                           placeholder="Misal: BRS-006"
+                           class="@error('barcode') error @enderror"
+                           required>
+                    @error('barcode')
+                        <div class="field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label>Kategori Produk <span class="required">*</span></label>
+                    <select name="id_kategori" class="@error('id_kategori') error @enderror" required>
+                        <option value="">-- Pilih Kategori --</option>
+                        @foreach ($kategoriList as $kat)
+                            <option value="{{ $kat->id_kategori }}"
+                                {{ old('id_kategori') == $kat->id_kategori ? 'selected' : '' }}>
+                                {{ $kat->nama_kategori }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('id_kategori')
+                        <div class="field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+
+            {{-- Baris 2: Nama Produk --}}
+            <div class="form-group">
+                <label>Nama Produk Lengkap <span class="required">*</span></label>
+                <input type="text"
+                       name="nama_produk"
+                       value="{{ old('nama_produk') }}"
+                       placeholder="Misal: Kopi Kapal Api Special 165g"
+                       class="@error('nama_produk') error @enderror"
+                       required>
+                @error('nama_produk')
+                    <div class="field-error">{{ $message }}</div>
+                @enderror
+            </div>
+
+            {{-- Baris 3: Satuan & Stok Awal --}}
+            <div class="form-grid-2col">
+                <div class="form-group">
+                    <label>Satuan <span class="required">*</span></label>
+                    <select name="satuan" class="@error('satuan') error @enderror" required>
+                        <option value="">-- Pilih Satuan --</option>
+                        @php
+                            $satuanList = ['Pcs', 'Sak', 'Kg', 'Dus', 'Botol', 'Pouch', 'Kaleng', 'Bungkus', 'Pak', 'Box', 'Liter'];
+                        @endphp
+                        @foreach ($satuanList as $sat)
+                            <option value="{{ $sat }}" {{ old('satuan') == $sat ? 'selected' : '' }}>
+                                {{ $sat }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('satuan')
+                        <div class="field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label>Stok Awal <span class="required">*</span></label>
+                    <input type="number"
+                           name="stok_sekarang"
+                           value="{{ old('stok_sekarang', 0) }}"
+                           min="0"
+                           placeholder="0"
+                           class="@error('stok_sekarang') error @enderror"
+                           required>
+                    @error('stok_sekarang')
+                        <div class="field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+
+            {{-- Baris 4: Harga Beli & Harga Jual --}}
+            <div class="form-grid-2col">
+                <div class="form-group">
+                    <label>Harga Beli / Modal <span class="required">*</span></label>
+                    <input type="number"
+                           name="harga_beli"
+                           value="{{ old('harga_beli') }}"
+                           min="0"
+                           step="100"
+                           placeholder="Rp 0"
+                           class="@error('harga_beli') error @enderror"
+                           required>
+                    @error('harga_beli')
+                        <div class="field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label>Harga Jual (Kasir) <span class="required">*</span></label>
+                    <input type="number"
+                           name="harga_jual"
+                           value="{{ old('harga_jual') }}"
+                           min="0"
+                           step="100"
+                           placeholder="Rp 0"
+                           class="@error('harga_jual') error @enderror"
+                           required>
+                    @error('harga_jual')
+                        <div class="field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+
+            {{-- Baris 5: Batas Minimal Stok --}}
+            <div class="form-group">
+                <label>Batas Minimal Stok (Alert Reorder) <span class="required">*</span></label>
+                <input type="number"
+                       name="min_stok"
+                       value="{{ old('min_stok', 10) }}"
+                       min="0"
+                       placeholder="10"
+                       class="@error('min_stok') error @enderror"
+                       required>
+                <div style="font-size: 10px; color: #94a3b8; margin-top: 2px;">
+                    Akan muncul peringatan jika stok mencapai angka ini.
+                </div>
+                @error('min_stok')
+                    <div class="field-error">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeModalTambah()">
+                    Batal
+                </button>
+                <button type="submit" class="btn-submit">
+                    <i class="fa-solid fa-save"></i> Simpan Produk
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
+
 <script>
     let activeKategori = 'Semua';
 
@@ -196,5 +356,37 @@
 
         document.getElementById('visibleCount').textContent = visible;
     }
+
+    // ═══════════════════════════════════════════
+    // MODAL TAMBAH PRODUK
+    // ═══════════════════════════════════════════
+    function openModalTambah() {
+        document.getElementById('modalTambahProduk').classList.add('active');
+    }
+
+    function closeModalTambah() {
+        document.getElementById('modalTambahProduk').classList.remove('active');
+    }
+
+    // Tutup modal kalau klik area overlay (luar card)
+    document.getElementById('modalTambahProduk').addEventListener('click', function (e) {
+        if (e.target === this) {
+            closeModalTambah();
+        }
+    });
+
+    // Tutup modal dengan tombol ESC
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeModalTambah();
+        }
+    });
+
+    // AUTO-OPEN modal kalau ada validation error dari server
+    @if ($errors->any())
+        document.addEventListener('DOMContentLoaded', function () {
+            openModalTambah();
+        });
+    @endif
 </script>
 @endpush

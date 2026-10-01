@@ -34,25 +34,35 @@ class ProdukController extends Controller
      */
     public function store(Request $request)
     {
-        return redirect()->route('produk.index')
-            ->with('success', 'Fitur tambah produk belum diimplementasi.');
-    }
+        $validated = $request->validate([
+            'barcode'       => ['required', 'string', 'max:255', 'unique:produk,barcode'],
+            'nama_produk'   => ['required', 'string', 'max:255'],
+            'id_kategori'   => ['required', 'exists:kategori_produk,id_kategori'],
+            'satuan'        => ['required', 'string', 'max:50'],
+            'harga_beli'    => ['required', 'numeric', 'min:0'],
+            'harga_jual'    => ['required', 'numeric', 'min:0', 'gte:harga_beli'],
+            'stok_sekarang' => ['required', 'integer', 'min:0'],
+            'min_stok'      => ['required', 'integer', 'min:0'],
+        ], [
+            'barcode.required'       => 'Kode barcode wajib diisi.',
+            'barcode.unique'         => 'Kode barcode sudah dipakai produk lain.',
+            'nama_produk.required'   => 'Nama produk wajib diisi.',
+            'id_kategori.required'   => 'Kategori wajib dipilih.',
+            'id_kategori.exists'     => 'Kategori tidak valid.',
+            'satuan.required'        => 'Satuan wajib diisi.',
+            'harga_beli.required'    => 'Harga beli wajib diisi.',
+            'harga_beli.numeric'     => 'Harga beli harus berupa angka.',
+            'harga_jual.required'    => 'Harga jual wajib diisi.',
+            'harga_jual.gte'         => 'Harga jual tidak boleh lebih rendah dari harga beli.',
+            'stok_sekarang.required' => 'Stok awal wajib diisi.',
+            'stok_sekarang.integer'  => 'Stok awal harus berupa angka bulat.',
+            'min_stok.required'      => 'Batas minimal stok wajib diisi.',
+        ]);
 
-    /**
-     * Update produk (akan diimplementasikan di Sub-Fase 1.4).
-     */
-    public function update(Request $request, $id)
-    {
-        return redirect()->route('produk.index')
-            ->with('success', 'Fitur edit produk belum diimplementasi.');
-    }
+        Produk::create($validated);
 
-    /**
-     * Hapus produk (akan diimplementasikan di Sub-Fase 1.4).
-     */
-    public function destroy($id)
-    {
-        return redirect()->route('produk.index')
-            ->with('success', 'Fitur hapus produk belum diimplementasi.');
+        return redirect()
+            ->route('produk.index')
+            ->with('success', "Produk \"{$validated['nama_produk']}\" berhasil ditambahkan!");
     }
-}
+}   
