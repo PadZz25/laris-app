@@ -818,12 +818,137 @@
             padding: 3px 8px;
             border-radius: 6px;
         }
+
+
+        /* ═══════════════════════════════════════════
+        TOAST NOTIFICATION (pojok kanan atas)
+        ═══════════════════════════════════════════ */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 14px 18px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 280px;
+            max-width: 400px;
+            border-left: 4px solid #22c55e;
+            color: #0f172a;
+            animation: toastIn 0.3s ease;
+            pointer-events: auto;
+        }
+
+        .toast.error {
+            border-left-color: #ef4444;
+        }
+
+        .toast i {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .toast.success i { color: #22c55e; }
+        .toast.error i   { color: #ef4444; }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(100%); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes toastOut {
+            from { opacity: 1; transform: translateX(0); }
+            to   { opacity: 0; transform: translateX(100%); }
+        }
+
+        /* ═══════════════════════════════════════════
+        TABEL KATEGORI (dalam modal)
+        ═══════════════════════════════════════════ */
+        .kategori-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .kategori-table th {
+            background-color: #f8fafc;
+            color: #475569;
+            font-weight: 800;
+            padding: 10px 12px;
+            border-bottom: 2px solid #e2e8f0;
+            text-align: left;
+            font-size: 11px;
+        }
+
+        .kategori-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #0f172a;
+            vertical-align: middle;
+        }
+
+        .kategori-table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .kategori-table-wrap {
+            max-height: 320px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+        }
+
+        /* Form inline tambah kategori */
+        .kategori-add-form {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .kategori-add-form input {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            outline: none;
+            font-size: 12px;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+
+        .kategori-add-form input:focus {
+            border-color: #429198;
+            box-shadow: 0 0 0 3px rgba(66, 145, 152, 0.15);
+        }
+
+        /* Sub-modal lebih tinggi dari modal biasa */
+        #subModalEditKategori {
+            z-index: 1100;
+        }
+
+        /* Modal kelola lebih ringkas paddingnya */
+        #modalKelolaKategori .modal-body {
+            padding: 18px 22px;
+        }
     </style>
 
     @stack('styles')
 </head>
 <body>
-
+    <div class="toast-container" id="toastContainer"></div>
     @include('partials.sidebar')
 
     <div class="main-container">

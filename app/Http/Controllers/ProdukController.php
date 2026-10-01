@@ -6,7 +6,9 @@ use App\Models\KategoriProduk;
 use App\Models\Produk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage; 
 use Illuminate\Validation\Rule;
+use Intervention\Image\Laravel\Facades\Image;
 
 class ProdukController extends Controller
 {
@@ -75,8 +77,7 @@ class ProdukController extends Controller
         // Handle upload foto
         // ─────────────────────────────────────────────
         if ($request->hasFile('foto_produk')) {
-            $validated['foto_produk'] = $request->file('foto_produk')
-                ->store('produk', 'public');
+            $validated['foto_produk'] = $this->uploadFotoProduk($request->file('foto_produk'));
         }
 
         // ─────────────────────────────────────────────
@@ -149,7 +150,7 @@ class ProdukController extends Controller
             if ($produk->foto_produk && Storage::disk('public')->exists($produk->foto_produk)) {
                 Storage::disk('public')->delete($produk->foto_produk);
             }
-            $validated['foto_produk'] = $this->uploadFotoProduk($request->file('foto_produk'));
+           $validated['foto_produk'] = $this->uploadFotoProduk($request->file('foto_produk'));
         }
 
         $produk->update($validated);
@@ -181,5 +182,21 @@ class ProdukController extends Controller
         return redirect()
             ->route('produk.index')
             ->with('success', "Produk \"{$nama}\" berhasil dihapus!");
+    }
+
+        /**
+     * Upload foto produk: konversi ke WebP, resize, compress.
+     */
+    private function uploadFotoProduk($file): string
+    {
+        $filename = 'produk/' . uniqid('prd_', true) . '_' . time() . '.webp';
+
+        $image = Image::read($file)
+            ->scale(width: 800)
+            ->toWebp(quality: 80);
+
+        Storage::disk('public')->put($filename, (string) $image);
+
+        return $filename;
     }
 }   

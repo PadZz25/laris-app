@@ -67,9 +67,15 @@
             </div>
         </div>
 
-        <button type="button" class="btn-primary" onclick="openModalTambah()">
-            <i class="fa-solid fa-plus"></i> Tambah Barang Baru
-        </button>
+        <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn-secondary" onclick="openModalKategori()"
+                    style="padding: 10px 18px; border-radius: 10px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+                <i class="fa-solid fa-tags"></i> Kelola Kategori
+            </button>
+            <button type="button" class="btn-primary" onclick="openModalTambah()">
+                <i class="fa-solid fa-plus"></i> Tambah Barang Baru
+            </button>
+        </div>
     </section>
 
 {{-- ═══════════════════════════════════════════
@@ -598,6 +604,114 @@
     </div>
 </div>
 
+
+{{-- ═══════════════════════════════════════════
+     MODAL: KELOLA KATEGORI
+     ═══════════════════════════════════════════ --}}
+<div class="modal-overlay" id="modalKelolaKategori">
+    <div class="modal-card">
+
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-tags"></i> Kelola Kategori Produk</h3>
+            <button type="button" class="btn-close-modal" onclick="closeModalKategori()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="modal-body">
+
+            {{-- Form Tambah Kategori --}}
+            <div>
+                <label style="font-size: 11px; font-weight: 700; color: #0f172a; display: block; margin-bottom: 6px;">
+                    Tambah Kategori Baru
+                </label>
+                <div class="kategori-add-form">
+                    <input type="text"
+                           id="inputKategoriKelola"
+                           placeholder="Misal: Frozen Food"
+                           maxlength="255"
+                           onkeydown="if(event.key==='Enter'){ event.preventDefault(); submitKategoriTambah(); }">
+                    <button type="button" class="btn-primary" id="btnTambahKategori"
+                            onclick="submitKategoriTambah()"
+                            style="padding: 10px 18px;">
+                        <i class="fa-solid fa-plus"></i> Tambah
+                    </button>
+                </div>
+            </div>
+
+            {{-- Daftar Kategori --}}
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <label style="font-size: 11px; font-weight: 700; color: #0f172a;">
+                        Daftar Kategori
+                    </label>
+                    <span style="font-size: 10px; color: #64748b;">
+                        Total: <strong id="kategoriCounter" style="color: #0f172a;">0</strong> kategori
+                    </span>
+                </div>
+
+                <div class="kategori-table-wrap">
+                    <table class="kategori-table">
+                        <thead>
+                            <tr>
+                                <th>Nama Kategori</th>
+                                <th style="text-align: center; width: 120px;">Jumlah Produk</th>
+                                <th style="text-align: center; width: 100px;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="kategoriTbody">
+                            <tr>
+                                <td colspan="3" style="text-align: center; padding: 30px; color: #94a3b8;">
+                                    <i class="fa-solid fa-spinner fa-spin"></i> Memuat...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn-cancel" onclick="closeModalKategori()">Tutup</button>
+        </div>
+
+    </div>
+</div>
+
+{{-- ═══════════════════════════════════════════
+     SUB-MODAL: EDIT KATEGORI
+     ═══════════════════════════════════════════ --}}
+<div class="modal-overlay" id="subModalEditKategori">
+    <div class="modal-card modal-card-sm">
+
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-pen-to-square"></i> Edit Kategori</h3>
+            <button type="button" class="btn-close-modal" onclick="closeSubModalEditKategori()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Nama Kategori <span class="required">*</span></label>
+                <input type="text"
+                       id="editKategoriNama"
+                       maxlength="255"
+                       onkeydown="if(event.key==='Enter'){ event.preventDefault(); submitKategoriEdit(); }">
+                <input type="hidden" id="editKategoriId">
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn-cancel" onclick="closeSubModalEditKategori()">Batal</button>
+            <button type="button" class="btn-save" id="btnSimpanKategori" onclick="submitKategoriEdit()">
+                <i class="fa-solid fa-floppy-disk"></i> Simpan
+            </button>
+        </div>
+
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -927,6 +1041,270 @@
         if (e.key === 'Escape') {
             closeEditModal();
             closeDeleteModal();
+        }
+    });
+
+    // ═══════════════════════════════════════════
+    // TOAST NOTIFICATION
+    // ═══════════════════════════════════════════
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+
+        const iconClass = type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation';
+        toast.innerHTML = `<i class="fa-solid ${iconClass}"></i><span>${message}</span>`;
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.animation = 'toastOut 0.3s ease forwards';
+            setTimeout(() => toast.remove(), 300);
+        }, 3200);
+    }
+
+    // ═══════════════════════════════════════════
+    // MODAL KELOLA KATEGORI
+    // ═══════════════════════════════════════════
+    let kategoriChanged = false;
+
+    function openModalKategori() {
+        kategoriChanged = false;
+        document.getElementById('inputKategoriKelola').value = '';
+        document.getElementById('kategoriTbody').innerHTML = `
+            <tr>
+                <td colspan="3" style="text-align: center; padding: 30px; color: #94a3b8;">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Memuat...
+                </td>
+            </tr>`;
+        document.getElementById('modalKelolaKategori').classList.add('active');
+        loadKategoriTable();
+    }
+
+    function closeModalKategori() {
+        // Kalau ada perubahan, reload page biar pill filter & dropdown ikut sync
+        if (kategoriChanged) {
+            window.location.reload();
+        } else {
+            document.getElementById('modalKelolaKategori').classList.remove('active');
+        }
+    }
+
+    async function loadKategoriTable() {
+        try {
+            const res = await fetch('{{ route("kategori.index") }}', {
+                headers: { 'Accept': 'application/json' }
+            });
+            const list = await res.json();
+            renderKategoriTable(list);
+        } catch (err) {
+            console.error(err);
+            showToast('Gagal memuat daftar kategori.', 'error');
+        }
+    }
+
+    function renderKategoriTable(list) {
+        const tbody = document.getElementById('kategoriTbody');
+        document.getElementById('kategoriCounter').textContent = list.length;
+
+        if (list.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="3" style="text-align: center; padding: 30px; color: #94a3b8;">
+                        Belum ada kategori. Tambahkan kategori pertama di atas.
+                    </td>
+                </tr>`;
+            return;
+        }
+
+        tbody.innerHTML = list.map(kat => {
+            const json = JSON.stringify(kat).replace(/"/g, '&quot;');
+            return `
+                <tr>
+                    <td style="font-weight: 700;">${kat.nama_kategori}</td>
+                    <td style="text-align: center;">
+                        <span class="badge badge-info">${kat.jumlah_produk} produk</span>
+                    </td>
+                    <td>
+                        <div class="action-btns-cell">
+                            <button class="btn-icon" title="Rename Kategori"
+                                    data-kat="${json}"
+                                    onclick="openSubModalEditKategori(this)">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button class="btn-icon danger" title="Hapus Kategori"
+                                    data-kat="${json}"
+                                    onclick="hapusKategori(this)">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>`;
+        }).join('');
+    }
+
+    // ═══════════════════════════════════════════
+    // TAMBAH KATEGORI (AJAX)
+    // ═══════════════════════════════════════════
+    async function submitKategoriTambah() {
+        const input = document.getElementById('inputKategoriKelola');
+        const btn = document.getElementById('btnTambahKategori');
+        const nama = input.value.trim();
+
+        if (!nama) {
+            showToast('Nama kategori wajib diisi.', 'error');
+            input.focus();
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+
+        try {
+            const res = await fetch('{{ route("kategori.store") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ nama_kategori: nama }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                showToast(data.message, 'success');
+                renderKategoriTable(data.kategori_list);
+                input.value = '';
+                input.focus();
+                kategoriChanged = true;
+            } else {
+                const err = data.errors?.nama_kategori?.[0] || data.message || 'Gagal menyimpan kategori.';
+                showToast(err, 'error');
+            }
+        } catch (err) {
+            console.error(err);
+            showToast('Terjadi kesalahan jaringan.', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-plus"></i> Tambah';
+        }
+    }
+
+    // ═══════════════════════════════════════════
+    // EDIT KATEGORI (AJAX)
+    // ═══════════════════════════════════════════
+    function openSubModalEditKategori(btn) {
+        const kat = JSON.parse(btn.dataset.kat);
+        document.getElementById('editKategoriId').value = kat.id_kategori;
+        document.getElementById('editKategoriNama').value = kat.nama_kategori;
+        document.getElementById('subModalEditKategori').classList.add('active');
+        setTimeout(() => document.getElementById('editKategoriNama').focus(), 100);
+    }
+
+    function closeSubModalEditKategori() {
+        document.getElementById('subModalEditKategori').classList.remove('active');
+    }
+
+    async function submitKategoriEdit() {
+        const id = document.getElementById('editKategoriId').value;
+        const nama = document.getElementById('editKategoriNama').value.trim();
+        const btn = document.getElementById('btnSimpanKategori');
+
+        if (!nama) {
+            showToast('Nama kategori wajib diisi.', 'error');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+
+        try {
+            const res = await fetch(`/kategori/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ nama_kategori: nama }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                showToast(data.message, 'success');
+                renderKategoriTable(data.kategori_list);
+                closeSubModalEditKategori();
+                kategoriChanged = true;
+            } else {
+                const err = data.errors?.nama_kategori?.[0] || data.message || 'Gagal menyimpan.';
+                showToast(err, 'error');
+            }
+        } catch (err) {
+            console.error(err);
+            showToast('Terjadi kesalahan jaringan.', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan';
+        }
+    }
+
+    // ═══════════════════════════════════════════
+    // HAPUS KATEGORI (AJAX)
+    // ═══════════════════════════════════════════
+    async function hapusKategori(btn) {
+        const kat = JSON.parse(btn.dataset.kat);
+
+        if (kat.jumlah_produk > 0) {
+            showToast(`Kategori "${kat.nama_kategori}" masih dipakai oleh ${kat.jumlah_produk} produk.`, 'error');
+            return;
+        }
+
+        if (!confirm(`Yakin ingin menghapus kategori "${kat.nama_kategori}"?`)) {
+            return;
+        }
+
+        try {
+            const res = await fetch(`/kategori/${kat.id_kategori}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                showToast(data.message, 'success');
+                renderKategoriTable(data.kategori_list);
+                kategoriChanged = true;
+            } else {
+                showToast(data.message || 'Gagal menghapus kategori.', 'error');
+            }
+        } catch (err) {
+            console.error(err);
+            showToast('Terjadi kesalahan jaringan.', 'error');
+        }
+    }
+
+    // ═══════════════════════════════════════════
+    // EVENT LISTENER TAMBAHAN (sub-modal edit)
+    // ═══════════════════════════════════════════
+    document.getElementById('subModalEditKategori').addEventListener('click', function (e) {
+        if (e.target === this) closeSubModalEditKategori();
+    });
+
+    // Update ESC handler untuk handle sub-modal juga
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            if (document.getElementById('subModalEditKategori').classList.contains('active')) {
+                closeSubModalEditKategori();
+            } else if (document.getElementById('modalKelolaKategori').classList.contains('active')) {
+                closeModalKategori();
+            }
         }
     });
 </script>
