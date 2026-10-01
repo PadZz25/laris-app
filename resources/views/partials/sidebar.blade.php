@@ -15,7 +15,8 @@
             <a href="#" class="nav-item">
                 <i class="fa-solid fa-book"></i> Buku Kasbon
             </a>
-            <a href="#" class="nav-item">
+            <a href="{{ route('produk.index') }}"
+                class="nav-item {{ request()->routeIs('produk.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-box-open"></i> Barang & Stok
             </a>
             <a href="#" class="nav-item">

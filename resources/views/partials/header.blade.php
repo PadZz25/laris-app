@@ -2,7 +2,7 @@
 
 <header class="top-header">
     <div class="header-title">
-        <h1>{{ $title }}</h1>
+        <h1>{!! $title !!}</h1>
         <span>Toko Ina</span>
     </div>
 
