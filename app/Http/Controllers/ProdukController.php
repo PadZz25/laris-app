@@ -34,31 +34,66 @@ class ProdukController extends Controller
      */
     public function store(Request $request)
     {
+        // ─────────────────────────────────────────────
+        // Validasi
+        // ─────────────────────────────────────────────
         $validated = $request->validate([
             'barcode'       => ['required', 'string', 'max:255', 'unique:produk,barcode'],
             'nama_produk'   => ['required', 'string', 'max:255'],
-            'id_kategori'   => ['required', 'exists:kategori_produk,id_kategori'],
             'satuan'        => ['required', 'string', 'max:50'],
             'harga_beli'    => ['required', 'numeric', 'min:0'],
             'harga_jual'    => ['required', 'numeric', 'min:0', 'gte:harga_beli'],
             'stok_sekarang' => ['required', 'integer', 'min:0'],
             'min_stok'      => ['required', 'integer', 'min:0'],
+            'foto_produk'   => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+
+            // Kategori: salah satu harus diisi
+            'id_kategori'   => ['nullable', 'required_without:new_kategori', 'exists:kategori_produk,id_kategori'],
+            'new_kategori'  => ['nullable', 'required_without:id_kategori', 'string', 'max:255', 'unique:kategori_produk,nama_kategori'],
         ], [
-            'barcode.required'       => 'Kode barcode wajib diisi.',
-            'barcode.unique'         => 'Kode barcode sudah dipakai produk lain.',
-            'nama_produk.required'   => 'Nama produk wajib diisi.',
-            'id_kategori.required'   => 'Kategori wajib dipilih.',
-            'id_kategori.exists'     => 'Kategori tidak valid.',
-            'satuan.required'        => 'Satuan wajib diisi.',
-            'harga_beli.required'    => 'Harga beli wajib diisi.',
-            'harga_beli.numeric'     => 'Harga beli harus berupa angka.',
-            'harga_jual.required'    => 'Harga jual wajib diisi.',
-            'harga_jual.gte'         => 'Harga jual tidak boleh lebih rendah dari harga beli.',
-            'stok_sekarang.required' => 'Stok awal wajib diisi.',
-            'stok_sekarang.integer'  => 'Stok awal harus berupa angka bulat.',
-            'min_stok.required'      => 'Batas minimal stok wajib diisi.',
+            'barcode.required'         => 'Kode barcode wajib diisi.',
+            'barcode.unique'           => 'Kode barcode sudah dipakai produk lain.',
+            'nama_produk.required'     => 'Nama produk wajib diisi.',
+            'satuan.required'          => 'Satuan wajib diisi.',
+            'harga_beli.required'      => 'Harga beli wajib diisi.',
+            'harga_jual.required'      => 'Harga jual wajib diisi.',
+            'harga_jual.gte'           => 'Harga jual tidak boleh lebih rendah dari harga beli.',
+            'stok_sekarang.required'   => 'Stok awal wajib diisi.',
+            'min_stok.required'        => 'Batas minimal stok wajib diisi.',
+            'foto_produk.image'        => 'File harus berupa gambar.',
+            'foto_produk.mimes'        => 'Format foto harus jpg, jpeg, png, atau webp.',
+            'foto_produk.max'          => 'Ukuran foto maksimal 2MB.',
+
+            'id_kategori.required_without'  => 'Pilih kategori atau isi kategori baru.',
+            'id_kategori.exists'            => 'Kategori yang dipilih tidak valid.',
+            'new_kategori.required_without' => 'Pilih kategori atau isi kategori baru.',
+            'new_kategori.unique'           => 'Nama kategori sudah ada. Pilih dari dropdown saja.',
         ]);
 
+        // ─────────────────────────────────────────────
+        // Handle upload foto
+        // ─────────────────────────────────────────────
+        if ($request->hasFile('foto_produk')) {
+            $validated['foto_produk'] = $request->file('foto_produk')
+                ->store('produk', 'public');
+        }
+
+        // ─────────────────────────────────────────────
+        // Handle kategori baru (kalau diisi)
+        // ─────────────────────────────────────────────
+        if (!empty($validated['new_kategori'])) {
+            $kategoriBaru = KategoriProduk::create([
+                'nama_kategori' => $validated['new_kategori'],
+            ]);
+            $validated['id_kategori'] = $kategoriBaru->id_kategori;
+        }
+
+        // Hapus key yang tidak perlu dimasukkan ke tabel produk
+        unset($validated['new_kategori']);
+
+        // ─────────────────────────────────────────────
+        // Simpan produk
+        // ─────────────────────────────────────────────
         Produk::create($validated);
 
         return redirect()

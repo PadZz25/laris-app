@@ -480,18 +480,18 @@
             color: #cbd5e1;
         }
 
-        /* ═══════════════════════════════════════════
-        MODAL (reusable di semua halaman)
+       /* ═══════════════════════════════════════════
+        MODAL (reusable)
         ═══════════════════════════════════════════ */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(15, 23, 42, 0.65);
+            background: rgba(15, 23, 42, 0.55);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            backdrop-filter: blur(3px);
+            backdrop-filter: blur(2px);
             padding: 20px;
         }
 
@@ -500,14 +500,12 @@
         .modal-card {
             background: #ffffff;
             border-radius: 20px;
-            padding: 24px;
-            width: 520px;
-            max-width: 100%;
+            width: 580px;
+            max-width: 92%;
             max-height: 90vh;
-            overflow-y: auto;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            gap: 16px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
             animation: modalIn 0.2s ease;
         }
@@ -517,29 +515,37 @@
             to   { opacity: 1; transform: scale(1); }
         }
 
+        /* Header */
         .modal-header {
+            padding: 18px 24px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 12px;
+            flex-shrink: 0;
         }
 
         .modal-header h3 {
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 800;
             color: #0f172a;
+            margin: 0;
         }
 
         .btn-close-modal {
             background: none;
             border: none;
-            font-size: 16px;
+            font-size: 18px;
             color: #64748b;
             cursor: pointer;
-            padding: 4px 10px;
-            border-radius: 6px;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
             transition: background 0.15s, color 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-close-modal:hover {
@@ -547,20 +553,36 @@
             color: #0f172a;
         }
 
-        .form-grid-2col {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
+        /* Body (scrollable) */
+        .modal-body {
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            overflow-y: auto;
+            flex: 1;
+            min-height: 0;
         }
 
+        .modal-body .form-group { margin-bottom: 0; }
+
+        /* Footer */
+        .modal-footer {
+            padding: 14px 24px;
+            background-color: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        /* Form group & input (dalam modal) */
         .form-group {
             display: flex;
             flex-direction: column;
             gap: 5px;
-            margin-bottom: 12px;
         }
-
-        .form-group:last-child { margin-bottom: 0; }
 
         .form-group label {
             font-size: 11px;
@@ -576,15 +598,15 @@
         .form-group input,
         .form-group select {
             width: 100%;
-            padding: 10px 12px;
-            border-radius: 8px;
+            padding: 9px 12px;
+            border-radius: 10px;
             border: 1px solid #cbd5e1;
             outline: none;
             font-size: 12px;
             color: #0f172a;
-            background: #ffffff;
-            transition: all 0.15s;
+            background-color: #ffffff;
             font-family: inherit;
+            transition: all 0.15s;
         }
 
         .form-group input:focus,
@@ -599,6 +621,12 @@
             background-color: #fef2f2;
         }
 
+        .form-grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
         .field-error {
             font-size: 10px;
             color: #ef4444;
@@ -606,35 +634,104 @@
             margin-top: 2px;
         }
 
-        .modal-actions {
+        /* Icon input wrapper */
+        .input-icon-wrapper {
+            position: relative;
             display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            padding-top: 16px;
-            border-top: 2px solid #f1f5f9;
-            margin-top: 4px;
+            align-items: center;
         }
 
-        .btn-secondary {
-            background: #e2e8f0;
-            color: #334155;
-            border: none;
-            padding: 10px 18px;
+        .input-icon-wrapper i {
+            position: absolute;
+            left: 12px;
+            color: #64748b;
+            font-size: 13px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .input-icon-wrapper input {
+            padding-left: 36px !important;
+        }
+
+        /* Upload dropzone */
+        .image-upload-box {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 20px 16px;
+            background-color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            min-height: 140px;
+            text-align: center;
+        }
+
+        .image-upload-box:hover {
+            border-color: #429198;
+            background-color: #f0fdfa;
+        }
+
+        .image-upload-box i {
+            font-size: 26px;
+            color: #429198;
+        }
+
+        .image-upload-box span {
+            font-size: 11px;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        .image-upload-box small {
+            font-size: 9.5px;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        .image-upload-box img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 10px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .file-input-hidden {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Tombol Modal */
+        .btn-cancel {
+            background-color: #ffffff;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            padding: 9px 18px;
             border-radius: 10px;
             font-size: 12px;
             font-weight: 700;
             cursor: pointer;
-            transition: background 0.15s;
             font-family: inherit;
+            transition: background 0.15s;
         }
 
-        .btn-secondary:hover { background: #cbd5e1; }
+        .btn-cancel:hover { background-color: #f1f5f9; }
 
-        .btn-submit {
-            background: linear-gradient(135deg, #162F32 0%, #429198 100%);
+        .btn-save {
+            background-color: #0f172a;
             color: #ffffff;
             border: none;
-            padding: 10px 22px;
+            padding: 9px 20px;
             border-radius: 10px;
             font-size: 12px;
             font-weight: 800;
@@ -642,14 +739,11 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 4px 10px rgba(66, 145, 152, 0.25);
-            transition: transform 0.15s, box-shadow 0.15s;
             font-family: inherit;
+            transition: background 0.15s;
         }
 
-        .btn-submit:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 14px rgba(66, 145, 152, 0.35);
+        .btn-save:hover { background-color: #162F32; }
 }
     </style>
 

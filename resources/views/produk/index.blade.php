@@ -165,156 +165,224 @@
      ═══════════════════════════════════════════ --}}
 <div class="modal-overlay" id="modalTambahProduk">
     <div class="modal-card">
+
+        {{-- Header --}}
         <div class="modal-header">
-            <h3><i class="fa-solid fa-plus-circle"></i> Tambah Barang Baru</h3>
+            <h3>Tambah Barang Baru</h3>
             <button type="button" class="btn-close-modal" onclick="closeModalTambah()">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
 
-        <form method="POST" action="{{ route('produk.store') }}" id="formTambahProduk">
+        <form method="POST"
+              action="{{ route('produk.store') }}"
+              enctype="multipart/form-data"
+              id="formTambahProduk"
+              style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
+
             @csrf
 
-            {{-- Baris 1: Barcode & Kategori --}}
-            <div class="form-grid-2col">
+            {{-- Body --}}
+            <div class="modal-body">
+
+                {{-- Upload Foto Produk (Dropzone) --}}
                 <div class="form-group">
-                    <label>Kode / SKU Barcode <span class="required">*</span></label>
+                    <label>Foto Produk (Tampil di POS Kasir)</label>
+                    <div class="image-upload-box" id="fotoDropzone">
+                        <i class="fa-solid fa-cloud-arrow-up" id="fotoIcon"></i>
+                        <span id="fotoText">Klik atau Tarik Foto Produk ke Sini</span>
+                        <small id="fotoHint">Format: JPG, PNG, WEBP (Maks. 2MB) — otomatis dikompres ke WebP</small>
+                        <img id="fotoPreviewImg" src="" alt="Preview" style="display: none;">
+                        <input type="file"
+                               name="foto_produk"
+                               id="fotoInput"
+                               accept="image/jpeg,image/jpg,image/png,image/webp"
+                               class="file-input-hidden"
+                               onchange="previewFoto(this)">
+                    </div>
+                    @error('foto_produk')
+                        <div class="field-error">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                {{-- Row 1: Barcode + Kategori --}}
+                <div class="form-grid-2col">
+                    <div class="form-group">
+                        <label>Kode / SKU Barcode <span class="required">*</span></label>
+                        <div class="input-icon-wrapper">
+                            <i class="fa-solid fa-barcode"></i>
+                            <input type="text"
+                                   name="barcode"
+                                   value="{{ old('barcode') }}"
+                                   placeholder="Contoh: BRS-006"
+                                   class="@error('barcode') error @enderror"
+                                   required>
+                        </div>
+                        @error('barcode')
+                            <div class="field-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label>Kategori Produk <span class="required">*</span></label>
+
+                        {{-- Mode 1: Dropdown existing --}}
+                        <div id="kategoriModeExisting">
+                            <select name="id_kategori"
+                                    id="selectKategori"
+                                    class="@error('id_kategori') error @enderror">
+                                <option value="">Pilih Kategori...</option>
+                                @foreach ($kategoriList as $kat)
+                                    <option value="{{ $kat->id_kategori }}"
+                                        {{ old('id_kategori') == $kat->id_kategori ? 'selected' : '' }}>
+                                        {{ $kat->nama_kategori }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('id_kategori')
+                                <div class="field-error">{{ $message }}</div>
+                            @enderror
+                            <div style="font-size: 10px; margin-top: 4px;">
+                                <a href="#" onclick="switchKategoriMode('new'); return false;"
+                                   style="color: #429198; font-weight: 700; text-decoration: none;">
+                                    <i class="fa-solid fa-plus"></i> Atau tambah kategori baru
+                                </a>
+                            </div>
+                        </div>
+
+                        {{-- Mode 2: Input kategori baru --}}
+                        <div id="kategoriModeNew" style="display: none;">
+                            <input type="text"
+                                   name="new_kategori"
+                                   id="inputKategoriBaru"
+                                   value="{{ old('new_kategori') }}"
+                                   placeholder="Misal: Frozen Food"
+                                   class="@error('new_kategori') error @enderror">
+                            @error('new_kategori')
+                                <div class="field-error">{{ $message }}</div>
+                            @enderror
+                            <div style="font-size: 10px; margin-top: 4px;">
+                                <a href="#" onclick="switchKategoriMode('existing'); return false;"
+                                   style="color: #64748b; font-weight: 700; text-decoration: none;">
+                                    <i class="fa-solid fa-arrow-left"></i> Kembali pilih dari daftar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Row 2: Nama Produk --}}
+                <div class="form-group">
+                    <label>Nama Produk Lengkap <span class="required">*</span></label>
                     <input type="text"
-                           name="barcode"
-                           value="{{ old('barcode') }}"
-                           placeholder="Misal: BRS-006"
-                           class="@error('barcode') error @enderror"
+                           name="nama_produk"
+                           value="{{ old('nama_produk') }}"
+                           placeholder="Masukkan nama produk..."
+                           class="@error('nama_produk') error @enderror"
                            required>
-                    @error('barcode')
+                    @error('nama_produk')
                         <div class="field-error">{{ $message }}</div>
                     @enderror
                 </div>
 
-                <div class="form-group">
-                    <label>Kategori Produk <span class="required">*</span></label>
-                    <select name="id_kategori" class="@error('id_kategori') error @enderror" required>
-                        <option value="">-- Pilih Kategori --</option>
-                        @foreach ($kategoriList as $kat)
-                            <option value="{{ $kat->id_kategori }}"
-                                {{ old('id_kategori') == $kat->id_kategori ? 'selected' : '' }}>
-                                {{ $kat->nama_kategori }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('id_kategori')
-                        <div class="field-error">{{ $message }}</div>
-                    @enderror
-                </div>
-            </div>
+                {{-- Row 3: Harga Beli + Harga Jual --}}
+                <div class="form-grid-2col">
+                    <div class="form-group">
+                        <label>Harga Beli / Modal (Rp) <span class="required">*</span></label>
+                        <input type="number"
+                               name="harga_beli"
+                               value="{{ old('harga_beli') }}"
+                               placeholder="0"
+                               min="0"
+                               step="100"
+                               class="@error('harga_beli') error @enderror"
+                               required>
+                        @error('harga_beli')
+                            <div class="field-error">{{ $message }}</div>
+                        @enderror
+                    </div>
 
-            {{-- Baris 2: Nama Produk --}}
-            <div class="form-group">
-                <label>Nama Produk Lengkap <span class="required">*</span></label>
-                <input type="text"
-                       name="nama_produk"
-                       value="{{ old('nama_produk') }}"
-                       placeholder="Misal: Kopi Kapal Api Special 165g"
-                       class="@error('nama_produk') error @enderror"
-                       required>
-                @error('nama_produk')
-                    <div class="field-error">{{ $message }}</div>
-                @enderror
-            </div>
-
-            {{-- Baris 3: Satuan & Stok Awal --}}
-            <div class="form-grid-2col">
-                <div class="form-group">
-                    <label>Satuan <span class="required">*</span></label>
-                    <select name="satuan" class="@error('satuan') error @enderror" required>
-                        <option value="">-- Pilih Satuan --</option>
-                        @php
-                            $satuanList = ['Pcs', 'Sak', 'Kg', 'Dus', 'Botol', 'Pouch', 'Kaleng', 'Bungkus', 'Pak', 'Box', 'Liter'];
-                        @endphp
-                        @foreach ($satuanList as $sat)
-                            <option value="{{ $sat }}" {{ old('satuan') == $sat ? 'selected' : '' }}>
-                                {{ $sat }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('satuan')
-                        <div class="field-error">{{ $message }}</div>
-                    @enderror
+                    <div class="form-group">
+                        <label>Harga Jual Kasir (Rp) <span class="required">*</span></label>
+                        <input type="number"
+                               name="harga_jual"
+                               value="{{ old('harga_jual') }}"
+                               placeholder="0"
+                               min="0"
+                               step="100"
+                               class="@error('harga_jual') error @enderror"
+                               required>
+                        @error('harga_jual')
+                            <div class="field-error">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
 
+                {{-- Row 4: Stok Awal + Satuan --}}
+                <div class="form-grid-2col">
+                    <div class="form-group">
+                        <label>Jumlah Stok Awal <span class="required">*</span></label>
+                        <input type="number"
+                               name="stok_sekarang"
+                               value="{{ old('stok_sekarang', 0) }}"
+                               placeholder="0"
+                               min="0"
+                               class="@error('stok_sekarang') error @enderror"
+                               required>
+                        @error('stok_sekarang')
+                            <div class="field-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label>Satuan Barang <span class="required">*</span></label>
+                        <select name="satuan" class="@error('satuan') error @enderror" required>
+                            <option value="">Pilih Satuan...</option>
+                            @php
+                                $satuanList = ['Pcs', 'Sak', 'Kg', 'Dus', 'Botol', 'Pouch', 'Kaleng', 'Bungkus', 'Pak', 'Box', 'Liter'];
+                            @endphp
+                            @foreach ($satuanList as $sat)
+                                <option value="{{ $sat }}" {{ old('satuan') == $sat ? 'selected' : '' }}>
+                                    {{ $sat }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('satuan')
+                            <div class="field-error">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                {{-- Row 5: Batas Minimal Stok --}}
                 <div class="form-group">
-                    <label>Stok Awal <span class="required">*</span></label>
+                    <label>Batas Minimal Stok (Peringatan Restock) <span class="required">*</span></label>
                     <input type="number"
-                           name="stok_sekarang"
-                           value="{{ old('stok_sekarang', 0) }}"
+                           name="min_stok"
+                           value="{{ old('min_stok', 5) }}"
+                           placeholder="Contoh: 5"
                            min="0"
-                           placeholder="0"
-                           class="@error('stok_sekarang') error @enderror"
+                           class="@error('min_stok') error @enderror"
                            required>
-                    @error('stok_sekarang')
-                        <div class="field-error">{{ $message }}</div>
-                    @enderror
-                </div>
-            </div>
-
-            {{-- Baris 4: Harga Beli & Harga Jual --}}
-            <div class="form-grid-2col">
-                <div class="form-group">
-                    <label>Harga Beli / Modal <span class="required">*</span></label>
-                    <input type="number"
-                           name="harga_beli"
-                           value="{{ old('harga_beli') }}"
-                           min="0"
-                           step="100"
-                           placeholder="Rp 0"
-                           class="@error('harga_beli') error @enderror"
-                           required>
-                    @error('harga_beli')
+                    <div style="font-size: 10px; color: #94a3b8; margin-top: 2px;">
+                        Sistem akan memperingatkan jika stok mencapai angka ini.
+                    </div>
+                    @error('min_stok')
                         <div class="field-error">{{ $message }}</div>
                     @enderror
                 </div>
 
-                <div class="form-group">
-                    <label>Harga Jual (Kasir) <span class="required">*</span></label>
-                    <input type="number"
-                           name="harga_jual"
-                           value="{{ old('harga_jual') }}"
-                           min="0"
-                           step="100"
-                           placeholder="Rp 0"
-                           class="@error('harga_jual') error @enderror"
-                           required>
-                    @error('harga_jual')
-                        <div class="field-error">{{ $message }}</div>
-                    @enderror
-                </div>
             </div>
 
-            {{-- Baris 5: Batas Minimal Stok --}}
-            <div class="form-group">
-                <label>Batas Minimal Stok (Alert Reorder) <span class="required">*</span></label>
-                <input type="number"
-                       name="min_stok"
-                       value="{{ old('min_stok', 10) }}"
-                       min="0"
-                       placeholder="10"
-                       class="@error('min_stok') error @enderror"
-                       required>
-                <div style="font-size: 10px; color: #94a3b8; margin-top: 2px;">
-                    Akan muncul peringatan jika stok mencapai angka ini.
-                </div>
-                @error('min_stok')
-                    <div class="field-error">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="modal-actions">
-                <button type="button" class="btn-secondary" onclick="closeModalTambah()">
+            {{-- Footer --}}
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeModalTambah()">
                     Batal
                 </button>
-                <button type="submit" class="btn-submit">
-                    <i class="fa-solid fa-save"></i> Simpan Produk
+                <button type="submit" class="btn-save">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Produk
                 </button>
             </div>
+
         </form>
     </div>
 </div>
@@ -386,6 +454,135 @@
     @if ($errors->any())
         document.addEventListener('DOMContentLoaded', function () {
             openModalTambah();
+        });
+    @endif
+
+    // ═══════════════════════════════════════════
+    // PREVIEW FOTO + DRAG & DROP
+    // ═══════════════════════════════════════════
+    function previewFoto(input) {
+        const preview = document.getElementById('fotoPreviewImg');
+        const icon    = document.getElementById('fotoIcon');
+        const text    = document.getElementById('fotoText');
+        const hint    = document.getElementById('fotoHint');
+        const box     = document.getElementById('fotoDropzone');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                icon.style.display = 'none';
+                text.textContent = input.files[0].name;
+                text.style.color = '#16a34a';
+                hint.textContent = '✓ Foto siap diupload — otomatis dikompres ke WebP';
+                hint.style.color = '#16a34a';
+                box.style.borderColor = '#16a34a';
+                box.style.backgroundColor = '#f0fdf4';
+            };
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            resetFotoDropzone();
+        }
+    }
+
+    function resetFotoDropzone() {
+        const preview = document.getElementById('fotoPreviewImg');
+        const icon    = document.getElementById('fotoIcon');
+        const text    = document.getElementById('fotoText');
+        const hint    = document.getElementById('fotoHint');
+        const box     = document.getElementById('fotoDropzone');
+
+        preview.src = '';
+        preview.style.display = 'none';
+        icon.style.display = 'block';
+        text.textContent = 'Klik atau Tarik Foto Produk ke Sini';
+        text.style.color = '#475569';
+        hint.textContent = 'Format: JPG, PNG, WEBP (Maks. 2MB) — otomatis dikompres ke WebP';
+        hint.style.color = '#94a3b8';
+        box.style.borderColor = '#cbd5e1';
+        box.style.backgroundColor = '#f8fafc';
+    }
+
+    // Drag & drop support
+    document.addEventListener('DOMContentLoaded', function () {
+        const dropzone = document.getElementById('fotoDropzone');
+        if (!dropzone) return;
+
+        ['dragenter', 'dragover'].forEach(evt => {
+            dropzone.addEventListener(evt, (e) => {
+                e.preventDefault();
+                dropzone.style.borderColor = '#429198';
+                dropzone.style.backgroundColor = '#f0fdfa';
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(evt => {
+            dropzone.addEventListener(evt, (e) => {
+                e.preventDefault();
+                if (!document.getElementById('fotoInput').files.length) {
+                    dropzone.style.borderColor = '#cbd5e1';
+                    dropzone.style.backgroundColor = '#f8fafc';
+                }
+            });
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const input = document.getElementById('fotoInput');
+                input.files = files;
+                previewFoto(input);
+            }
+        });
+    });
+
+    // Reset dropzone setiap modal ditutup
+    function closeModalTambah() {
+        document.getElementById('modalTambahProduk').classList.remove('active');
+        resetFotoDropzone();
+        document.getElementById('formTambahProduk').reset();
+    }
+
+    // AUTO-OPEN modal kalau ada validation error dari server
+    @if ($errors->any())
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('modalTambahProduk').classList.add('active');
+        });
+    @endif
+
+    // AUTO-SWITCH ke mode "new" kalau ada error validasi di new_kategori
+    @if ($errors->has('new_kategori'))
+        document.addEventListener('DOMContentLoaded', function () {
+            switchKategoriMode('new');
+        });
+    @endif
+
+    // ═══════════════════════════════════════════
+    // TOGGLE MODE KATEGORI (existing vs new)
+    // ═══════════════════════════════════════════
+    function switchKategoriMode(mode) {
+        const existing = document.getElementById('kategoriModeExisting');
+        const newMode  = document.getElementById('kategoriModeNew');
+        const selectEl = document.getElementById('selectKategori');
+        const inputEl  = document.getElementById('inputKategoriBaru');
+
+        if (mode === 'new') {
+            existing.style.display = 'none';
+            newMode.style.display  = 'block';
+            selectEl.value = '';       // reset dropdown biar tidak bentrok validasi
+            inputEl.focus();
+        } else {
+            existing.style.display = 'block';
+            newMode.style.display  = 'none';
+            inputEl.value = '';        // reset input kategori baru
+        }
+    }
+
+    // AUTO-SWITCH ke mode "new" kalau ada error validasi di new_kategori
+    @if ($errors->has('new_kategori'))
+        document.addEventListener('DOMContentLoaded', function () {
+            switchKategoriMode('new');
         });
     @endif
 </script>
