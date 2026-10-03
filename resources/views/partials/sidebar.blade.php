@@ -4,32 +4,36 @@
             <div class="avatar-circle"></div>
         </div>
 
-        <nav class="nav-menu">
-            <a href="{{ route('dashboard') }}"
-               class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                <i class="fa-solid fa-chart-line"></i> Dashboard
+       <nav class="nav-menu">
+            {{-- Laporan & Omzet di paling atas --}}
+            <a href="{{ route('laporan.index') }}"
+            class="nav-item {{ request()->routeIs('laporan.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-chart-line"></i> Laporan & Omzet
             </a>
-            <a href="#" class="nav-item">
+
+            <a href="#"
+            class="nav-item {{ request()->routeIs('kasir.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-cart-shopping"></i> Kasir
             </a>
+
             <a href="{{ route('kasbon.index') }}"
-                class="nav-item {{ request()->routeIs('kasbon.*') ? 'active' : '' }}">
+            class="nav-item {{ request()->routeIs('kasbon.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-book"></i> Buku Kasbon
-            </a>  
+            </a>
+
             <a href="{{ route('produk.index') }}"
-                class="nav-item {{ request()->routeIs('produk.*') ? 'active' : '' }}">
+            class="nav-item {{ request()->routeIs('produk.*') || request()->routeIs('kategori.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-box-open"></i> Barang & Stok
             </a>
+
             <a href="{{ route('supplier.index') }}"
-                class="nav-item {{ request()->routeIs('supplier.*') ? 'active' : '' }}">
+            class="nav-item {{ request()->routeIs('supplier.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-truck-fast"></i> Pasokan Supplier
             </a>
+
             <a href="{{ route('pengeluaran.index') }}"
-                class="nav-item {{ request()->routeIs('pengeluaran.*') ? 'active' : '' }}">
+            class="nav-item {{ request()->routeIs('pengeluaran.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-wallet"></i> Pengeluaran
-            </a>
-            <a href="#" class="nav-item">
-                <i class="fa-solid fa-chart-pie"></i> Laporan & Omzet
             </a>
         </nav>
     </div>

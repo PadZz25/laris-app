@@ -7,6 +7,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\PengeluaranController;
 use App\Http\Controllers\KasbonController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\LaporanController;
 use Illuminate\Support\Facades\Route;
 
 // ─────────────────────────────────────────────
@@ -63,6 +64,10 @@ Route::middleware('auth')->group(function () {
         Route::delete('/pasokan/{id}', 'destroyFaktur')->name('destroyFaktur');
         Route::post('/pasokan/{id}/bayar', 'bayarFaktur')->name('bayarFaktur');
         Route::post('/produk-baru', 'storeProdukBaru')->name('storeProdukBaru');
+    });
+
+        Route::prefix('laporan')->name('laporan.')->controller(LaporanController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
     });
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');

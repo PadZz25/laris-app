@@ -40,11 +40,18 @@ class LoginController extends Controller
 
         // 3. Coba login
         if (Auth::attempt($credentials, $remember)) {
-            // Regenerate session — proteksi session fixation
             $request->session()->regenerate();
 
-            return redirect()->intended(route('dashboard'))
-                ->with('success', 'Selamat datang, ' . Auth::user()->nama_karyawan . '!');
+            $user = Auth::user();
+            $welcome = 'Selamat datang, ' . $user->nama_karyawan . '!';
+
+            // Redirect berdasarkan peran
+            if ($user->peran === 'admin') {
+                return redirect()->route('laporan.index')->with('success', $welcome);
+            }
+
+            // Kasir sementara ke dashboard (menunggu halaman POS)
+            return redirect()->route('dashboard')->with('success', $welcome);
         }
 
         // 4. Kalau gagal, kembalikan ke form dengan pesan error
