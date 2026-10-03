@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProdukController; 
 use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\PengeluaranController;
 use Illuminate\Support\Facades\Route;
 
 // ─────────────────────────────────────────────
@@ -30,5 +31,12 @@ Route::middleware('auth')->group(function () {
         Route::put('/{id}', 'update')->name('update');
         Route::delete('/{id}', 'destroy')->name('destroy');
     });
+
+    Route::prefix('pengeluaran')->name('pengeluaran.')->controller(PengeluaranController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::delete('/{id}', 'destroy')->name('destroy');
+    });
+
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });

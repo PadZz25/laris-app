@@ -22,7 +22,8 @@
             <a href="#" class="nav-item">
                 <i class="fa-solid fa-truck-fast"></i> Pasokan Supplier
             </a>
-            <a href="#" class="nav-item">
+            <a href="{{ route('pengeluaran.index') }}"
+                class="nav-item {{ request()->routeIs('pengeluaran.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-wallet"></i> Pengeluaran
             </a>
             <a href="#" class="nav-item">
