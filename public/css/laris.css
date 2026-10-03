@@ -24,14 +24,26 @@ body {
     flex-shrink: 0;
 }
 
-.profile-container { display: flex; justify-content: center; margin-bottom: 20px; }
-
-.avatar-circle {
-    width: 75px; height: 75px; border-radius: 50%;
-    background-color: #e2e8f0;
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 8px;
+    padding: 4px 6px;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
 }
 
-.nav-menu { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+.logo-container img {
+    width: 100%;
+    max-width: 165px;
+    height: auto;
+    display: block;
+    object-fit: contain;
+}
+
+.nav-menu { display: flex; flex-direction: column; gap: 12px; margin-top: 0; }
 
 .nav-item {
     display: flex; align-items: center; gap: 14px;
