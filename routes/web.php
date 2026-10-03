@@ -18,6 +18,11 @@ Route::post('/login', [LoginController::class, 'login']);
 Route::middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index']);
+    // Penyesuaian Stok (Stock Opname)
+    Route::post('/produk/penyesuaian', [ProdukController::class, 'penyesuaianStok'])
+        ->name('produk.penyesuaian');
+
+    Route::resource('produk', ProdukController::class);
     Route::resource('produk', ProdukController::class);
     Route::prefix('kategori')->name('kategori.')->controller(KategoriController::class)->group(function () {
         Route::get('/', 'index')->name('index');

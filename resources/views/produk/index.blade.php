@@ -42,41 +42,43 @@
         </div>
     </section>
 
-    {{-- ═══════════════════════════════════════════
-         CONTROL & FILTER CARD
-         ═══════════════════════════════════════════ --}}
-    <section class="control-card">
-        <div class="control-left">
-            <div class="search-wrapper">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input
-                    type="text"
-                    id="searchInput"
-                    class="search-input"
-                    placeholder="Cari Nama Barang / Kode Barcode..."
-                    oninput="filterProduk()"
-                >
-            </div>
-            <div class="category-group" id="categoryPills">
-                <div class="cat-pill active" data-kategori="Semua" onclick="setKategori('Semua', this)">Semua</div>
-                @foreach ($kategoriList as $kat)
-                    <div class="cat-pill" data-kategori="{{ $kat->nama_kategori }}" onclick="setKategori('{{ $kat->nama_kategori }}', this)">
-                        {{ $kat->nama_kategori }}
-                    </div>
-                @endforeach
-            </div>
+{{-- ═══════════════════════════════════════════
+     CONTROL & FILTER CARD
+     ═══════════════════════════════════════════ --}}
+<section class="control-card">
+    <div class="control-left">
+        <div class="search-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input
+                type="text"
+                id="searchInput"
+                class="search-input"
+                placeholder="Cari Nama Barang / Kode Barcode..."
+                oninput="filterProduk()"
+            >
         </div>
+        <div class="category-group" id="categoryPills">
+            <div class="cat-pill active" data-kategori="Semua" onclick="setKategori('Semua', this)">Semua</div>
+            @foreach ($kategoriList as $kat)
+                <div class="cat-pill" data-kategori="{{ $kat->nama_kategori }}" onclick="setKategori('{{ $kat->nama_kategori }}', this)">
+                    {{ $kat->nama_kategori }}
+                </div>
+            @endforeach
+        </div>
+    </div>
 
-        <div style="display: flex; gap: 8px;">
-            <button type="button" class="btn-secondary" onclick="openModalKategori()"
-                    style="padding: 10px 18px; border-radius: 10px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
-                <i class="fa-solid fa-tags"></i> Kelola Kategori
-            </button>
-            <button type="button" class="btn-primary" onclick="openModalTambah()">
-                <i class="fa-solid fa-plus"></i> Tambah Barang Baru
-            </button>
-        </div>
-    </section>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button type="button" class="btn-secondary" onclick="openModalKategori()">
+            <i class="fa-solid fa-tags"></i> Kelola Kategori
+        </button>
+        <button type="button" class="btn-secondary" onclick="openModalPenyesuaian()">
+            <i class="fa-solid fa-clipboard-check"></i> Penyesuaian Stok
+        </button>
+        <button type="button" class="btn-primary" onclick="openModalTambah()">
+            <i class="fa-solid fa-plus"></i> Tambah Barang Baru
+        </button>
+    </div>
+</section>
 
 {{-- ═══════════════════════════════════════════
      DATA TABLE PRODUK (full-height, scroll di dalam)
@@ -712,8 +714,130 @@
 
     </div>
 </div>
+
+{{-- ═══════════════════════════════════════════
+     MODAL: PENYESUAIAN STOK (OPNAME) — SPLIT LAYOUT
+     ═══════════════════════════════════════════ --}}
+<div class="modal-overlay" id="modalPenyesuaianStok">
+    <div class="modal-card modal-card-lg">
+
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-clipboard-check"></i> Penyesuaian Stok (Opname)</h3>
+            <button type="button" class="btn-close-modal" onclick="closeModalPenyesuaian()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form method="POST" action="{{ route('produk.penyesuaian') }}" id="formPenyesuaianStok">
+            @csrf
+            <input type="hidden" name="id_produk" id="opnameSelectedProdukId">
+
+            <div class="opname-layout">
+
+                {{-- Panel KIRI: Pencarian & Daftar Produk --}}
+                <div class="opname-left">
+                    <div class="opname-search">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text"
+                               id="opnameSearch"
+                               placeholder="Cari nama produk / barcode..."
+                               oninput="filterOpnameProducts()">
+                    </div>
+
+                    <div class="opname-cats" id="opnameCategories">
+                        <div class="opname-cat active" data-kat="Semua" onclick="setOpnameKategori('Semua', this)">Semua</div>
+                        @foreach ($kategoriList as $kat)
+                            <div class="opname-cat"
+                                 data-kat="{{ $kat->nama_kategori }}"
+                                 onclick="setOpnameKategori('{{ $kat->nama_kategori }}', this)">
+                                {{ $kat->nama_kategori }}
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="opname-list" id="opnameList">
+                        {{-- Diisi oleh JavaScript --}}
+                    </div>
+                </div>
+
+                {{-- Panel KANAN: Detail & Input --}}
+                <div class="opname-right">
+
+                    {{-- Empty state: belum pilih produk --}}
+                    <div class="opname-empty" id="opnameEmptyState">
+                        <i class="fa-solid fa-hand-pointer"></i>
+                        <p>Pilih produk di sebelah kiri</p>
+                        <div style="font-size: 10px; max-width: 260px;">
+                            Cari berdasarkan nama atau filter per kategori, lalu klik produk untuk mulai penyesuaian.
+                        </div>
+                    </div>
+
+                    {{-- Detail panel: setelah produk dipilih --}}
+                    <div id="opnameDetailPanel" style="display: none;">
+
+                        <div class="opname-detail-header">
+                            <div class="opname-product-name" id="opnameDetailNama">—</div>
+                            <div class="opname-product-meta" id="opnameDetailMeta">—</div>
+                        </div>
+
+                        <div class="opname-info-grid">
+                            <div class="stok-display-box">
+                                <div class="label">Stok Sistem</div>
+                                <div class="value" id="opnameStokSistem">—</div>
+                            </div>
+                            <div class="stok-display-box">
+                                <div class="label">Selisih</div>
+                                <div class="value neutral" id="opnameSelisih">—</div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 16px;">
+                            <label>Stok Fisik Riil <span class="required">*</span></label>
+                            <input type="number"
+                                   name="stok_fisik"
+                                   id="opnameStokFisik"
+                                   min="0"
+                                   placeholder="Masukkan hasil hitung fisik..."
+                                   required
+                                   oninput="hitungSelisih()">
+                            <div style="font-size: 10px; color: #94a3b8; margin-top: 4px;">
+                                <i class="fa-solid fa-info-circle"></i>
+                                Selisih dihitung otomatis: <strong>Fisik − Sistem</strong>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeModalPenyesuaian()">
+                    Batal
+                </button>
+                <button type="submit" class="btn-save" id="opnameSubmitBtn" disabled>
+                    <i class="fa-solid fa-check"></i> Eksekusi Penyesuaian
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
 @endsection
 
+@php
+    $opnameProductsData = $produk->map(function ($p) {
+        return [
+            'id'       => $p->id_produk,
+            'nama'     => $p->nama_produk,
+            'barcode'  => $p->barcode,
+            'kategori' => $p->kategori->nama_kategori ?? 'Tanpa Kategori',
+            'satuan'   => $p->satuan,
+            'stok'     => (int) $p->stok_sekarang,
+        ];
+    })->values()->toArray();
+@endphp
 @push('scripts')
 
 <script>
@@ -870,7 +994,7 @@
     }
 
     // AUTO-OPEN modal kalau ada validation error dari server
-    @if ($errors->any())
+    @if ($errors->hasAny(['barcode', 'nama_produk', 'satuan', 'harga_beli', 'harga_jual', 'stok_sekarang', 'min_stok', 'foto_produk', 'new_kategori']))
         document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('modalTambahProduk').classList.add('active');
         });
@@ -1307,5 +1431,177 @@
             }
         }
     });
+
+
+    // ═══════════════════════════════════════════
+    // MODAL PENYESUAIAN STOK — SPLIT VIEW
+    // ═══════════════════════════════════════════
+    const opnameProducts = @json($opnameProductsData);
+
+    let opnameActiveKategori = 'Semua';
+    let opnameSelectedId = null;
+
+    function openModalPenyesuaian() {
+        // Reset state
+        opnameActiveKategori = 'Semua';
+        opnameSelectedId = null;
+
+        document.getElementById('opnameSearch').value = '';
+        document.getElementById('opnameStokFisik').value = '';
+        document.getElementById('opnameSelectedProdukId').value = '';
+
+        // Reset kategori pills
+        document.querySelectorAll('#opnameCategories .opname-cat').forEach((el, i) => {
+            el.classList.toggle('active', i === 0);
+        });
+
+        // Reset panel kanan
+        document.getElementById('opnameEmptyState').style.display = 'flex';
+        document.getElementById('opnameDetailPanel').style.display = 'none';
+        document.getElementById('opnameSubmitBtn').disabled = true;
+
+        renderOpnameList();
+        document.getElementById('modalPenyesuaianStok').classList.add('active');
+    }
+
+    function closeModalPenyesuaian() {
+        document.getElementById('modalPenyesuaianStok').classList.remove('active');
+    }
+
+    function setOpnameKategori(kategori, el) {
+        opnameActiveKategori = kategori;
+        document.querySelectorAll('#opnameCategories .opname-cat').forEach(p => p.classList.remove('active'));
+        el.classList.add('active');
+        renderOpnameList();
+    }
+
+    function filterOpnameProducts() {
+        renderOpnameList();
+    }
+
+    function renderOpnameList() {
+        const keyword = document.getElementById('opnameSearch').value.toLowerCase().trim();
+        const list = document.getElementById('opnameList');
+
+        const filtered = opnameProducts.filter(p => {
+            const matchKat = opnameActiveKategori === 'Semua' || p.kategori === opnameActiveKategori;
+            const haystack = `${p.nama} ${p.barcode || ''}`.toLowerCase();
+            const matchSearch = keyword === '' || haystack.includes(keyword);
+            return matchKat && matchSearch;
+        });
+
+        if (filtered.length === 0) {
+            list.innerHTML = `
+                <div class="opname-list-empty">
+                    <i class="fa-solid fa-box-open"></i>
+                    Produk tidak ditemukan
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = filtered.map(p => `
+            <div class="opname-item ${opnameSelectedId === p.id ? 'selected' : ''}"
+                onclick="selectOpnameProduct(${p.id})">
+                <div style="min-width: 0; flex: 1;">
+                    <div class="opname-item-nama">${p.nama}</div>
+                    <div class="opname-item-meta">${p.barcode || '-'} • ${p.kategori}</div>
+                </div>
+                <div class="opname-item-stok">${p.stok} ${p.satuan || ''}</div>
+            </div>
+        `).join('');
+    }
+
+    function selectOpnameProduct(id) {
+        const p = opnameProducts.find(x => x.id === id);
+        if (!p) return;
+
+        opnameSelectedId = id;
+
+        // Update hidden input
+        document.getElementById('opnameSelectedProdukId').value = id;
+
+        // Highlight di list
+        document.querySelectorAll('#opnameList .opname-item').forEach(el => el.classList.remove('selected'));
+        const selectedEl = [...document.querySelectorAll('#opnameList .opname-item')]
+            .find(el => el.getAttribute('onclick')?.includes(`(${id})`));
+        if (selectedEl) selectedEl.classList.add('selected');
+
+        // Tampilkan panel detail
+        document.getElementById('opnameEmptyState').style.display = 'none';
+        document.getElementById('opnameDetailPanel').style.display = 'block';
+
+        document.getElementById('opnameDetailNama').textContent = p.nama;
+        document.getElementById('opnameDetailMeta').textContent = `${p.barcode || '-'} • ${p.kategori}`;
+        document.getElementById('opnameStokSistem').textContent = `${p.stok} ${p.satuan || ''}`;
+
+        // Reset input fisik + selisih
+        document.getElementById('opnameStokFisik').value = '';
+        const selisihEl = document.getElementById('opnameSelisih');
+        selisihEl.textContent = '—';
+        selisihEl.className = 'value neutral';
+
+        document.getElementById('opnameSubmitBtn').disabled = true;
+
+        // Fokus ke input
+        setTimeout(() => document.getElementById('opnameStokFisik').focus(), 100);
+    }
+
+    function hitungSelisih() {
+        const selisihEl = document.getElementById('opnameSelisih');
+        const submitBtn = document.getElementById('opnameSubmitBtn');
+
+        if (!opnameSelectedId) {
+            selisihEl.textContent = '—';
+            selisihEl.className = 'value neutral';
+            submitBtn.disabled = true;
+            return;
+        }
+
+        const p = opnameProducts.find(x => x.id === opnameSelectedId);
+        const inputVal = document.getElementById('opnameStokFisik').value;
+
+        if (inputVal === '') {
+            selisihEl.textContent = '—';
+            selisihEl.className = 'value neutral';
+            submitBtn.disabled = true;
+            return;
+        }
+
+        const stokFisik = parseInt(inputVal) || 0;
+        const selisih = stokFisik - p.stok;
+        const satuan = p.satuan || '';
+
+        if (selisih === 0) {
+            selisihEl.textContent = `0 ${satuan} — Tidak ada perubahan`;
+            selisihEl.className = 'value neutral';
+            submitBtn.disabled = true;
+        } else if (selisih > 0) {
+            selisihEl.textContent = `+${selisih} ${satuan}`;
+            selisihEl.className = 'value positive';
+            submitBtn.disabled = false;
+        } else {
+            selisihEl.textContent = `${selisih} ${satuan}`;
+            selisihEl.className = 'value negative';
+            submitBtn.disabled = false;
+        }
+    }
+
+    // Tutup modal via overlay & ESC
+    document.getElementById('modalPenyesuaianStok').addEventListener('click', function (e) {
+        if (e.target === this) closeModalPenyesuaian();
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && document.getElementById('modalPenyesuaianStok').classList.contains('active')) {
+            closeModalPenyesuaian();
+        }
+    });
+
+    // Auto-open kalau ada error validasi
+    @if ($errors->hasAny(['id_produk', 'stok_fisik']))
+        document.addEventListener('DOMContentLoaded', function () {
+            openModalPenyesuaian();
+        });
+    @endif
 </script>
 @endpush

@@ -943,6 +943,305 @@
         #modalKelolaKategori .modal-body {
             padding: 18px 22px;
         }
+
+        /* ═══════════════════════════════════════════
+        STOK DISPLAY BOX (untuk modal opname)
+        ═══════════════════════════════════════════ */
+        .stok-display-box {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 14px 16px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stok-display-box .label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .stok-display-box .value {
+            font-size: 22px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-top: 4px;
+            transition: color 0.2s;
+        }
+
+        .stok-display-box .value.positive { color: #16a34a; }
+        .stok-display-box .value.negative { color: #dc2626; }
+        .stok-display-box .value.neutral  { color: #64748b; font-size: 16px; }
+
+
+        /* Tombol Secondary (abu, untuk aksi non-primary) */
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #334155;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+            transition: background 0.15s, transform 0.15s;
+            white-space: nowrap;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e1;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary:active {
+            transform: translateY(0);
+        }
+
+        /* ═══════════════════════════════════════════
+        MODAL BESAR (untuk opname/picker)
+        ═══════════════════════════════════════════ */
+        .modal-card-lg {
+            width: 960px !important;
+            max-width: 95% !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+        }
+
+        .modal-card-lg .modal-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid #e2e8f0;
+            margin: 0;
+        }
+
+        .modal-card-lg .modal-footer {
+            padding: 14px 24px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            margin: 0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* ═══════════════════════════════════════════
+        OPNAME LAYOUT (split view)
+        ═══════════════════════════════════════════ */
+        .opname-layout {
+            display: flex;
+            height: 62vh;
+            min-height: 480px;
+            max-height: 700px;
+        }
+
+        /* Panel Kiri */
+        .opname-left {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #e2e8f0;
+            background: #fafbfc;
+        }
+
+        .opname-search {
+            position: relative;
+            padding: 14px 14px 8px;
+        }
+
+        .opname-search i {
+            position: absolute;
+            left: 26px;
+            top: 50%;
+            transform: translateY(-30%);
+            color: #64748b;
+            font-size: 13px;
+            pointer-events: none;
+        }
+
+        .opname-search input {
+            width: 100%;
+            padding: 9px 14px 9px 38px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            outline: none;
+            font-size: 12px;
+            font-family: inherit;
+            background: #ffffff;
+            transition: all 0.15s;
+        }
+
+        .opname-search input:focus {
+            border-color: #429198;
+            box-shadow: 0 0 0 3px rgba(66, 145, 152, 0.15);
+        }
+
+        .opname-cats {
+            display: flex;
+            gap: 6px;
+            padding: 0 14px 10px;
+            overflow-x: auto;
+            flex-shrink: 0;
+            scrollbar-width: thin;
+        }
+
+        .opname-cats::-webkit-scrollbar { height: 4px; }
+        .opname-cats::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        .opname-cat {
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid #cbd5e1;
+            background-color: #ffffff;
+            color: #334155;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+
+        .opname-cat:hover { background: #f1f5f9; }
+
+        .opname-cat.active {
+            background-color: #0f172a;
+            color: #ffffff;
+            border-color: #0f172a;
+        }
+
+        .opname-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 14px 14px;
+            min-height: 0;
+        }
+
+        .opname-list::-webkit-scrollbar { width: 6px; }
+        .opname-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        .opname-item {
+            padding: 10px 12px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.15s;
+            margin-bottom: 6px;
+        }
+
+        .opname-item:hover {
+            border-color: #429198;
+            background: #f0fdfa;
+        }
+
+        .opname-item.selected {
+            border-color: #429198;
+            background: #f0fdfa;
+            box-shadow: 0 0 0 2px rgba(66, 145, 152, 0.2);
+        }
+
+        .opname-item-nama {
+            font-size: 12px;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.3;
+        }
+
+        .opname-item-meta {
+            font-size: 10px;
+            color: #64748b;
+            margin-top: 3px;
+        }
+
+        .opname-item-stok {
+            font-size: 10px;
+            font-weight: 800;
+            color: #0f172a;
+            background: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 6px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .opname-list-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: #94a3b8;
+            font-size: 11px;
+        }
+
+        .opname-list-empty i {
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: block;
+            color: #cbd5e1;
+        }
+
+        /* Panel Kanan */
+        .opname-right {
+            flex: 1.2;
+            min-width: 0;
+            padding: 20px 22px;
+            overflow-y: auto;
+            background: #ffffff;
+        }
+
+        .opname-empty {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            text-align: center;
+            gap: 10px;
+        }
+
+        .opname-empty i {
+            font-size: 42px;
+            color: #cbd5e1;
+        }
+
+        .opname-empty p {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .opname-detail-header {
+            padding-bottom: 14px;
+            border-bottom: 2px solid #f1f5f9;
+            margin-bottom: 16px;
+        }
+
+        .opname-product-name {
+            font-size: 18px;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.3;
+        }
+
+        .opname-product-meta {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .opname-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
     </style>
 
     @stack('styles')

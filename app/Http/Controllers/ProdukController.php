@@ -183,6 +183,49 @@ class ProdukController extends Controller
             ->route('produk.index')
             ->with('success', "Produk \"{$nama}\" berhasil dihapus!");
     }
+    
+    /**
+     * Eksekusi penyesuaian stok (stock opname).
+     * Memanggil SP sp_penyesuaian_stok untuk update stok + catat riwayat.
+     */
+    public function penyesuaianStok(Request $request)
+    {
+        $validated = $request->validate([
+            'id_produk'  => ['required', 'exists:produk,id_produk'],
+            'stok_fisik' => ['required', 'integer', 'min:0'],
+        ], [
+            'id_produk.required'  => 'Produk wajib dipilih.',
+            'id_produk.exists'    => 'Produk tidak ditemukan.',
+            'stok_fisik.required' => 'Stok fisik wajib diisi.',
+            'stok_fisik.integer'  => 'Stok fisik harus berupa angka bulat.',
+            'stok_fisik.min'      => 'Stok fisik tidak boleh negatif.',
+        ]);
+
+        $produk = Produk::findOrFail($validated['id_produk']);
+
+        // Hitung selisih: fisik - sistem
+        $selisih = $validated['stok_fisik'] - $produk->stok_sekarang;
+
+        // Kalau sama, tidak ada yang perlu disesuaikan
+        if ($selisih === 0) {
+            return redirect()
+                ->route('produk.index')
+                ->with('error', "Stok fisik sama dengan stok sistem. Tidak ada perubahan untuk produk \"{$produk->nama_produk}\".");
+        }
+
+        // Eksekusi via stored procedure (otomatis update produk + catat riwayat_stok)
+        DB::statement('CALL sp_penyesuaian_stok(?, ?)', [
+            $produk->id_produk,
+            $selisih,
+        ]);
+
+        $arah = $selisih > 0 ? 'ditambah' : 'dikurangi';
+        $abs  = abs($selisih);
+
+        return redirect()
+            ->route('produk.index')
+            ->with('success', "Penyesuaian stok \"{$produk->nama_produk}\" berhasil! Stok {$arah} {$abs} {$produk->satuan}.");
+    }
 
         /**
      * Upload foto produk: konversi ke WebP, resize, compress.
