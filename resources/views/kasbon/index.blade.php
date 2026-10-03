@@ -12,33 +12,31 @@
                 <div class="stat-label">Total Warga Terdaftar</div>
                 <div class="stat-value">{{ $stats['total_warga'] }} Warga</div>
             </div>
-            <div class="stat-icon blue"><i class="fa-solid fa-users"></i></div>
+            <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
         </div>
 
         <div class="stat-card">
             <div class="stat-info">
                 <div class="stat-label">Warga Ada Kasbon</div>
-                <div class="stat-value" style="color: #dc2626;">{{ $stats['warga_kasbon'] }} Warga</div>
+                <div class="stat-value">{{ $stats['warga_kasbon'] }} Warga</div>
             </div>
-            <div class="stat-icon red"><i class="fa-solid fa-book"></i></div>
+            <div class="stat-icon"><i class="fa-solid fa-book"></i></div>
         </div>
 
         <div class="stat-card">
             <div class="stat-info">
                 <div class="stat-label">Warga Bebas Utang</div>
-                <div class="stat-value" style="color: #16a34a;">{{ $stats['warga_bebas'] }} Warga</div>
+                <div class="stat-value">{{ $stats['warga_bebas'] }} Warga</div>
             </div>
-            <div class="stat-icon green"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
         </div>
 
         <div class="stat-card">
             <div class="stat-info">
                 <div class="stat-label">Total Piutang Berjalan</div>
-                <div class="stat-value" style="color: #dc2626;">
-                    Rp {{ number_format($stats['total_piutang'], 0, ',', '.') }}
-                </div>
+                <div class="stat-value">Rp {{ number_format($stats['total_piutang'], 0, ',', '.') }}</div>
             </div>
-            <div class="stat-icon yellow"><i class="fa-solid fa-money-bill-wave"></i></div>
+            <div class="stat-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
         </div>
     </section>
 
@@ -69,18 +67,13 @@
         <div class="kasbon-main">
             <div class="warga-grid" id="wargaGrid">
                 @forelse ($pelanggan as $p)
-                    @php
-                        $colors = ['#0ea5e9','#8b5cf6','#ec4899','#f59e0b','#10b981','#ef4444','#06b6d4','#a855f7'];
-                        $avatarColor = $colors[crc32($p->nama_pelanggan) % count($colors)];
-                        $initial = strtoupper(mb_substr($p->nama_pelanggan, 0, 1));
-                    @endphp
                     <div class="warga-card"
                          data-id="{{ $p->id_pelanggan }}"
                          data-status="{{ $p->status_piutang }}"
                          data-search="{{ strtolower($p->nama_pelanggan . ' ' . ($p->no_telepon ?? '') . ' ' . ($p->alamat ?? '')) }}"
                          onclick="selectWarga({{ $p->id_pelanggan }}, this)">
-                        <div class="warga-avatar" style="background: {{ $avatarColor }};">
-                            {{ $initial }}
+                        <div class="warga-avatar">
+                            {{ strtoupper(mb_substr($p->nama_pelanggan, 0, 1)) }}
                         </div>
                         <div class="warga-info">
                             <div class="warga-nama">{{ $p->nama_pelanggan }}</div>
@@ -262,6 +255,9 @@
     let activeStatus = 'Semua';
     let currentWarga = null;
 
+    // ═══════════════════════════════════════════
+    // FILTER
+    // ═══════════════════════════════════════════
     function setFilterStatus(status, el) {
         activeStatus = status;
         document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
@@ -289,6 +285,9 @@
         document.getElementById('visibleCount').textContent = visible;
     }
 
+    // ═══════════════════════════════════════════
+    // PILIH WARGA → LOAD DETAIL KE SIDE PANEL
+    // ═══════════════════════════════════════════
     async function selectWarga(id, cardEl) {
         document.querySelectorAll('.warga-card').forEach(c => c.classList.remove('active'));
         cardEl.classList.add('active');
@@ -348,6 +347,9 @@
         `).join('');
     }
 
+    // ═══════════════════════════════════════════
+    // MODAL TAMBAH WARGA
+    // ═══════════════════════════════════════════
     function openModalTambahWarga() {
         document.getElementById('modalTambahWarga').classList.add('active');
     }
@@ -361,6 +363,9 @@
         });
     @endif
 
+    // ═══════════════════════════════════════════
+    // MODAL PELUNASAN
+    // ═══════════════════════════════════════════
     function openModalPelunasan() {
         if (!currentWarga || currentWarga.total_hutang <= 0) return;
         document.getElementById('pelunasanNama').textContent = currentWarga.nama_pelanggan;
@@ -381,6 +386,9 @@
         document.getElementById('inputNominalBayar').value = currentWarga.total_hutang;
     }
 
+    // ═══════════════════════════════════════════
+    // EVENT LISTENERS
+    // ═══════════════════════════════════════════
     document.getElementById('modalTambahWarga').addEventListener('click', function (e) {
         if (e.target === this) closeModalTambahWarga();
     });
