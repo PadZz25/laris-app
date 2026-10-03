@@ -20,7 +20,8 @@
                 class="nav-item {{ request()->routeIs('produk.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-box-open"></i> Barang & Stok
             </a>
-            <a href="#" class="nav-item">
+            <a href="{{ route('supplier.index') }}"
+                class="nav-item {{ request()->routeIs('supplier.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-truck-fast"></i> Pasokan Supplier
             </a>
             <a href="{{ route('pengeluaran.index') }}"

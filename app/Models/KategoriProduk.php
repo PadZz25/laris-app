@@ -5,30 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Pelanggan extends Model
+class KategoriProduk extends Model
 {
-    protected $table = 'pelanggan';
-    protected $primaryKey = 'id_pelanggan';
+    protected $table = 'kategori_produk';
+    protected $primaryKey = 'id_kategori';
     public $timestamps = false;
 
     protected $fillable = [
-        'nama_pelanggan',
-        'no_telepon',
-        'alamat',
-        'total_hutang',
+        'nama_kategori',
     ];
 
-    protected $casts = [
-        'total_hutang' => 'decimal:2',
-    ];
-
-    public function penjualan(): HasMany
+    /**
+     * Relasi: 1 kategori punya banyak produk.
+     */
+    public function produk(): HasMany
     {
-        return $this->hasMany(Penjualan::class, 'id_pelanggan', 'id_pelanggan');
-    }
-
-    public function getStatusPiutangAttribute(): string
-    {
-        return $this->total_hutang > 0 ? 'Ada Kasbon' : 'Bebas Utang';
+        return $this->hasMany(Produk::class, 'id_kategori', 'id_kategori');
     }
 }

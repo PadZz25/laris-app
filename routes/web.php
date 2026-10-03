@@ -6,6 +6,7 @@ use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\PengeluaranController;
 use App\Http\Controllers\KasbonController;
+use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 
 // ─────────────────────────────────────────────
@@ -46,6 +47,22 @@ Route::middleware('auth')->group(function () {
         Route::get('/{id}/detail', 'detail')->name('detail');
         Route::delete('/{id}', 'destroy')->name('destroy');
         Route::post('/{id}/bayar', 'bayar')->name('bayar');
+    });
+
+    // Modul Pasokan Supplier
+    Route::prefix('supplier')->name('supplier.')->controller(SupplierController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+
+        // Supplier CRUD
+        Route::post('/tambah', 'storeSupplier')->name('storeSupplier');
+        Route::delete('/{id}/hapus', 'destroySupplier')->name('destroySupplier');
+
+        // Pasokan
+        Route::post('/pasokan', 'storePasokan')->name('storePasokan');
+        Route::get('/pasokan/{id}/detail', 'detail')->name('detail');
+        Route::delete('/pasokan/{id}', 'destroyFaktur')->name('destroyFaktur');
+        Route::post('/pasokan/{id}/bayar', 'bayarFaktur')->name('bayarFaktur');
+        Route::post('/produk-baru', 'storeProdukBaru')->name('storeProdukBaru');
     });
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
