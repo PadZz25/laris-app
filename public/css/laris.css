@@ -332,7 +332,7 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #162F32 0%, #429198 100%);
+    background: #0f172a;
     color: #ffffff;
     border: none;
     padding: 10px 18px;
@@ -344,14 +344,15 @@ body {
     align-items: center;
     gap: 8px;
     white-space: nowrap;
-    box-shadow: 0 4px 10px rgba(66, 145, 152, 0.25);
-    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
+    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
     text-decoration: none;
 }
 
 .btn-primary:hover {
+    background: #1e293b;
     transform: translateY(-1px);
-    box-shadow: 0 6px 14px rgba(66, 145, 152, 0.35);
+    box-shadow: 0 6px 14px rgba(15, 23, 42, 0.3);
 }
 
 .btn-secondary {
@@ -1301,16 +1302,17 @@ body {
 
 /* Info summary di side */
 .breakdown-summary {
-    background: linear-gradient(135deg, #162F32 0%, #429198 100%);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 16px;
-    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .breakdown-summary .label {
     font-size: 10px;
     font-weight: 700;
-    color: #cbd5e1;
+    color: #64748b;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -1318,13 +1320,17 @@ body {
 .breakdown-summary .value {
     font-size: 22px;
     font-weight: 800;
+    color: #0f172a;
     margin-top: 4px;
 }
 
 .breakdown-summary .sub {
     font-size: 10px;
-    color: #cbd5e1;
+    color: #64748b;
     margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 
