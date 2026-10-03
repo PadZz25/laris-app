@@ -965,32 +965,46 @@ body {
 .modal-card-lg {
     width: 960px !important;
     max-width: 95% !important;
+    height: 90vh !important;
+    max-height: 90vh !important;
     padding: 0 !important;
     overflow: hidden !important;
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-card-lg .modal-header {
-    padding: 18px 24px;
+    padding: 16px 24px;
     border-bottom: 1px solid #e2e8f0;
     margin: 0;
+    flex-shrink: 0;
 }
 
 .modal-card-lg .modal-footer {
-    padding: 14px 24px;
+    padding: 12px 24px;
     background: #f8fafc;
     border-top: 1px solid #e2e8f0;
     margin: 0;
     display: flex;
     justify-content: flex-end;
     gap: 10px;
+    flex-shrink: 0;
+}
+
+.modal-card-lg form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
 }
 
 /* ═══ OPNAME LAYOUT (split view) ═══ */
 .opname-layout {
+    flex: 1;
+    min-height: 0;
     display: flex;
-    height: 62vh;
-    min-height: 480px;
-    max-height: 700px;
+    overflow: hidden;
 }
 
 .opname-left {
@@ -1005,6 +1019,7 @@ body {
 .opname-search {
     position: relative;
     padding: 14px 14px 8px;
+    flex-shrink: 0; 
 }
 
 .opname-search i {
@@ -1040,6 +1055,7 @@ body {
     padding: 0 14px 10px;
     overflow-x: auto;
     flex-shrink: 0;
+    flex-shrink: 0; 
     scrollbar-width: thin;
 }
 
