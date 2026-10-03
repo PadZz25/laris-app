@@ -246,6 +246,12 @@ body {
     color: #429198;
 }
 
+/* Icon ke-2 dan ke-4 (even) dapat warna sedikit beda */
+.stat-card:nth-child(even) .stat-icon {
+    background-color: #e0f2fe;
+    color: #0284c7;
+}
+
 .stat-icon.blue,
 .stat-icon.yellow { background-color: #e0f2fe; color: #0284c7; }
 
