@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProdukController; 
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\PengeluaranController;
+use App\Http\Controllers\KasbonController;
 use Illuminate\Support\Facades\Route;
 
 // ─────────────────────────────────────────────
@@ -36,6 +37,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/', 'store')->name('store');
         Route::delete('/{id}', 'destroy')->name('destroy');
+    });
+
+    // Modul Buku Kasbon
+    Route::prefix('kasbon')->name('kasbon.')->controller(KasbonController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{id}/detail', 'detail')->name('detail');
+        Route::delete('/{id}', 'destroy')->name('destroy');
+        Route::post('/{id}/bayar', 'bayar')->name('bayar');
     });
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
