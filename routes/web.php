@@ -8,6 +8,7 @@ use App\Http\Controllers\PengeluaranController;
 use App\Http\Controllers\KasbonController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\PosController;
 use Illuminate\Support\Facades\Route;
 
 // ─────────────────────────────────────────────
@@ -68,6 +69,12 @@ Route::middleware('auth')->group(function () {
 
         Route::prefix('laporan')->name('laporan.')->controller(LaporanController::class)->group(function () {
             Route::get('/', 'index')->name('index');
+    });
+
+    // Modul Kasir / POS
+    Route::prefix('kasir')->name('kasir.')->controller(PosController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/store', 'store')->name('store');
     });
 
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');

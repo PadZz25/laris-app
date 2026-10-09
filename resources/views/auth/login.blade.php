@@ -193,7 +193,7 @@
                         <input
                             type="password"
                             name="password"
-                            placeholder="••••••••"
+                            placeholder="Masukkan kata sandi..."
                             class="@error('password') error @enderror"
                             required
                         >

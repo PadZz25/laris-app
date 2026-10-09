@@ -11,8 +11,8 @@
                 <i class="fa-solid fa-chart-line"></i> Laporan & Omzet
             </a>
 
-            <a href="#"
-            class="nav-item {{ request()->routeIs('kasir.*') ? 'active' : '' }}">
+            <a href="{{ route('kasir.index') }}"
+                class="nav-item {{ request()->routeIs('kasir.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-cart-shopping"></i> Kasir
             </a>
 
