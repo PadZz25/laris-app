@@ -1,0 +1,140 @@
+/* ═══════════════════════════════════════════════════════════
+   MODUL PENGELUARAN
+   ═══════════════════════════════════════════════════════════ */
+
+.pengeluaran-layout {
+    display: flex;
+    gap: 14px;
+    flex: 1;
+    min-height: 0;
+}
+
+.pengeluaran-main {
+    flex: 7;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 0;
+    min-width: 0;
+}
+
+.pengeluaran-side {
+    flex: 3;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-y: auto;
+}
+
+.badge-cat {
+    font-size: 9px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 10px;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.cat-operasional { background-color: #dbeafe; color: #1d4ed8; }
+.cat-gaji { background-color: #fef3c7; color: #b45309; }
+.cat-perlengkapan { background-color: #e0e7ff; color: #4338ca; }
+.cat-lain { background-color: #f3e8ff; color: #7e22ce; }
+
+.breakdown-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.breakdown-title {
+    font-size: 12px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cat-progress-item {
+    margin-bottom: 14px;
+}
+
+.cat-progress-item:last-child {
+    margin-bottom: 0;
+}
+
+.cat-progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 5px;
+}
+
+.cat-progress-label span:last-child {
+    color: #64748b;
+    font-weight: 600;
+}
+
+.progress-bar-bg {
+    height: 6px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.4s ease;
+}
+
+.breakdown-empty {
+    text-align: center;
+    padding: 30px 10px;
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+.breakdown-empty i {
+    font-size: 28px;
+    display: block;
+    margin-bottom: 8px;
+    color: #cbd5e1;
+}
+
+.breakdown-summary {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.breakdown-summary .label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.breakdown-summary .value {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-top: 4px;
+}
+
+.breakdown-summary .sub {
+    font-size: 10px;
+    color: #64748b;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}

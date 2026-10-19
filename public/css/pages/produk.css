@@ -1,0 +1,321 @@
+/* ═══════════════════════════════════════════════════════════
+   MODUL PRODUK & STOK
+   ═══════════════════════════════════════════════════════════ */
+
+.stok-display-box {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+}
+
+.stok-display-box .label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.stok-display-box .value {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-top: 4px;
+    transition: color 0.2s;
+}
+
+.stok-display-box .value.positive { color: #16a34a; }
+.stok-display-box .value.negative { color: #dc2626; }
+.stok-display-box .value.neutral { color: #64748b; font-size: 16px; }
+
+/* MODAL BESAR (OPNAME) */
+.modal-card-lg {
+    width: 960px !important;
+    max-width: 95% !important;
+    height: 90vh !important;
+    max-height: 90vh !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-card-lg .modal-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.modal-card-lg .modal-footer {
+    padding: 12px 24px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    margin: 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.modal-card-lg form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* OPNAME LAYOUT */
+.opname-layout {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    overflow: hidden;
+}
+
+.opname-left {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #e2e8f0;
+    background: #fafbfc;
+}
+
+.opname-search {
+    position: relative;
+    padding: 14px 14px 8px;
+    flex-shrink: 0;
+}
+
+.opname-search i {
+    position: absolute;
+    left: 26px;
+    top: 50%;
+    transform: translateY(-30%);
+    color: #64748b;
+    font-size: 13px;
+    pointer-events: none;
+}
+
+.opname-search input {
+    width: 100%;
+    padding: 9px 14px 9px 38px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    outline: none;
+    font-size: 12px;
+    font-family: inherit;
+    background: #ffffff;
+    transition: all 0.15s;
+}
+
+.opname-search input:focus {
+    border-color: #429198;
+    box-shadow: 0 0 0 3px rgba(66, 145, 152, 0.15);
+}
+
+.opname-cats {
+    display: flex;
+    gap: 6px;
+    padding: 0 14px 10px;
+    overflow-x: auto;
+    flex-shrink: 0;
+    scrollbar-width: thin;
+}
+
+.opname-cat {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid #cbd5e1;
+    background-color: #ffffff;
+    color: #334155;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+}
+
+.opname-cat:hover {
+    background: #f1f5f9;
+}
+
+.opname-cat.active {
+    background-color: #0f172a;
+    color: #ffffff;
+    border-color: #0f172a;
+}
+
+.opname-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 14px 14px;
+    min-height: 0;
+}
+
+.opname-item {
+    padding: 10px 12px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.15s;
+    margin-bottom: 6px;
+}
+
+.opname-item:hover,
+.opname-item.selected {
+    border-color: #429198;
+    background: #f0fdfa;
+}
+
+.opname-item.selected {
+    box-shadow: 0 0 0 2px rgba(66, 145, 152, 0.2);
+}
+
+.opname-item-nama {
+    font-size: 12px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.3;
+}
+
+.opname-item-meta {
+    font-size: 10px;
+    color: #64748b;
+    margin-top: 3px;
+}
+
+.opname-item-stok {
+    font-size: 10px;
+    font-weight: 800;
+    color: #0f172a;
+    background: #f1f5f9;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.opname-right {
+    flex: 1.2;
+    min-width: 0;
+    padding: 20px 22px;
+    overflow-y: auto;
+    background: #ffffff;
+}
+
+.opname-empty {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    text-align: center;
+    gap: 10px;
+}
+
+.opname-empty i {
+    font-size: 42px;
+    color: #cbd5e1;
+}
+
+.opname-detail-header {
+    padding-bottom: 14px;
+    border-bottom: 2px solid #f1f5f9;
+    margin-bottom: 16px;
+}
+
+.opname-product-name {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.3;
+}
+
+.opname-product-meta {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+.opname-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 4px;
+}
+
+/* KATEGORI TABLE */
+.kategori-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.kategori-table th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 800;
+    padding: 10px 12px;
+    border-bottom: 2px solid #e2e8f0;
+    text-align: left;
+    font-size: 11px;
+}
+
+.kategori-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #0f172a;
+    vertical-align: middle;
+}
+
+.kategori-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.kategori-table-wrap {
+    max-height: 320px;
+    overflow-y: auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+}
+
+.kategori-add-form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.kategori-add-form input {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    outline: none;
+    font-size: 12px;
+    font-family: inherit;
+    transition: all 0.15s;
+}
+
+.kategori-add-form input:focus {
+    border-color: #429198;
+    box-shadow: 0 0 0 3px rgba(66, 145, 152, 0.15);
+}
+
+#subModalEditKategori {
+    z-index: 1100;
+}
+
+#modalKelolaKategori .modal-body {
+    padding: 18px 22px;
+}
