@@ -4,40 +4,46 @@
             <img src="{{ asset('img/logo-laris.png') }}" alt="LARIS Logo">
         </div>
 
-       <nav class="nav-menu">
-            {{-- Laporan & Omzet di paling atas --}}
-            <a href="{{ route('laporan.index') }}"
-            class="nav-item {{ request()->routeIs('laporan.*') ? 'active' : '' }}">
-                <i class="fa-solid fa-chart-line"></i> Laporan & Omzet
-            </a>
+        <nav class="nav-menu">
+            {{-- 1. Laporan & Omzet (Hanya Admin) --}}
+            @if(auth()->user()->peran === 'admin')
+                <a href="{{ route('laporan.index') }}" class="nav-item {{ request()->routeIs('laporan.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-chart-line"></i> Laporan & Omzet
+                </a>
+            @endif
 
-            <a href="{{ route('kasir.index') }}"
-                class="nav-item {{ request()->routeIs('kasir.*') ? 'active' : '' }}">
+            {{-- 2. Kasir (Semua) --}}
+            <a href="{{ route('kasir.index') }}" class="nav-item {{ request()->routeIs('kasir.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-cart-shopping"></i> Kasir
             </a>
 
-            <a href="{{ route('kasbon.index') }}"
-            class="nav-item {{ request()->routeIs('kasbon.*') ? 'active' : '' }}">
+            {{-- 3. Buku Kasbon (Semua) --}}
+            <a href="{{ route('kasbon.index') }}" class="nav-item {{ request()->routeIs('kasbon.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-book"></i> Buku Kasbon
             </a>
 
-            <a href="{{ route('produk.index') }}"
-            class="nav-item {{ request()->routeIs('produk.*') || request()->routeIs('kategori.*') ? 'active' : '' }}">
+            {{-- 4. Barang & Stok (Semua) --}}
+            <a href="{{ route('produk.index') }}" class="nav-item {{ request()->routeIs('produk.*') || request()->routeIs('kategori.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-box-open"></i> Barang & Stok
             </a>
 
-            <a href="{{ route('supplier.index') }}"
-            class="nav-item {{ request()->routeIs('supplier.*') ? 'active' : '' }}">
-                <i class="fa-solid fa-truck-fast"></i> Pasokan Supplier
-            </a>
+            {{-- 5. Pasokan Supplier (Hanya Admin) --}}
+            @if(auth()->user()->peran === 'admin')
+                <a href="{{ route('supplier.index') }}" class="nav-item {{ request()->routeIs('supplier.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-truck-fast"></i> Pasokan Supplier
+                </a>
+            @endif
 
-            <a href="{{ route('pengeluaran.index') }}"
-            class="nav-item {{ request()->routeIs('pengeluaran.*') ? 'active' : '' }}">
-                <i class="fa-solid fa-wallet"></i> Pengeluaran
-            </a>
+            {{-- 6. Pengeluaran (Hanya Admin) --}}
+            @if(auth()->user()->peran === 'admin')
+                <a href="{{ route('pengeluaran.index') }}" class="nav-item {{ request()->routeIs('pengeluaran.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-wallet"></i> Pengeluaran
+                </a>
+            @endif
         </nav>
     </div>
 
+    {{-- Tombol Logout --}}
     <form method="POST" action="{{ route('logout') }}">
         @csrf
         <button type="submit" class="logout-btn">

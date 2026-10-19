@@ -13,9 +13,10 @@ class LoginController extends Controller
      */
     public function showLoginForm()
     {
-        // Kalau sudah login, langsung lempar ke dashboard
         if (Auth::check()) {
-            return redirect()->route('dashboard');
+            return Auth::user()->peran === 'admin' 
+                ? redirect()->route('laporan.index') 
+                : redirect()->route('kasir.index');
         }
 
         return view('auth.login');
@@ -49,9 +50,7 @@ class LoginController extends Controller
             if ($user->peran === 'admin') {
                 return redirect()->route('laporan.index')->with('success', $welcome);
             }
-
-            // Kasir sementara ke dashboard (menunggu halaman POS)
-            return redirect()->route('dashboard')->with('success', $welcome);
+            return redirect()->route('kasir.index')->with('success', $welcome);
         }
 
         // 4. Kalau gagal, kembalikan ke form dengan pesan error
