@@ -69,6 +69,8 @@ Route::middleware('auth')->group(function () {
 
         Route::prefix('laporan')->name('laporan.')->controller(LaporanController::class)->group(function () {
             Route::get('/', 'index')->name('index');
+            Route::get('/export-excel', 'exportExcel')->name('exportExcel');
+            Route::get('/export-pdf', 'exportPdf')->name('exportPdf');
     });
 
     // Modul Kasir / POS
