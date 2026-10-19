@@ -19,18 +19,27 @@ class PosController extends Controller
             ->orderBy('nama_produk')
             ->get();
 
-        $kategoriList = KategoriProduk::orderBy('nama_kategori')->get();
+        // Siapkan data JSON untuk JS
+        $produkData = $produk->map(function ($p) {
+            return [
+                'id'       => $p->id_produk,
+                'nama'     => $p->nama_produk,
+                'barcode'  => $p->barcode,
+                'kategori' => $p->kategori->nama_kategori ?? 'Tanpa Kategori',
+                'harga'    => (float) $p->harga_jual,
+                'stok'     => (int) $p->stok_sekarang,
+                'satuan'   => $p->satuan,
+                'foto'     => $p->foto_produk ? asset('storage/' . $p->foto_produk) : null,
+            ];
+        })->values()->toArray();
+
+        $kategoriList  = KategoriProduk::orderBy('nama_kategori')->get();
         $pelangganList = Pelanggan::orderBy('nama_pelanggan')->get();
 
-        // Kategori terlaris (bulan ini) — placeholder dulu
-        // Akan dioptimasi di Sub-Fase 5.7
-        $topCategories = collect();
-
         return view('kasir.index', compact(
-            'produk',
+            'produkData',
             'kategoriList',
-            'pelangganList',
-            'topCategories'
+            'pelangganList'
         ));
     }
 
