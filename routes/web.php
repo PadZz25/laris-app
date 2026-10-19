@@ -77,5 +77,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/store', 'store')->name('store');
     });
 
+    Route::prefix('kasir')->name('kasir.')->controller(PosController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/store', 'store')->name('store');
+        Route::get('/nota/{id}', 'printNota')->name('nota'); // <-- TAMBAH INI
+    });
+
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });

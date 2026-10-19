@@ -595,33 +595,83 @@
         }
     }
 
-    function prosesPembayaran() {
-        // Validasi Tunai
+        async function prosesPembayaran() {
+        // 1. Validasi Tunai
+        let uangDiterima = 0;
+        let kembalian = 0;
+
         if (metodeTerpilih === 'Tunai') {
-            const uangDiterima = parseFloat(document.getElementById('inputUangDiterima').value) || 0;
+            uangDiterima = parseFloat(document.getElementById('inputUangDiterima').value) || 0;
             if (uangDiterima < totalBelanjaGlobal) {
                 showToast('Uang yang dibayarkan masih kurang!', 'error');
                 return;
             }
+            kembalian = uangDiterima - totalBelanjaGlobal;
         }
         
-        // Validasi Kasbon
+        // 2. Validasi Kasbon
+        let idPelanggan = null;
         if (metodeTerpilih === 'Kasbon') {
-            const warga = document.getElementById('selectPelanggan').value;
-            if (!warga) {
+            idPelanggan = document.getElementById('selectPelanggan').value;
+            if (!idPelanggan) {
                 showToast('Pilih nama warga untuk kasbon!', 'error');
                 return;
             }
         }
 
-        // Nanti di 5.4: Ini akan diubah menjadi AJAX request ke backend
-        showToast(`Transaksi ${metodeTerpilih} Berhasil (Simulasi). Lanjut ke 5.4!`, 'success');
-        
-        // Reset keranjang (karena transaksi sukses)
-        cart = [];
-        saveCart();
-        renderCart();
-        closePaymentModal();
+        // 3. Siapkan Data
+        const payload = {
+            items: cart,
+            metode_bayar: metodeTerpilih,
+            id_pelanggan: idPelanggan,
+            uang_diterima: uangDiterima,
+            kembalian: kembalian
+        };
+
+        const btnProses = document.querySelector('#modalPembayaran .btn-save');
+        btnProses.disabled = true;
+        btnProses.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+
+        try {
+            // 4. Kirim ke Backend
+            const res = await fetch('{{ route("kasir.store") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                // 5. Sukses: Bersihkan Cart & LocalStorage
+                cart = [];
+                saveCart();
+                renderCart();
+                closePaymentModal();
+                
+                // Tampilkan Toast
+                showToast('Transaksi Berhasil!', 'success');
+
+                // Buka struk di tab baru untuk di-print
+                window.open(`/kasir/nota/${data.id_penjualan}`, '_blank');
+                
+                // Refresh halaman setelah 2 detik untuk update stok di grid
+                setTimeout(() => { location.reload(); }, 2000);
+
+            } else {
+                showToast(data.message || 'Gagal memproses transaksi.', 'error');
+            }
+        } catch (err) {
+            console.error(err);
+            showToast('Terjadi kesalahan jaringan.', 'error');
+        } finally {
+            btnProses.disabled = false;
+            btnProses.innerHTML = '<i class="fa-solid fa-print"></i> Proses & Cetak Nota';
+        }
     }
 
     // INIT
