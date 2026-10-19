@@ -1,59 +1,78 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# LARIS (Layanan Aplikasi Ritel & Inventaris Sistem)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+LARIS adalah sistem informasi manajemen operasional berbasis web yang dirancang khusus untuk UMKM ritel, dengan studi kasus **Toko Ina** (toko kelontong di Desa Wates, Kabupaten Blitar). Aplikasi ini bertujuan untuk mendigitalkan seluruh proses bisnis toko, mulai dari transaksi kasir, pencatatan stok, pengelolaan kasbon warga, hingga analisis laporan keuangan.
 
-## About Laravel
+Dengan antarmuka yang bersih dan alur kerja yang dioptimalkan, LARIS membantu pemilik toko dan kasir bekerja lebih cepat, mengurangi kesalahan pencatatan manual, dan memberikan wawasan berbasis data.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Fitur Utama
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Point of Sale (POS):** Transaksi kasir yang responsif dengan dukungan multi-metode pembayaran (Tunai, Transfer, Kasbon) dan cetak struk.
+- **Manajemen Inventaris:** Pengelolaan data produk, kategori, unggah foto otomatis (dengan optimasi konversi gambar), serta fitur penyesuaian stok (Stock Opname).
+- **Buku Kasbon:** Pencatatan utang-piutang warga sekitar secara terstruktur, dilengkapi fitur pelunasan bertahap (cicilan) atau lunas penuh.
+- **Pasokan Supplier:** Pencatatan barang masuk dari distributor dengan pembaruan stok otomatis yang terintegrasi.
+- **Pengeluaran Operasional:** Pencatatan biaya operasional toko di luar pembelian barang dagangan agar arus kas tetap terpantau.
+- **Laporan & Analitik:** Dasbor interaktif dengan grafik tren penjualan, kalkulasi laba kotor, daftar produk terlaris, serta ekspor laporan (PDF & Excel).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Teknologi yang Digunakan
 
-## Learning Laravel
+- **Framework Backend:** Laravel 12 (PHP 8.2+)
+- **Database:** MySQL 8
+- **Frontend:** Blade Templating, CSS Modular, Vanilla JavaScript
+- **Library Pendukung:** ApexCharts, Intervention Image, Laravel Excel, DomPDF.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Arsitektur Modul
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Aplikasi ini dibangun secara modular untuk memudahkan pemeliharaan:
+1. **Modul Produk & Stok:** Mengelola master data barang dan riwayat stok.
+2. **Modul Kasir (POS):** Menangani antarmuka transaksi dan kalkulasi keranjang.
+3. **Modul Kasbon:** Mengelola data pelanggan tetap dan piutang toko.
+4. **Modul Supplier:** Mencatat rantai pasok masuk (restock) dan tagihan distributor.
+5. **Modul Pengeluaran:** Mencatat biaya operasional harian toko.
+6. **Modul Laporan:** Menyajikan rekapitulasi dan visualisasi data finansial.
 
-## Laravel Sponsors
+## Panduan Instalasi (Lokal)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Ikuti langkah-langkah standar berikut untuk menjalankan proyek di lingkungan lokal Anda:
 
-### Premium Partners
+### Prasyarat
+- PHP 8.2 atau lebih baru
+- Composer
+- MySQL Database
+- Web Server (Apache/Nginx)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Langkah-langkah
 
-## Contributing
+1. **Clone repository ini**
+       git clone https://github.com/PadZz25/laris-app.git
+       cd laris-app
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+2. **Install dependensi PHP**
+       composer install
 
-## Code of Conduct
+3. **Salin file environment**
+       cp .env.example .env
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+4. **Generate application key**
+       php artisan key:generate
 
-## Security Vulnerabilities
+5. **Konfigurasi Database**
+   Buka file `.env` dan sesuaikan pengaturan koneksi database dengan lingkungan lokal Anda (sesuaikan `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD`).
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+6. **Jalankan Migrasi Database**
+   Proyek ini menyertakan file migrasi standar untuk membangun struktur tabel:
+       php artisan migrate
 
-## License
+7. **Buat Tautan Penyimpanan**
+   Tautan ini diperlukan agar foto produk yang diunggah dapat diakses secara publik:
+       php artisan storage:link
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+8. **Jalankan Server Lokal**
+       php artisan serve
+   Aplikasi dapat diakses melalui `http://localhost:8000`.
+
+> **Catatan Keamanan:** Konfigurasi kredensial dan data *dummy* bersifat privat. Untuk kebutuhan pengujian lokal, silakan gunakan data *seeder* yang telah disediakan (jika ada) atau hubungi pengembang untuk akses ke lingkungan pengembangan.
+
+## Lisensi & Hak Cipta
+
+Proyek ini dikembangkan untuk keperluan akademik dan operasional mitra.
+© 2026 Tim Pengembang LARIS - Universitas Negeri Malang.
