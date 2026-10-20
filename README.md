@@ -72,7 +72,7 @@ Ikuti langkah-langkah standar berikut untuk menjalankan proyek di lingkungan lok
 
 > **Catatan Keamanan:** Konfigurasi kredensial dan data *dummy* bersifat privat. Untuk kebutuhan pengujian lokal, silakan gunakan data *seeder* yang telah disediakan (jika ada) atau hubungi pengembang untuk akses ke lingkungan pengembangan.
 
-## Lisensi & Hak Cipta
+### Lisensi & Hak Cipta
 
 Proyek ini dikembangkan untuk keperluan akademik dan operasional mitra.
 © 2026 Tim Pengembang LARIS - Universitas Negeri Malang.
