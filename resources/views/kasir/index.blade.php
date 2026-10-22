@@ -87,7 +87,7 @@
                 {{-- SISI KIRI: Tabel Barang --}}
                 <div class="pos-modal-left">
                     <div class="pos-modal-left-header">
-                        <i class="fa-solid fa-list-ul" style="color: #429198;"></i> Rincian Barang
+                        <i class="fa-solid fa-list-ul" style="color: #429198;"></i> Rincian Item
                     </div>
                     <div class="pos-modal-left-list">
                         <table class="pos-table">
