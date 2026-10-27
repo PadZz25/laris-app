@@ -499,6 +499,39 @@
         </div>
     </div>
 
+    {{-- MODAL: KONFIRMASI HAPUS KATEGORI --}}
+    <div class="modal-overlay" id="modalKonfirmasiKategori" style="z-index: 1200;">
+        <div class="modal-card modal-card-sm">
+            <div class="modal-header">
+                <h3 style="color: #dc2626;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Hapus Kategori
+                </h3>
+                <button type="button" class="btn-close-modal" onclick="closeKonfirmasiKategori()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-info-box warning">
+                    <p style="font-weight: 700; font-size: 12px; margin-bottom: 6px;">
+                        Anda yakin ingin menghapus kategori ini?
+                    </p>
+                    <p style="font-size: 11px;">
+                        Kategori: <strong id="deleteNamaKategori">-</strong>
+                    </p>
+                    <p style="font-size: 10px; margin-top: 8px; opacity: 0.8;">
+                        Tindakan ini tidak bisa dibatalkan.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeKonfirmasiKategori()">Batal</button>
+                <button type="button" class="btn-danger" id="btnConfirmHapusKategori" onclick="eksekusiHapusKategori()">
+                    <i class="fa-solid fa-trash"></i> Ya, Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+
     {{-- MODAL: OPNAME --}}
     <div class="modal-overlay" id="modalPenyesuaianStok">
         <div class="modal-card modal-card-lg">
@@ -891,19 +924,52 @@
         finally { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan'; }
     }
 
-    async function hapusKategori(btn) {
+    // --- HAPUS KATEGORI (CUSTOM MODAL) ---
+    let kategoriIdToDelete = null;
+
+    function hapusKategori(btn) {
         const kat = JSON.parse(btn.dataset.kat);
-        if (kat.jumlah_produk > 0) { showToast(`Kategori "${kat.nama_kategori}" masih dipakai oleh ${kat.jumlah_produk} produk.`, 'error'); return; }
-        if (!confirm(`Yakin ingin menghapus kategori "${kat.nama_kategori}"?`)) return;
+        if (kat.jumlah_produk > 0) {
+            showToast(`Kategori "${kat.nama_kategori}" masih dipakai oleh ${kat.jumlah_produk} produk.`, 'error');
+            return;
+        }
+        kategoriIdToDelete = kat.id_kategori;
+        document.getElementById('deleteNamaKategori').textContent = kat.nama_kategori;
+        document.getElementById('modalKonfirmasiKategori').classList.add('active');
+    }
+
+    function closeKonfirmasiKategori() {
+        document.getElementById('modalKonfirmasiKategori').classList.remove('active');
+        kategoriIdToDelete = null;
+    }
+
+    async function eksekusiHapusKategori() {
+        if (!kategoriIdToDelete) return;
+        const btn = document.getElementById('btnConfirmHapusKategori');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menghapus...';
+
         try {
-            const res = await fetch(`/kategori/${kat.id_kategori}`, {
+            const res = await fetch(`/kategori/${kategoriIdToDelete}`, {
                 method: 'DELETE',
                 headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json' },
             });
             const data = await res.json();
-            if (res.ok && data.success) { showToast(data.message, 'success'); renderKategoriTable(data.kategori_list); kategoriChanged = true; }
-            else { showToast(data.message || 'Gagal menghapus kategori.', 'error'); }
-        } catch (err) { showToast('Terjadi kesalahan jaringan.', 'error'); }
+            if (res.ok && data.success) {
+                showToast(data.message, 'success'); 
+                renderKategoriTable(data.kategori_list); 
+                closeKonfirmasiKategori(); 
+                kategoriChanged = true;
+            } else {
+                showToast(data.message || 'Gagal menghapus kategori.', 'error');
+            }
+        } catch (err) {
+            console.error(err); 
+            showToast('Terjadi kesalahan jaringan.', 'error');
+        } finally {
+            btn.disabled = false; 
+            btn.innerHTML = '<i class="fa-solid fa-trash"></i> Ya, Hapus';
+        }
     }
 
     // --- MODAL OPNAME ---
@@ -994,10 +1060,11 @@
     document.getElementById('subModalEditKategori').addEventListener('click', function (e) { if (e.target === this) closeSubModalEditKategori(); });
     document.getElementById('modalEditProduk').addEventListener('click', function (e) { if (e.target === this) closeEditModal(); });
     document.getElementById('modalHapusProduk').addEventListener('click', function (e) { if (e.target === this) closeDeleteModal(); });
+    document.getElementById('modalKonfirmasiKategori').addEventListener('click', function (e) { if (e.target === this) closeKonfirmasiKategori(); });
 
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
-            closeModalTambah(); closeEditModal(); closeDeleteModal(); closeModalKategori(); closeModalPenyesuaian();
+            closeModalTambah(); closeEditModal(); closeDeleteModal(); closeModalKategori(); closeModalPenyesuaian(); closeKonfirmasiKategori();
         }
     });
 
