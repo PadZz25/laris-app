@@ -75,4 +75,5 @@ Ikuti langkah-langkah standar berikut untuk menjalankan proyek di lingkungan lok
 ### Lisensi & Hak Cipta
 
 Proyek ini dikembangkan untuk keperluan akademik dan operasional mitra.
-© 2026 Tim Pengembang LARIS - Universitas Negeri Malang.
+© 2026 Tim Pengembang LARIS - Universitas Negeri Malang
+
