@@ -1,3 +1,6 @@
+@php
+    $toko = \App\Models\Pengaturan::first();
+@endphp
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -59,9 +62,12 @@
 
     <div class="receipt-container" id="receipt">
         <div class="receipt-header">
-            <div class="store-name">TOKO INA</div>
-            <div class="store-info">Desa Wates, Kec. Wates, Blitar</div>
-            <div class="store-info">Telp/WA: 0812-3456-7890</div>
+            @if($toko && $toko->logo)
+                <img src="{{ asset('storage/' . $toko->logo) }}" alt="Logo" style="max-height: 50px; margin-bottom: 4px;">
+            @endif
+            <div class="store-name">{{ $toko->nama_toko ?? 'TOKO INA' }}</div>
+            <div class="store-info">{{ $toko->alamat ?? 'Desa Wates, Kec. Wates, Blitar' }}</div>
+            <div class="store-info">Telp/WA: {{ $toko->no_telepon ?? '0812-3456-7890' }}</div>
         </div>
 
         <div class="dashed-line"></div>

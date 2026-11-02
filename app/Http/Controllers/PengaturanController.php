@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pengaturan;
+use Intervention\Image\Laravel\Facades\Image;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -59,5 +62,39 @@ class PengaturanController extends Controller
         ]);
 
         return back()->with('success', 'Password berhasil diubah!')->with('tab', 'keamanan');
+    }
+
+    public function updateToko(Request $request)
+    {
+        $request->validate([
+            'nama_toko'   => ['required', 'string', 'max:255'],
+            'alamat'      => ['required', 'string', 'max:255'],
+            'no_telepon'  => ['required', 'string', 'max:50'],
+            'logo'        => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+        ]);
+
+        // Ambil data pengaturan pertama (ID 1), jika belum ada buat baru
+        $toko = Pengaturan::firstOrCreate(['id' => 1]);
+
+        $data = $request->only(['nama_toko', 'alamat', 'no_telepon']);
+
+        if ($request->hasFile('logo')) {
+            // Hapus logo lama jika ada
+            if ($toko->logo && Storage::disk('public')->exists($toko->logo)) {
+                Storage::disk('public')->delete($toko->logo);
+            }
+            
+            // Simpan logo baru ke folder public/toko
+            $file = $request->file('logo');
+            $filename = 'toko/logo_' . time() . '.webp';
+            $image = Image::read($file)->scale(width: 400)->toWebp(80);
+            Storage::disk('public')->put($filename, (string) $image);
+            
+            $data['logo'] = $filename;
+        }
+
+        $toko->update($data);
+
+        return back()->with('success', 'Informasi Toko berhasil diperbarui!')->with('tab', 'toko');
     }
 }

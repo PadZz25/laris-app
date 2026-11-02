@@ -108,5 +108,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/profil', 'updateProfil')->name('updateProfil');
         Route::post('/password', 'updatePassword')->name('updatePassword');
+        Route::post('/toko', 'updateToko')->name('updateToko');
     });
 });
