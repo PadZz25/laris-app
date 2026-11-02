@@ -23,10 +23,6 @@
                 </div>
             </div>
         </div>
-
-        <button onclick="tutupAplikasi()" class="icon-btn" title="Tutup Aplikasi" style="background-color: #fee2e2; border-color: #fca5a5; color: #dc2626;">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
     </div>
 </header>
 

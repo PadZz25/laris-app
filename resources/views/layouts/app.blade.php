@@ -8,7 +8,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/laris.css') }}?v=10">
+    <link rel="stylesheet" href="{{ asset('css/laris.css') }}?v=12">
     @stack('styles')
 </head>
 <body>
@@ -43,13 +43,37 @@
 
         @yield('content')
     </div>
+
+    <!-- ═══════════════════════════════════════════
+         GLOBAL CONFIRM MODAL (Pengganti confirm bawaan)
+         ═══════════════════════════════════════════ -->
+    <div class="modal-overlay" id="globalConfirmModal" style="z-index: 99999;">
+        <div class="modal-card modal-card-sm">
+            <div class="modal-header">
+                <h3 id="globalConfirmTitle" style="color: #dc2626;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Konfirmasi
+                </h3>
+                <button type="button" class="btn-close-modal" onclick="closeGlobalConfirm()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="globalConfirmMessage" style="font-size: 13px; color: #475569; line-height: 1.5;"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeGlobalConfirm()">Batal</button>
+                <button type="button" class="btn-danger" id="globalConfirmBtn">Ya, Lanjutkan</button>
+            </div>
+        </div>
+    </div>
+
     @stack('scripts')
 
     <!-- ═══════════════════════════════════════════
          JAVASCRIPT GLOBAL
          ═══════════════════════════════════════════ -->
     <script>
-        // 1. Fungsi Loading Spinner
+        // --- 1. GLOBAL LOADING SPINNER ---
         function showLoader() {
             document.getElementById('global-loader').classList.add('active');
         }
@@ -62,14 +86,35 @@
         document.addEventListener('DOMContentLoaded', function() {
             const forms = document.querySelectorAll('form');
             forms.forEach(form => {
-                form.addEventListener('submit', function(e) {
-                    // Cek jika tombol submit ditekan (bukan sekadar validasi error HTML5)
+                form.addEventListener('submit', function() {
                     if (form.checkValidity()) {
                         showLoader();
                     }
                 });
             });
         });
+
+        // --- 2. GLOBAL CONFIRM LOGIC ---
+        let globalConfirmCallback = null;
+
+        function showGlobalConfirm(title, message, callback) {
+            document.getElementById('globalConfirmTitle').innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: #dc2626;"></i> ${title}`;
+            document.getElementById('globalConfirmMessage').innerText = message;
+            globalConfirmCallback = callback;
+            
+            // Set aksi tombol Ya
+            document.getElementById('globalConfirmBtn').onclick = function() {
+                if (globalConfirmCallback) globalConfirmCallback();
+                closeGlobalConfirm();
+            };
+            
+            document.getElementById('globalConfirmModal').classList.add('active');
+        }
+
+        function closeGlobalConfirm() {
+            document.getElementById('globalConfirmModal').classList.remove('active');
+            globalConfirmCallback = null;
+        }
     </script>
 </body>
 </html>
