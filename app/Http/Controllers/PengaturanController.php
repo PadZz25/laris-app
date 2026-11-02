@@ -141,4 +141,34 @@ class PengaturanController extends Controller
         $karyawan->delete();
         return back()->with('success', 'Akun karyawan berhasil dihapus.')->with('tab', 'karyawan');
     }
+
+        // Fitur 4: Backup Database
+    public function backupDatabase()
+    {
+        $dbName = env('DB_DATABASE');
+        $dbUser = env('DB_USERNAME');
+        $dbPass = env('DB_PASSWORD');
+        $dbHost = env('DB_HOST', '127.0.0.1');
+        
+        $fileName = 'backup_laris_' . date('Y-m-d_H-i-s') . '.sql';
+        $folderPath = storage_path('app/public/backups');
+        $filePath = $folderPath . '/' . $fileName;
+
+        // Buat folder jika belum ada
+        if (!file_exists($folderPath)) {
+            mkdir($folderPath, 0755, true);
+        }
+
+        // Perintah mysqldump (Standar Windows/Laragon)
+        $command = "mysqldump --user={$dbUser} --password={$dbPass} --host={$dbHost} {$dbName} > \"{$filePath}\"";
+        
+        exec($command, $output, $returnVar);
+
+        if ($returnVar === 0 && file_exists($filePath)) {
+            // Hapus file setelah diunduh agar tidak menumpuk di server
+            return response()->download($filePath)->deleteFileAfterSend(true);
+        }
+        
+        return back()->with('error', 'Gagal membuat backup. Pastikan Anda menggunakan Laragon dan MySQL berjalan.');
+    }
 }

@@ -111,5 +111,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/toko', 'updateToko')->name('updateToko');
         Route::post('/karyawan', 'tambahKaryawan')->name('tambahKaryawan');
         Route::delete('/karyawan/{id}', 'hapusKaryawan')->name('hapusKaryawan');
+        Route::get('/backup', 'backupDatabase')->name('backup');
     });
 });

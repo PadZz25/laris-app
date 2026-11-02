@@ -23,7 +23,7 @@
             <div class="settings-menu-item" id="menu-karyawan" onclick="switchTab('karyawan')">
                 <i class="fa-solid fa-users"></i> Manajemen Karyawan
             </div>
-            <div class="settings-menu-item" onclick="alert('Fitur Backup segera hadir!')">
+            <div class="settings-menu-item" id="menu-backup" onclick="switchTab('backup')">
                 <i class="fa-solid fa-database"></i> Backup & Sistem
             </div>
         @endif
@@ -173,6 +173,49 @@
             </div>
         @endif
 
+                    {{-- Tab 5: Backup & Sistem --}}
+            <div id="tab-backup" style="display: none;">
+                <h2 style="font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 20px;">Backup & Sistem</h2>
+                
+                {{-- Card Backup --}}
+                <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 20px; background: #f8fafc;">
+                    <h3 style="font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 8px;"><i class="fa-solid fa-download" style="color: #0284c7;"></i> Unduh Backup Database</h3>
+                    <p style="font-size: 11px; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
+                        Sangat disarankan untuk mengunduh backup database secara rutin (misal: setiap akhir bulan). File ini berisi seluruh data produk, transaksi, kasbon, dan pengaturan toko Anda.
+                    </p>
+                    <a href="{{ route('pengaturan.backup') }}" class="btn-primary" style="text-decoration: none; display: inline-flex; background: #16a34a;">
+                        <i class="fa-solid fa-file-export"></i> Unduh File .SQL Sekarang
+                    </a>
+                </div>
+
+                {{-- Card Info Aplikasi --}}
+                <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px;">
+                    <h3 style="font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 8px;"><i class="fa-solid fa-circle-info" style="color: #0284c7;"></i> Informasi Aplikasi</h3>
+                    <table style="font-size: 11px; color: #475569; width: 100%; max-width: 400px; line-height: 2;">
+                        <tr>
+                            <td style="font-weight: 700;">Nama Aplikasi</td>
+                            <td>: LARIS (Layanan Aplikasi Ritel & Inventaris Sistem)</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: 700;">Versi</td>
+                            <td>: 1.0.0 (Stable)</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: 700;">Framework</td>
+                            <td>: Laravel 12 & MySQL 8</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: 700;">Pengembang</td>
+                            <td>: Tim Pengembang LARIS - Universitas Negeri Malang</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: 700;">Hak Cipta</td>
+                            <td>: &copy; 2026 Toko Ina Desa Wates</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
     </div>
 </div>
 
@@ -253,6 +296,39 @@
 
     function closeModalKaryawan() {
         document.getElementById('modalTambahKaryawan').classList.remove('active');
+    }
+
+        function switchTab(tab) {
+        // Sembunyikan semua tab
+        document.getElementById('tab-profil').style.display = 'none';
+        document.getElementById('tab-keamanan').style.display = 'none';
+        
+        const tabToko = document.getElementById('tab-toko');
+        if (tabToko) tabToko.style.display = 'none';
+
+        const tabKaryawan = document.getElementById('tab-karyawan');
+        if (tabKaryawan) tabKaryawan.style.display = 'none';
+
+        const tabBackup = document.getElementById('tab-backup');
+        if (tabBackup) tabBackup.style.display = 'none';
+        
+        // Hapus class active
+        document.getElementById('menu-profil').classList.remove('active');
+        document.getElementById('menu-keamanan').classList.remove('active');
+        
+        const menuToko = document.getElementById('menu-toko');
+        if (menuToko) menuToko.classList.remove('active');
+
+        const menuKaryawan = document.getElementById('menu-karyawan');
+        if (menuKaryawan) menuKaryawan.classList.remove('active');
+
+        const menuBackup = document.getElementById('menu-backup');
+        if (menuBackup) menuBackup.classList.remove('active');
+
+        // Tampilkan yang dipilih
+        document.getElementById('tab-' + tab).style.display = 'block';
+        const selectedMenu = document.getElementById('menu-' + tab);
+        if (selectedMenu) selectedMenu.classList.add('active');
     }
 
     // Cek session tab
