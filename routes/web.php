@@ -109,5 +109,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/profil', 'updateProfil')->name('updateProfil');
         Route::post('/password', 'updatePassword')->name('updatePassword');
         Route::post('/toko', 'updateToko')->name('updateToko');
+        Route::post('/karyawan', 'tambahKaryawan')->name('tambahKaryawan');
+        Route::delete('/karyawan/{id}', 'hapusKaryawan')->name('hapusKaryawan');
     });
 });

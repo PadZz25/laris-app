@@ -38,7 +38,7 @@ class PengaturanController extends Controller
         return back()->with('success', 'Profil berhasil diperbarui!');
     }
 
-    // Fitur 1: Update Password
+    // Fitur 2: Update Password
     public function updatePassword(Request $request)
     {
         $request->validate([
@@ -96,5 +96,49 @@ class PengaturanController extends Controller
         $toko->update($data);
 
         return back()->with('success', 'Informasi Toko berhasil diperbarui!')->with('tab', 'toko');
+    }
+
+        // Fitur 3: Manajemen Karyawan
+    public function tambahKaryawan(Request $request)
+    {
+        $request->validate([
+            'nama_karyawan' => ['required', 'string', 'max:255'],
+            'username'      => ['required', 'string', 'max:255', 'unique:karyawan,username'],
+            'password'      => ['required', 'string', 'min:6'],
+            'peran'         => ['required', 'in:admin,kasir'],
+        ], [
+            'username.unique' => 'Username sudah digunakan.',
+            'password.min'    => 'Password minimal 6 karakter.',
+        ]);
+
+        \App\Models\Karyawan::create([
+            'nama_karyawan' => $request->nama_karyawan,
+            'username'      => $request->username,
+            'password_hash' => Hash::make($request->password),
+            'peran'         => $request->peran,
+        ]);
+
+        return back()->with('success', 'Karyawan baru berhasil ditambahkan!')->with('tab', 'karyawan');
+    }
+
+    public function hapusKaryawan($id)
+    {
+        $karyawan = \App\Models\Karyawan::findOrFail($id);
+
+        // Proteksi: Tidak bisa menghapus diri sendiri
+        if ($karyawan->id_karyawan === Auth::user()->id_karyawan) {
+            return back()->with('error', 'Anda tidak bisa menghapus akun Anda sendiri!');
+        }
+
+        // Proteksi: Minimal harus ada 1 admin yang tersisa
+        if ($karyawan->peran === 'admin') {
+            $jumlahAdmin = \App\Models\Karyawan::where('peran', 'admin')->count();
+            if ($jumlahAdmin <= 1) {
+                return back()->with('error', 'Tidak bisa menghapus satu-satunya akun Admin!');
+            }
+        }
+
+        $karyawan->delete();
+        return back()->with('success', 'Akun karyawan berhasil dihapus.')->with('tab', 'karyawan');
     }
 }
