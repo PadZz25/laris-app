@@ -43,11 +43,19 @@
         </nav>
     </div>
 
-    {{-- Tombol Logout --}}
-    <form method="POST" action="{{ route('logout') }}">
-        @csrf
-        <button type="submit" class="logout-btn">
-            <i class="fa-solid fa-right-from-bracket"></i> Logout
+        {{-- Tombol Ganti Password --}}
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+        
+        <button type="button" class="logout-btn" style="background-color: #e2e8f0; color: #0f172a; border: none; box-shadow: none;" onclick="openModalPassword()">
+            <i class="fa-solid fa-key"></i> Ganti Password
         </button>
-    </form>
+
+        <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
+            @csrf
+            <button type="submit" class="logout-btn">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </button>
+        </form>
+
+    </div>
 </aside>

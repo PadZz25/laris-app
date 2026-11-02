@@ -101,4 +101,7 @@ Route::middleware('auth')->group(function () {
         // Hapus Warga Kasbon
         Route::delete('/kasbon/{id}', [KasbonController::class, 'destroy'])->name('kasbon.destroy');
     });
+
+    // Fitur Ganti Password
+    Route::post('/change-password', [App\Http\Controllers\Auth\LoginController::class, 'changePassword'])->name('password.update'); 
 });

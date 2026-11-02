@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
@@ -72,5 +73,31 @@ class LoginController extends Controller
 
         return redirect()->route('login')
             ->with('success', 'Anda telah berhasil keluar.');
+    }
+        public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => ['required'],
+            'new_password' => ['required', 'string', 'min:6', 'confirmed'],
+        ], [
+            'current_password.required' => 'Password lama wajib diisi.',
+            'new_password.required' => 'Password baru wajib diisi.',
+            'new_password.min' => 'Password baru minimal 6 karakter.',
+            'new_password.confirmed' => 'Konfirmasi password baru tidak cocok.',
+        ]);
+
+        $user = Auth::user();
+
+        // Cek apakah password lama benar
+        if (!Hash::check($request->current_password, $user->password_hash)) {
+            return back()->with('error', 'Password lama yang Anda masukkan salah!');
+        }
+
+        // Update password baru
+        $user->update([
+            'password_hash' => Hash::make($request->new_password)
+        ]);
+
+        return back()->with('success', 'Password berhasil diubah!');
     }
 }
