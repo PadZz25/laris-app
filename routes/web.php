@@ -8,6 +8,7 @@ use App\Http\Controllers\KasbonController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PosController;
+use App\Http\Controllers\PengaturanController;
 use Illuminate\Support\Facades\Route;
 
 // ─────────────────────────────────────────────
@@ -102,6 +103,10 @@ Route::middleware('auth')->group(function () {
         Route::delete('/kasbon/{id}', [KasbonController::class, 'destroy'])->name('kasbon.destroy');
     });
 
-    // Fitur Ganti Password
-    Route::post('/change-password', [App\Http\Controllers\Auth\LoginController::class, 'changePassword'])->name('password.update'); 
+    // Halaman Pengaturan
+    Route::prefix('pengaturan')->name('pengaturan.')->controller(PengaturanController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/profil', 'updateProfil')->name('updateProfil');
+        Route::post('/password', 'updatePassword')->name('updatePassword');
+    });
 });

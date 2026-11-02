@@ -40,16 +40,15 @@
                     <i class="fa-solid fa-wallet"></i> Pengeluaran
                 </a>
             @endif
+
+                        {{-- Menu Pengaturan --}}
+            <a href="{{ route('pengaturan.index') }}" class="nav-item {{ request()->routeIs('pengaturan.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-gear"></i> Pengaturan
+            </a>
         </nav>
     </div>
 
-        {{-- Tombol Ganti Password --}}
     <div style="display: flex; flex-direction: column; gap: 8px;">
-        
-        <button type="button" class="logout-btn" style="background-color: #e2e8f0; color: #0f172a; border: none; box-shadow: none;" onclick="openModalPassword()">
-            <i class="fa-solid fa-key"></i> Ganti Password
-        </button>
-
         <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
             @csrf
             <button type="submit" class="logout-btn">
