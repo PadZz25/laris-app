@@ -17,7 +17,7 @@ class KaryawanSeeder extends Seeder
             ['username' => 'ina'],           // kunci pencarian (kalau ada → update, kalau tidak → create)
             [
                 'nama_karyawan' => 'Ina',
-                'password_hash' => Hash::make('ina12345'),
+                'password_hash' => Hash::make(env('ADMIN_PASSWORD', 'password_rahasia')),
                 'peran'         => 'admin',
             ]
         );
@@ -29,7 +29,7 @@ class KaryawanSeeder extends Seeder
             ['username' => 'kaka'],
             [
                 'nama_karyawan' => 'Kaka',
-                'password_hash' => Hash::make('kaka12345'),
+                'password_hash' => Hash::make(env('KASIR_PASSWORD', 'password_rahasia')),
                 'peran'         => 'kasir',
             ]
         );
@@ -37,8 +37,8 @@ class KaryawanSeeder extends Seeder
         // Info di terminal setelah seeder selesai
         $this->command->newLine();
         $this->command->info('✅ Akun default berhasil dibuat:');
-        $this->command->line('   • Admin → username: ina   | password: ina12345');
-        $this->command->line('   • Kasir → username: kaka  | password: kaka12345');
+        $this->command->line('   • Admin → username: ina   | password: ' . env('ADMIN_PASSWORD', 'password_rahasia'));
+        $this->command->line('   • Kasir → username: kaka  | password: ' . env('KASIR_PASSWORD', 'password_rahasia'));
         $this->command->newLine();
         $this->command->warn('⚠️  Ganti password setelah login pertama kali!');
         $this->command->newLine();

@@ -115,6 +115,13 @@
             document.getElementById('globalConfirmModal').classList.remove('active');
             globalConfirmCallback = null;
         }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.innerText = text;
+            return div.innerHTML;
+        }
     </script>
 </body>
 </html>

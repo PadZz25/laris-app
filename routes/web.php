@@ -105,12 +105,17 @@ Route::middleware('auth')->group(function () {
 
     // Halaman Pengaturan
     Route::prefix('pengaturan')->name('pengaturan.')->controller(PengaturanController::class)->group(function () {
-        Route::get('/', 'index')->name('index');
-        Route::post('/profil', 'updateProfil')->name('updateProfil');
-        Route::post('/password', 'updatePassword')->name('updatePassword');
+    // SEMUA ROLE BISA AKSES (Profil & Password)
+    Route::get('/', 'index')->name('index');
+    Route::post('/profil', 'updateProfil')->name('updateProfil');
+    Route::post('/password', 'updatePassword')->name('updatePassword');
+
+    // HANYA ADMIN YANG BISA AKSES
+    Route::middleware('role:admin')->group(function () {
         Route::post('/toko', 'updateToko')->name('updateToko');
         Route::post('/karyawan', 'tambahKaryawan')->name('tambahKaryawan');
         Route::delete('/karyawan/{id}', 'hapusKaryawan')->name('hapusKaryawan');
         Route::get('/backup', 'backupDatabase')->name('backup');
+        });
     });
 });

@@ -143,7 +143,7 @@ class PengaturanController extends Controller
     }
 
         // Fitur 4: Backup Database
-    public function backupDatabase()
+        public function backupDatabase()
     {
         $dbName = env('DB_DATABASE');
         $dbUser = env('DB_USERNAME');
@@ -151,24 +151,23 @@ class PengaturanController extends Controller
         $dbHost = env('DB_HOST', '127.0.0.1');
         
         $fileName = 'backup_laris_' . date('Y-m-d_H-i-s') . '.sql';
-        $folderPath = storage_path('app/public/backups');
+        // UBAH PATH KE FOLDER PRIVATE (Bukan public)
+        $folderPath = storage_path('app/backups'); 
         $filePath = $folderPath . '/' . $fileName;
 
-        // Buat folder jika belum ada
         if (!file_exists($folderPath)) {
             mkdir($folderPath, 0755, true);
         }
 
-        // Perintah mysqldump (Standar Windows/Laragon)
-        $command = "mysqldump --user={$dbUser} --password={$dbPass} --host={$dbHost} {$dbName} > \"{$filePath}\"";
+        // TAMBAHKAN --routines AGAR STORED PROCEDURE IKUT
+        $command = "mysqldump --routines --user={$dbUser} --password={$dbPass} --host={$dbHost} {$dbName} > \"{$filePath}\"";
         
         exec($command, $output, $returnVar);
 
         if ($returnVar === 0 && file_exists($filePath)) {
-            // Hapus file setelah diunduh agar tidak menumpuk di server
             return response()->download($filePath)->deleteFileAfterSend(true);
         }
         
-        return back()->with('error', 'Gagal membuat backup. Pastikan Anda menggunakan Laragon dan MySQL berjalan.');
+        return back()->with('error', 'Gagal membuat backup.');
     }
 }
