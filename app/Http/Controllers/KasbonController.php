@@ -60,6 +60,24 @@ class KasbonController extends Controller
         return redirect()->route('kasbon.index')->with('success', $msg);
     }
 
+    public function update(Request $request, $id)
+    {
+        $pelanggan = Pelanggan::findOrFail($id);
+
+        $validated = $request->validate([
+            'nama_pelanggan' => ['required', 'string', 'max:255'],
+            'no_telepon'     => ['nullable', 'string', 'max:30'],
+            'alamat'         => ['nullable', 'string', 'max:255'],
+        ], [
+            'nama_pelanggan.required' => 'Nama warga wajib diisi.',
+        ]);
+
+        $pelanggan->update($validated);
+
+        return redirect()->route('kasbon.index')
+            ->with('success', "Data warga \"{$pelanggan->nama_pelanggan}\" berhasil diperbarui!");
+    }
+
     public function destroy($id)
     {
         $pelanggan = Pelanggan::findOrFail($id);

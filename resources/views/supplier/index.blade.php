@@ -31,7 +31,7 @@
             <div class="stat-icon red"><i class="fa-solid fa-clock"></i></div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card" style="cursor: pointer;" onclick="openModalKelolaSupplier()" title="Klik untuk melihat daftar supplier">
             <div class="stat-info">
                 <div class="stat-label">Supplier Terdaftar</div>
                 <div class="stat-value" style="color: #0284c7;">{{ $stats['total_supplier'] }} Partner</div>
@@ -177,67 +177,135 @@
 
     </div>
 
-    {{-- ═══ MODAL: TAMBAH SUPPLIER ═══ --}}
+    {{-- MODAL: KELOLA SUPPLIER (DAFTAR, EDIT & HAPUS) --}}
+    <div class="modal-overlay" id="modalKelolaSupplier">
+        <div class="modal-card modal-card-lg">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-truck"></i> Daftar Supplier Terdaftar</h3>
+                <button type="button" class="btn-close-modal" onclick="closeModalKelolaSupplier()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body" style="padding: 0;">
+                <div class="table-card-scroll" style="max-height: 60vh;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nama Supplier</th>
+                                <th>Nama Sales</th>
+                                <th>No. Telepon</th>
+                                <th>Jadwal Kunjungan</th>
+                                <th>Alamat</th>
+                                <th style="text-align: center;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($supplierList as $sup)
+                                <tr>
+                                    <td style="font-weight: 800;">{{ $sup->nama_supplier }}</td>
+                                    <td>{{ $sup->nama_sales ?? '-' }}</td>
+                                    <td>
+                                        @if($sup->no_telepon)
+                                            <i class="fa-brands fa-whatsapp" style="color: #16a34a;"></i> {{ $sup->no_telepon }}
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                    <td>{{ $sup->jadwal_kunjungan ?? '-' }}</td>
+                                    <td>{{ $sup->alamat ?? '-' }}</td>
+                                    <td style="text-align: center;">
+                                        <div class="action-btns-cell">
+                                            {{-- TOMBOL EDIT --}}
+                                            <button type="button" class="btn-icon" title="Edit Supplier" 
+                                                    data-id="{{ $sup->id_supplier }}"
+                                                    data-nama="{{ $sup->nama_supplier }}"
+                                                    data-sales="{{ $sup->nama_sales }}"
+                                                    data-telepon="{{ $sup->no_telepon }}"
+                                                    data-jadwal="{{ $sup->jadwal_kunjungan }}"
+                                                    data-alamat="{{ $sup->alamat }}"
+                                                    data-keterangan="{{ $sup->keterangan }}"
+                                                    onclick="openEditSupplier(this)">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            {{-- TOMBOL HAPUS --}}
+                                            <button type="button" class="btn-icon danger" title="Hapus Supplier" 
+                                                    onclick="hapusSupplier({{ $sup->id_supplier }}, '{{ $sup->nama_supplier }}')">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" style="text-align: center; padding: 30px; color: #94a3b8;">
+                                        Belum ada supplier terdaftar.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeModalKelolaSupplier()">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    {{-- MODAL: TAMBAH / EDIT SUPPLIER --}}
     <div class="modal-overlay" id="modalSupplier">
         <div class="modal-card">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-truck"></i> Tambah Supplier Baru</h3>
+                <h3 id="modalSupplierTitle"><i class="fa-solid fa-truck"></i> Tambah Supplier Baru</h3>
                 <button type="button" class="btn-close-modal" onclick="closeModalSupplier()">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
-            <form method="POST" action="{{ route('supplier.storeSupplier') }}"
-                  style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
+            <form method="POST" action="{{ route('supplier.storeSupplier') }}" id="formSupplier" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
                 @csrf
-
+                <input type="hidden" name="_method" id="formSupplierMethod" value="POST">
+                
                 <div class="modal-body">
                     <div class="form-group">
                         <label>Nama Supplier / Distributor <span class="required">*</span></label>
-                        <input type="text" name="nama_supplier" value="{{ old('nama_supplier') }}"
-                               placeholder="Misal: CV Sumber Rejeki" required>
-                        @error('nama_supplier')
-                            <div class="field-error">{{ $message }}</div>
-                        @enderror
+                        <input type="text" name="nama_supplier" id="inputNamaSupplier" value="{{ old('nama_supplier') }}" placeholder="Misal: CV Sumber Rejeki" required>
+                        @error('nama_supplier') <div class="field-error">{{ $message }}</div> @enderror
                     </div>
 
                     <div class="form-grid-2col">
                         <div class="form-group">
                             <label>Nama Sales</label>
-                            <input type="text" name="nama_sales" value="{{ old('nama_sales') }}"
-                                   placeholder="Misal: Pak Slamet">
+                            <input type="text" name="nama_sales" id="inputSalesSupplier" value="{{ old('nama_sales') }}" placeholder="Misal: Pak Slamet">
                         </div>
                         <div class="form-group">
                             <label>No. WhatsApp / Telp</label>
-                            <input type="text" name="no_telepon" value="{{ old('no_telepon') }}"
-                                   placeholder="08xxxxxxxxxx">
+                            <input type="tel" name="no_telepon" id="inputTeleponSupplier" value="{{ old('no_telepon') }}" 
+                                   oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="08xxxxxxxxxx">
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label>Jadwal Kunjungan Rutin</label>
-                        <input type="text" name="jadwal_kunjungan" value="{{ old('jadwal_kunjungan') }}"
-                               placeholder="Misal: Setiap Selasa">
+                        <input type="text" name="jadwal_kunjungan" id="inputJadwalSupplier" value="{{ old('jadwal_kunjungan') }}" placeholder="Misal: Setiap Selasa">
                     </div>
 
                     <div class="form-group">
                         <label>Alamat</label>
-                        <input type="text" name="alamat" value="{{ old('alamat') }}"
-                               placeholder="Misal: Jl. Diponegoro No. 45, Malang">
+                        <input type="text" name="alamat" id="inputAlamatSupplier" value="{{ old('alamat') }}" placeholder="Misal: Jl. Diponegoro No. 45, Malang">
                     </div>
 
                     <div class="form-group">
                         <label>Keterangan</label>
-                        <input type="text" name="keterangan" value="{{ old('keterangan') }}"
-                               placeholder="Misal: Supplier utama sembako">
+                        <input type="text" name="keterangan" id="inputKeteranganSupplier" value="{{ old('keterangan') }}" placeholder="Misal: Supplier utama sembako">
                     </div>
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn-cancel" onclick="closeModalSupplier()">Batal</button>
-                    <button type="submit" class="btn-save">
-                        <i class="fa-solid fa-floppy-disk"></i> Simpan Supplier
-                    </button>
+                    <button type="submit" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> Simpan Supplier</button>
                 </div>
             </form>
         </div>
@@ -455,17 +523,7 @@
     </div>
 
 @endsection
-@php
-    $produkListData = $produkList->map(function ($p) {
-        return [
-            'id'     => $p->id_produk,
-            'nama'   => $p->nama_produk,
-            'harga'  => (float) $p->harga_beli,
-            'satuan' => $p->satuan,
-        ];
-    })->values()->toArray();
-@endphp
-@push('scripts')
+
 @php
     $produkListData = $produkList->map(function ($p) {
         return [
@@ -502,20 +560,73 @@
         document.getElementById('visibleCount').textContent = visible;
     }
 
-    // ═══ MODAL SUPPLIER ═══
-    function openModalSupplier()  { document.getElementById('modalSupplier').classList.add('active'); }
-    function closeModalSupplier() { document.getElementById('modalSupplier').classList.remove('active'); }
+    // ═══ MANAJEMEN MODAL SUPPLIER (ADD/EDIT) ═══
+    function openModalSupplier() {
+        document.getElementById('modalSupplierTitle').innerHTML = '<i class="fa-solid fa-truck"></i> Tambah Supplier Baru';
+        document.getElementById('formSupplier').action = "{{ route('supplier.storeSupplier') }}";
+        document.getElementById('formSupplierMethod').value = 'POST';
+        document.getElementById('formSupplier').reset();
+        document.getElementById('modalSupplier').classList.add('active');
+    }
 
-    @if ($errors->has('nama_supplier'))
-        document.addEventListener('DOMContentLoaded', () => openModalSupplier());
-    @endif
-    @if ($errors->hasAny(['nomor_pembelian', 'id_supplier', 'items', 'status_bayar']))
-        document.addEventListener('DOMContentLoaded', () => openModalPasokan());
-    @endif
+    function openEditSupplier(btn) {
+        document.getElementById('modalSupplierTitle').innerHTML = '<i class="fa-solid fa-pen"></i> Edit Data Supplier';
+        document.getElementById('formSupplier').action = `/supplier/${btn.dataset.id}`;
+        document.getElementById('formSupplierMethod').value = 'PUT';
+
+        document.getElementById('inputNamaSupplier').value = btn.dataset.nama;
+        document.getElementById('inputSalesSupplier').value = btn.dataset.sales || '';
+        document.getElementById('inputTeleponSupplier').value = btn.dataset.telepon || '';
+        document.getElementById('inputJadwalSupplier').value = btn.dataset.jadwal || '';
+        document.getElementById('inputAlamatSupplier').value = btn.dataset.alamat || '';
+        document.getElementById('inputKeteranganSupplier').value = btn.dataset.keterangan || '';
+
+        closeModalKelolaSupplier(); // Tutup modal daftar sebelum buka modal edit
+        document.getElementById('modalSupplier').classList.add('active');
+    }
+
+    function closeModalSupplier() {
+        document.getElementById('modalSupplier').classList.remove('active');
+    }
+
+    // ═══ MANAJEMEN MODAL DAFTAR SUPPLIER ═══
+    function openModalKelolaSupplier() {
+        document.getElementById('modalKelolaSupplier').classList.add('active');
+    }
+
+    function closeModalKelolaSupplier() {
+        document.getElementById('modalKelolaSupplier').classList.remove('active');
+    }
+
+    function hapusSupplier(id, nama) {
+        showGlobalConfirm(
+            'Hapus Supplier', 
+            `Apakah Anda yakin ingin menghapus supplier "${nama}"? Data riwayat pasokan yang sudah ada tidak akan terhapus.`, 
+            () => {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/supplier/${id}/hapus`;
+                
+                const csrf = document.createElement('input');
+                csrf.type = 'hidden';
+                csrf.name = '_token';
+                csrf.value = csrfToken;
+                
+                const method = document.createElement('input');
+                method.type = 'hidden';
+                method.name = '_method';
+                method.value = 'DELETE';
+                
+                form.appendChild(csrf);
+                form.appendChild(method);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        );
+    }
 
     // ═══ MODAL PASAKAN ═══
     function openModalPasokan() {
-        // Reset state
         pasokanCart = [];
         pasokanKategori = 'Semua';
         document.getElementById('pasokanSearch').value = '';
@@ -744,12 +855,10 @@
             const data = await res.json();
 
             if (res.ok && data.success) {
-                // Push ke pool & auto-add ke cart
                 produkPool.push(data.produk);
                 produkPool.sort((a, b) => a.nama.localeCompare(b.nama));
                 addToPasokanCart(data.produk.id);
 
-                // Update dropdown kategori di sub-modal
                 const selectKat = document.getElementById('pbKategori');
                 if (data.kategori_list) {
                     selectKat.innerHTML = '<option value="">-- Pilih Kategori --</option>' +
@@ -761,7 +870,6 @@
                 closeModalProdukBaru();
                 showToast(data.message, 'success');
 
-                // Auto-set produk baru di cart dengan qty 1
                 const item = pasokanCart.find(c => c.id === data.produk.id);
                 if (item) item.harga = data.produk.harga;
 
@@ -781,7 +889,7 @@
         }
     }
 
-    // ═══ SUBMIT PASAKAN — Serialize Cart ke Input Hidden ═══
+    // ═══ SUBMIT PASAKAN ═══
     document.getElementById('formPasokan').addEventListener('submit', function (e) {
         if (pasokanCart.length === 0) {
             e.preventDefault();
@@ -789,11 +897,9 @@
             return;
         }
 
-        // Hapus hidden input lama
         const container = document.getElementById('pasokanItemsHidden');
         container.innerHTML = '';
 
-        // Buat hidden input untuk setiap item
         pasokanCart.forEach((item, idx) => {
             const inputs = [
                 ['items[' + idx + '][id_produk]',  item.id],
@@ -898,6 +1004,9 @@
     document.getElementById('modalProdukBaru').addEventListener('click', function (e) {
         if (e.target === this) closeModalProdukBaru();
     });
+    document.getElementById('modalKelolaSupplier').addEventListener('click', function (e) {
+        if (e.target === this) closeModalKelolaSupplier();
+    });
 
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
@@ -906,8 +1015,16 @@
             } else {
                 closeModalSupplier();
                 closeModalPasokan();
+                closeModalKelolaSupplier();
             }
         }
     });
+
+    @if ($errors->has('nama_supplier'))
+        document.addEventListener('DOMContentLoaded', () => openModalSupplier());
+    @endif
+    @if ($errors->hasAny(['nomor_pembelian', 'id_supplier', 'items', 'status_bayar']))
+        document.addEventListener('DOMContentLoaded', () => openModalPasokan());
+    @endif
 </script>
 @endpush

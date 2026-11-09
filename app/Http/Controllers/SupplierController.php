@@ -67,6 +67,38 @@ class SupplierController extends Controller
             ->with('success', "Supplier \"{$validated['nama_supplier']}\" berhasil ditambahkan!");
     }
 
+        public function updateSupplier(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'nama_supplier'     => ['required', 'string', 'max:255'],
+            'nama_sales'        => ['nullable', 'string', 'max:255'],
+            'no_telepon'        => ['nullable', 'string', 'max:30'],
+            'jadwal_kunjungan'  => ['nullable', 'string', 'max:255'],
+            'alamat'            => ['nullable', 'string', 'max:255'],
+            'keterangan'        => ['nullable', 'string', 'max:255'],
+        ], [
+            'nama_supplier.required' => 'Nama supplier wajib diisi.',
+        ]);
+
+        try {
+            // Menggunakan Stored Procedure yang sudah kita buat di awal
+            DB::statement('CALL sp_ubah_supplier(?, ?, ?, ?, ?, ?, ?)', [
+                $id,
+                $validated['nama_supplier'],
+                $validated['no_telepon'] ?? null,
+                $validated['alamat'] ?? null,
+                $validated['keterangan'] ?? null,
+                $validated['nama_sales'] ?? null,
+                $validated['jadwal_kunjungan'] ?? null,
+            ]);
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', 'Gagal mengubah supplier: ' . $e->getMessage());
+        }
+
+        return redirect()->route('supplier.index')
+            ->with('success', "Data supplier \"{$validated['nama_supplier']}\" berhasil diperbarui!");
+    }
+
     public function destroySupplier($id)
     {
         $supplier = Supplier::findOrFail($id);

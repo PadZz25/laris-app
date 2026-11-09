@@ -115,6 +115,10 @@
             .auth-container { flex-direction: column; }
             .auth-banner { padding: 32px 24px; }
         }
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -188,15 +192,27 @@
 
                 <div class="form-group">
                     <label>Kata Sandi</label>
-                    <div class="input-wrapper">
+                    <div class="input-wrapper" style="position: relative;">
+                        {{-- Ikon Gembok --}}
                         <i class="fa-solid fa-lock"></i>
+                        
+                        {{-- Input Password --}}
                         <input
                             type="password"
                             name="password"
-                            placeholder="Masukkan kata sandi..."
+                            id="input-password"
+                            placeholder="••••••••"
                             class="@error('password') error @enderror"
+                            style="padding-right: 45px;"
                             required
                         >
+                        
+                        {{-- Ikon Mata (Pastikan ada pointer-events: auto) --}}
+                        <i class="fa-regular fa-eye" 
+                           id="toggle-password-icon" 
+                           onclick="togglePassword()" 
+                           style="position: absolute; right: 15px; left: auto; cursor: pointer; color: #64748b; z-index: 999; pointer-events: auto;">
+                        </i>
                     </div>
                 </div>
 
@@ -219,6 +235,21 @@
         </div>
 
     </div>
+        <script>
+        function togglePassword() {
+            const input = document.getElementById('input-password');
+            const icon = document.getElementById('toggle-password-icon');
 
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
 </body>
 </html>

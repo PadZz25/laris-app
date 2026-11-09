@@ -72,14 +72,22 @@
                          data-status="{{ $p->status_piutang }}"
                          data-search="{{ strtolower($p->nama_pelanggan . ' ' . ($p->no_telepon ?? '') . ' ' . ($p->alamat ?? '')) }}"
                          onclick="selectWarga({{ $p->id_pelanggan }}, this)">
+                        
                         <div class="warga-avatar">
                             {{ strtoupper(mb_substr($p->nama_pelanggan, 0, 1)) }}
                         </div>
+                        
                         <div class="warga-info">
                             <div class="warga-nama">{{ $p->nama_pelanggan }}</div>
-                            <div class="warga-alamat">{{ $p->alamat ?? 'Alamat tidak diisi' }}</div>
+                            <div class="warga-alamat">
+                                {{ $p->alamat ?? 'Tanpa Alamat' }} 
+                                @if($p->no_telepon) 
+                                    • <i class="fa-brands fa-whatsapp"></i> {{ $p->no_telepon }} 
+                                @endif
+                            </div>
                         </div>
-                        <div class="warga-nominal">
+                        
+                        <div class="warga-nominal" style="margin-right: 10px;">
                             <div class="warga-nominal-value {{ $p->total_hutang > 0 ? 'hutang' : 'lunas' }}">
                                 Rp {{ number_format($p->total_hutang, 0, ',', '.') }}
                             </div>
@@ -89,6 +97,24 @@
                                 <div class="warga-badge lunas">Lunas</div>
                             @endif
                         </div>
+
+                        {{-- TOMBOL EDIT & HAPUS (Di kanan, sejajar vertikal) --}}
+                        @if(auth()->user()->peran === 'admin')
+                        <div style="display: flex; flex-direction: column; gap: 6px; flex-shrink: 0;">
+                            <button class="btn-icon" title="Edit Warga" style="width: 26px; height: 26px; font-size: 11px;"
+                                    data-id="{{ $p->id_pelanggan }}"
+                                    data-nama="{{ $p->nama_pelanggan }}"
+                                    data-telepon="{{ $p->no_telepon }}"
+                                    data-alamat="{{ $p->alamat }}"
+                                    onclick="event.stopPropagation(); openEditWarga(this)">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button class="btn-icon danger" title="Hapus Warga" style="width: 26px; height: 26px; font-size: 11px;"
+                                    onclick="event.stopPropagation(); openHapusWarga({{ $p->id_pelanggan }}, '{{ $p->nama_pelanggan }}')">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                        @endif
                     </div>
                 @empty
                     <div style="grid-column: span 2;">
@@ -144,64 +170,69 @@
 
     </div>
 
-    {{-- MODAL: TAMBAH WARGA --}}
-    <div class="modal-overlay" id="modalTambahWarga">
+        {{-- MODAL TAMBAH/EDIT WARGA --}}
+    <div class="modal-overlay" id="modalWarga">
         <div class="modal-card">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-user-plus"></i> Tambah Warga / Pelanggan Baru</h3>
-                <button type="button" class="btn-close-modal" onclick="closeModalTambahWarga()">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <h3 id="modalWargaTitle"><i class="fa-solid fa-user-plus"></i> Tambah Warga Baru</h3>
+                <button type="button" class="btn-close-modal" onclick="closeModalWarga()"><i class="fa-solid fa-xmark"></i></button>
             </div>
-
-            <form method="POST" action="{{ route('kasbon.store') }}"
-                  style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
+            <form method="POST" action="{{ route('kasbon.store') }}" id="formWarga">
                 @csrf
-
+                <input type="hidden" name="_method" id="formWargaMethod" value="POST">
+                
                 <div class="modal-body">
                     <div class="form-group">
                         <label>Nama Lengkap Warga <span class="required">*</span></label>
-                        <input type="text" name="nama_pelanggan" value="{{ old('nama_pelanggan') }}"
-                               placeholder="Misal: Pak Joko, Bu Ani..." required>
-                        @error('nama_pelanggan')
-                            <div class="field-error">{{ $message }}</div>
-                        @enderror
+                        <input type="text" name="nama_pelanggan" id="wargaNama" required>
                     </div>
-
                     <div class="form-group">
                         <label>Alamat / RT / Dusun</label>
-                        <input type="text" name="alamat" value="{{ old('alamat') }}"
-                               placeholder="Misal: Jln. Mawar RT 02 / Desa Wates">
+                        <input type="text" name="alamat" id="wargaAlamat">
                     </div>
-
                     <div class="form-group">
-                        <label>Nomor Telepon / WhatsApp (Opsional)</label>
-                        <input type="text" name="no_telepon" value="{{ old('no_telepon') }}"
-                               placeholder="08xxxxxxxxxx">
+                        <label>Nomor Telepon / WhatsApp</label>
+                        {{-- ATURAN: Hanya menerima angka --}}
+                        <input type="tel" name="no_telepon" id="wargaTelepon" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="08xxxxxxxxxx">
                     </div>
-
-                    <div class="form-group">
+                    <div class="form-group" id="boxKasbonAwal">
                         <label>Nominal Kasbon Awal (Rp)</label>
-                        <input type="number" name="kasbon_awal" value="{{ old('kasbon_awal') }}"
-                               placeholder="0 (isi jika ada utang awal)" min="0" step="any">
-                        <div style="font-size: 10px; color: #94a3b8; margin-top: 4px;">
-                            Isi jika warga ini sudah punya utang sebelumnya. Biarkan 0 jika belum ada.
-                        </div>
-                        @error('kasbon_awal')
-                            <div class="field-error">{{ $message }}</div>
-                        @enderror
+                        <input type="number" name="kasbon_awal" id="wargaKasbonAwal" value="0" min="0">
                     </div>
                 </div>
-
                 <div class="modal-footer">
-                    <button type="button" class="btn-cancel" onclick="closeModalTambahWarga()">Batal</button>
-                    <button type="submit" class="btn-save">
-                        <i class="fa-solid fa-floppy-disk"></i> Simpan Warga
-                    </button>
+                    <button type="button" class="btn-cancel" onclick="closeModalWarga()">Batal</button>
+                    <button type="submit" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> Simpan Data</button>
                 </div>
             </form>
         </div>
     </div>
+
+    {{-- MODAL KONFIRMASI HAPUS WARGA --}}
+    <div class="modal-overlay" id="modalHapusWarga" style="z-index: 1100;">
+        <div class="modal-card modal-card-sm">
+            <div class="modal-header">
+                <h3 style="color: #dc2626;"><i class="fa-solid fa-triangle-exclamation"></i> Hapus Warga</h3>
+                <button type="button" class="btn-close-modal" onclick="closeHapusWarga()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-info-box warning">
+                    <p style="font-weight: 700; font-size: 12px; margin-bottom: 6px;">Anda yakin ingin menghapus warga ini?</p>
+                    <p style="font-size: 11px;">Nama: <strong id="hapusNamaWarga">-</strong></p>
+                    <p style="font-size: 10px; margin-top: 8px; opacity: 0.8;">Data warga yang masih memiliki hutang tidak akan bisa dihapus.</p>
+                </div>
+            </div>
+            <form method="POST" action="" id="formHapusWarga" style="display: contents;">
+                @csrf
+                @method('DELETE')
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeHapusWarga()">Batal</button>
+                    <button type="submit" class="btn-danger"><i class="fa-solid fa-trash"></i> Ya, Hapus</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
     {{-- MODAL: PELUNASAN --}}
     <div class="modal-overlay" id="modalPelunasan">
@@ -255,9 +286,6 @@
     let activeStatus = 'Semua';
     let currentWarga = null;
 
-    // ═══════════════════════════════════════════
-    // FILTER
-    // ═══════════════════════════════════════════
     function setFilterStatus(status, el) {
         activeStatus = status;
         document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
@@ -285,9 +313,6 @@
         document.getElementById('visibleCount').textContent = visible;
     }
 
-    // ═══════════════════════════════════════════
-    // PILIH WARGA → LOAD DETAIL KE SIDE PANEL
-    // ═══════════════════════════════════════════
     async function selectWarga(id, cardEl) {
         document.querySelectorAll('.warga-card').forEach(c => c.classList.remove('active'));
         cardEl.classList.add('active');
@@ -347,25 +372,41 @@
         `).join('');
     }
 
-    // ═══════════════════════════════════════════
-    // MODAL TAMBAH WARGA
-    // ═══════════════════════════════════════════
+    // --- MANAJEMEN MODAL WARGA ---
     function openModalTambahWarga() {
-        document.getElementById('modalTambahWarga').classList.add('active');
-    }
-    function closeModalTambahWarga() {
-        document.getElementById('modalTambahWarga').classList.remove('active');
+        document.getElementById('modalWargaTitle').innerHTML = '<i class="fa-solid fa-user-plus"></i> Tambah Warga Baru';
+        document.getElementById('formWarga').action = "{{ route('kasbon.store') }}";
+        document.getElementById('formWargaMethod').value = 'POST';
+        document.getElementById('formWarga').reset();
+        document.getElementById('boxKasbonAwal').style.display = 'block'; // Tampilkan kasbon awal
+        document.getElementById('modalWarga').classList.add('active');
     }
 
-    @if ($errors->any())
-        document.addEventListener('DOMContentLoaded', function () {
-            openModalTambahWarga();
-        });
-    @endif
+    function openEditWarga(btn) {
+        document.getElementById('modalWargaTitle').innerHTML = '<i class="fa-solid fa-pen"></i> Edit Data Warga';
+        document.getElementById('formWarga').action = `/kasbon/${btn.dataset.id}`;
+        document.getElementById('formWargaMethod').value = 'PUT'; // Ubah method jadi PUT
+        document.getElementById('wargaNama').value = btn.dataset.nama;
+        document.getElementById('wargaAlamat').value = btn.dataset.alamat || '';
+        document.getElementById('wargaTelepon').value = btn.dataset.telepon || '';
+        document.getElementById('boxKasbonAwal').style.display = 'none'; // Sembunyikan kasbon awal saat edit
+        document.getElementById('modalWarga').classList.add('active');
+    }
 
-    // ═══════════════════════════════════════════
-    // MODAL PELUNASAN
-    // ═══════════════════════════════════════════
+    function closeModalWarga() {
+        document.getElementById('modalWarga').classList.remove('active');
+    }
+
+    function openHapusWarga(id, nama) {
+        document.getElementById('hapusNamaWarga').textContent = nama;
+        document.getElementById('formHapusWarga').action = `/kasbon/${id}`;
+        document.getElementById('modalHapusWarga').classList.add('active');
+    }
+
+    function closeHapusWarga() {
+        document.getElementById('modalHapusWarga').classList.remove('active');
+    }
+
     function openModalPelunasan() {
         if (!currentWarga || currentWarga.total_hutang <= 0) return;
         document.getElementById('pelunasanNama').textContent = currentWarga.nama_pelanggan;
@@ -386,11 +427,12 @@
         document.getElementById('inputNominalBayar').value = currentWarga.total_hutang;
     }
 
-    // ═══════════════════════════════════════════
-    // EVENT LISTENERS
-    // ═══════════════════════════════════════════
-    document.getElementById('modalTambahWarga').addEventListener('click', function (e) {
-        if (e.target === this) closeModalTambahWarga();
+    // Event Listeners untuk Modal
+    document.getElementById('modalWarga').addEventListener('click', function (e) {
+        if (e.target === this) closeModalWarga();
+    });
+    document.getElementById('modalHapusWarga').addEventListener('click', function (e) {
+        if (e.target === this) closeHapusWarga();
     });
     document.getElementById('modalPelunasan').addEventListener('click', function (e) {
         if (e.target === this) closeModalPelunasan();
@@ -398,9 +440,16 @@
 
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
-            closeModalTambahWarga();
+            closeModalWarga();
+            closeHapusWarga();
             closeModalPelunasan();
         }
     });
+
+    @if ($errors->any())
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('modalWarga').classList.add('active');
+        });
+    @endif
 </script>
 @endpush

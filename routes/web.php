@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 // Halaman Publik
 // ─────────────────────────────────────────────
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
+Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:5,1'); // Tambah proteksi brute-force
 
 // Smart Redirect untuk halaman utama
 Route::get('/', function () {
@@ -28,7 +28,7 @@ Route::get('/', function () {
 });
 
 // ─────────────────────────────────────────────
-// Halaman yang butuh login
+// Halaman yang butuh login (Semua Role)
 // ─────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
     
@@ -51,10 +51,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/{id}/bayar', 'bayar')->name('bayar');
     });
 
-    // Modul Produk (Read Only untuk Kasir)
+    // Modul Produk & Kategori (Hanya Index yang bisa diakses Kasir)
     Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
     Route::get('/kategori', [KategoriController::class, 'index'])->name('kategori.index');
 
+    // Logout
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 
@@ -74,6 +75,7 @@ Route::middleware('auth')->group(function () {
         Route::prefix('supplier')->name('supplier.')->controller(SupplierController::class)->group(function () {
             Route::get('/', 'index')->name('index');
             Route::post('/tambah', 'storeSupplier')->name('storeSupplier');
+            Route::put('/{id}', 'updateSupplier')->name('updateSupplier');
             Route::delete('/{id}/hapus', 'destroySupplier')->name('destroySupplier');
             Route::post('/pasokan', 'storePasokan')->name('storePasokan');
             Route::get('/pasokan/{id}/detail', 'detail')->name('detail');
@@ -99,23 +101,28 @@ Route::middleware('auth')->group(function () {
         Route::put('/kategori/{id}', [KategoriController::class, 'update'])->name('kategori.update');
         Route::delete('/kategori/{id}', [KategoriController::class, 'destroy'])->name('kategori.destroy');
 
-        // Hapus Warga Kasbon
-        Route::delete('/kasbon/{id}', [KasbonController::class, 'destroy'])->name('kasbon.destroy');
+        // Modifikasi Kasbon (Edit & Hapus Warga - Khusus Admin)
+        Route::prefix('kasbon')->name('kasbon.')->controller(KasbonController::class)->group(function () {
+            Route::put('/{id}', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('destroy');
+        });
     });
 
-    // Halaman Pengaturan
+    // ==========================================
+    // HALAMAN PENGATURAN (Admin & Kasir)
+    // ==========================================
     Route::prefix('pengaturan')->name('pengaturan.')->controller(PengaturanController::class)->group(function () {
-    // SEMUA ROLE BISA AKSES (Profil & Password)
-    Route::get('/', 'index')->name('index');
-    Route::post('/profil', 'updateProfil')->name('updateProfil');
-    Route::post('/password', 'updatePassword')->name('updatePassword');
+        // Semua Role Bisa Akses
+        Route::get('/', 'index')->name('index');
+        Route::post('/profil', 'updateProfil')->name('updateProfil');
+        Route::post('/password', 'updatePassword')->name('updatePassword');
 
-    // HANYA ADMIN YANG BISA AKSES
-    Route::middleware('role:admin')->group(function () {
-        Route::post('/toko', 'updateToko')->name('updateToko');
-        Route::post('/karyawan', 'tambahKaryawan')->name('tambahKaryawan');
-        Route::delete('/karyawan/{id}', 'hapusKaryawan')->name('hapusKaryawan');
-        Route::get('/backup', 'backupDatabase')->name('backup');
+        // Hanya Admin yang Bisa Akses
+        Route::middleware('role:admin')->group(function () {
+            Route::post('/toko', 'updateToko')->name('updateToko');
+            Route::post('/karyawan', 'tambahKaryawan')->name('tambahKaryawan');
+            Route::delete('/karyawan/{id}', 'hapusKaryawan')->name('hapusKaryawan');
+            Route::get('/backup', 'backupDatabase')->name('backup');
         });
     });
 });
