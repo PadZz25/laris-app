@@ -116,4 +116,35 @@ class LarisWorkflowTest extends TestCase
         $this->assertStringContainsString('Laporan Penjualan Toko Ina', $pdfHtml);
         $this->assertStringContainsString('INV-20261113-0001', $pdfHtml);
     }
+
+    public function test_kasir_view_defines_global_helpers_before_pos_init_scripts(): void
+    {
+        $kasir = $this->makeUser('kasir', 2, 'Kasir Toko');
+        $this->actingAs($kasir);
+
+        $html = View::make('kasir.index', [
+            'produkData'    => [[
+                'id'       => 1,
+                'nama'     => 'Beras 5Kg',
+                'barcode'  => 'BRS-01',
+                'kategori' => 'Sembako',
+                'harga'    => 68000,
+                'stok'     => 10,
+                'satuan'   => 'Sak',
+                'foto'     => null,
+            ]],
+            'kategoriList'  => collect([]),
+            'pelangganList' => collect([]),
+        ])->render();
+
+        $escapePos = strpos($html, 'function escapeHtml(');
+        $toastPos  = strpos($html, 'function showToast(');
+        $initPos   = strpos($html, 'loadCart();');
+
+        $this->assertNotFalse($escapePos);
+        $this->assertNotFalse($toastPos);
+        $this->assertNotFalse($initPos);
+        $this->assertLessThan($initPos, $escapePos);
+        $this->assertLessThan($initPos, $toastPos);
+    }
 }

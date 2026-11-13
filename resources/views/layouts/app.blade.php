@@ -74,8 +74,6 @@
         </div>
     </div>
 
-    @stack('scripts')
-
     <!-- ═══════════════════════════════════════════
          JAVASCRIPT GLOBAL
          ═══════════════════════════════════════════ -->
@@ -145,5 +143,7 @@
             return div.innerHTML;
         }
     </script>
+
+    @stack('scripts')
 </body>
 </html>
