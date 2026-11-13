@@ -40,12 +40,12 @@
                 @csrf
                 <div class="form-group">
                     <label>Nama Lengkap</label>
-                    <input type="text" name="nama_karyawan" value="{{ auth()->user()->nama_karyawan }}" required>
+                    <input type="text" name="nama_karyawan" value="{{ session('tab') === 'karyawan' ? auth()->user()->nama_karyawan : old('nama_karyawan', auth()->user()->nama_karyawan) }}" required>
                     @error('nama_karyawan') <div class="field-error">{{ $message }}</div> @enderror
                 </div>
                 <div class="form-group" style="margin-top: 14px;">
                     <label>Username (Untuk Login)</label>
-                    <input type="text" name="username" value="{{ auth()->user()->username }}" required>
+                    <input type="text" name="username" value="{{ session('tab') === 'karyawan' ? auth()->user()->username : old('username', auth()->user()->username) }}" required>
                     @error('username') <div class="field-error">{{ $message }}</div> @enderror
                 </div>
                 
@@ -64,10 +64,12 @@
                 <div class="form-group">
                     <label>Password Lama <span class="required">*</span></label>
                     <input type="password" name="current_password" required>
+                    @error('current_password') <div class="field-error">{{ $message }}</div> @enderror
                 </div>
                 <div class="form-group" style="margin-top: 14px;">
                     <label>Password Baru <span class="required">*</span></label>
                     <input type="password" name="new_password" required minlength="6">
+                    @error('new_password') <div class="field-error">{{ $message }}</div> @enderror
                 </div>
                 <div class="form-group" style="margin-top: 14px;">
                     <label>Ulangi Password Baru <span class="required">*</span></label>
@@ -86,22 +88,25 @@
                 <h2 style="font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 20px;">Informasi Toko</h2>
                 
                 @php
-                    $toko = \App\Models\Pengaturan::first();
+                    $toko = \App\Models\Pengaturan::current();
                 @endphp
 
                 <form method="POST" action="{{ route('pengaturan.updateToko') }}" enctype="multipart/form-data" style="max-width: 400px;">
                     @csrf
                     <div class="form-group">
                         <label>Nama Toko <span class="required">*</span></label>
-                        <input type="text" name="nama_toko" value="{{ $toko->nama_toko ?? 'TOKO INA' }}" required>
+                        <input type="text" name="nama_toko" value="{{ old('nama_toko', $toko->nama_toko ?? 'TOKO INA') }}" required>
+                        @error('nama_toko', 'updateToko') <div class="field-error">{{ $message }}</div> @enderror
                     </div>
                     <div class="form-group" style="margin-top: 14px;">
                         <label>Alamat Toko <span class="required">*</span></label>
-                        <input type="text" name="alamat" value="{{ $toko->alamat ?? 'Desa Wates, Kec. Wates, Blitar' }}" required>
+                        <input type="text" name="alamat" value="{{ old('alamat', $toko->alamat ?? 'Desa Wates, Kec. Wates, Blitar') }}" required>
+                        @error('alamat', 'updateToko') <div class="field-error">{{ $message }}</div> @enderror
                     </div>
                     <div class="form-group" style="margin-top: 14px;">
                         <label>No. Telepon / WA <span class="required">*</span></label>
-                        <input type="text" name="no_telepon" value="{{ $toko->no_telepon ?? '0812-3456-7890' }}" required>
+                        <input type="text" name="no_telepon" value="{{ old('no_telepon', $toko->no_telepon ?? '0812-3456-7890') }}" required>
+                        @error('no_telepon', 'updateToko') <div class="field-error">{{ $message }}</div> @enderror
                     </div>
                     
                     <div class="form-group" style="margin-top: 14px;">
@@ -113,6 +118,7 @@
                         @endif
                         <input type="file" name="logo" accept="image/*" style="padding: 8px; border: 1px dashed #cbd5e1; border-radius: 8px;">
                         <div style="font-size: 10px; color: #64748b; margin-top: 4px;">Biarkan kosong jika tidak ingin mengubah logo.</div>
+                        @error('logo', 'updateToko') <div class="field-error">{{ $message }}</div> @enderror
                     </div>
                     
                     <button type="submit" class="btn-save" style="margin-top: 20px;">
@@ -141,7 +147,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach(\App\Models\Karyawan::all() as $kar)
+                            @foreach(\App\Models\Karyawan::orderBy('nama_karyawan')->get() as $kar)
                             <tr>
                                 <td style="font-weight: 800;">{{ $kar->nama_karyawan }}</td>
                                 <td>{{ $kar->username }}</td>
@@ -154,10 +160,12 @@
                                 </td>
                                 <td style="text-align: center;">
                                     @if($kar->id_karyawan !== auth()->user()->id_karyawan)
-                                        <form method="POST" action="{{ route('pengaturan.hapusKaryawan', $kar->id_karyawan) }}" style="display: inline-block;" onsubmit="return confirm('Yakin ingin menghapus akun ini?')">
+                                        <form method="POST" action="{{ route('pengaturan.hapusKaryawan', $kar->id_karyawan) }}" style="display: inline-block;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn-icon danger" title="Hapus">
+                                            <button type="button" class="btn-icon danger" title="Hapus"
+                                                    data-nama="{{ $kar->nama_karyawan }}"
+                                                    onclick="confirmHapusKaryawan(this.form, this.dataset.nama)">
                                                 <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </form>
@@ -171,9 +179,8 @@
                     </table>
                 </div>
             </div>
-        @endif
 
-                    {{-- Tab 5: Backup & Sistem --}}
+            {{-- Tab 5: Backup & Sistem --}}
             <div id="tab-backup" style="display: none;">
                 <h2 style="font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 20px;">Backup & Sistem</h2>
                 
@@ -210,11 +217,12 @@
                         </tr>
                         <tr>
                             <td style="font-weight: 700;">Hak Cipta</td>
-                            <td>: &copy; 2026 Toko Ina Desa Wates</td>
+                            <td>: &copy; {{ date('Y') }} {{ $toko->nama_toko ?? 'Toko Ina' }}</td>
                         </tr>
                     </table>
                 </div>
             </div>
+        @endif
 
     </div>
 </div>
@@ -232,22 +240,26 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label>Nama Lengkap <span class="required">*</span></label>
-                    <input type="text" name="nama_karyawan" required>
+                    <input type="text" name="nama_karyawan" value="{{ session('tab') === 'karyawan' ? old('nama_karyawan') : '' }}" required>
+                    @error('nama_karyawan', 'tambahKaryawan') <div class="field-error">{{ $message }}</div> @enderror
                 </div>
                 <div class="form-group">
                     <label>Username (Untuk Login) <span class="required">*</span></label>
-                    <input type="text" name="username" required>
+                    <input type="text" name="username" value="{{ session('tab') === 'karyawan' ? old('username') : '' }}" required>
+                    @error('username', 'tambahKaryawan') <div class="field-error">{{ $message }}</div> @enderror
                 </div>
                 <div class="form-group">
                     <label>Password <span class="required">*</span></label>
                     <input type="password" name="password" minlength="6" required>
+                    @error('password', 'tambahKaryawan') <div class="field-error">{{ $message }}</div> @enderror
                 </div>
                 <div class="form-group">
                     <label>Peran / Hak Akses <span class="required">*</span></label>
                     <select name="peran" required>
-                        <option value="kasir">Kasir (Akses Kasir & Kasbon)</option>
-                        <option value="admin">Admin (Akses Penuh)</option>
+                        <option value="kasir" {{ session('tab') === 'karyawan' && old('peran') === 'kasir' ? 'selected' : '' }}>Kasir (Akses Kasir & Kasbon)</option>
+                        <option value="admin" {{ session('tab') === 'karyawan' && old('peran') === 'admin' ? 'selected' : '' }}>Admin (Akses Penuh)</option>
                     </select>
+                    @error('peran', 'tambahKaryawan') <div class="field-error">{{ $message }}</div> @enderror
                 </div>
             </div>
             <div class="modal-footer">
@@ -264,80 +276,54 @@
 @push('scripts')
 <script>
     function switchTab(tab) {
-        // Sembunyikan semua tab
-        document.getElementById('tab-profil').style.display = 'none';
-        document.getElementById('tab-keamanan').style.display = 'none';
-        
-        const tabToko = document.getElementById('tab-toko');
-        if (tabToko) tabToko.style.display = 'none';
+        ['profil', 'keamanan', 'toko', 'karyawan', 'backup'].forEach(name => {
+            const tabEl = document.getElementById('tab-' + name);
+            if (tabEl) tabEl.style.display = 'none';
+            const menuEl = document.getElementById('menu-' + name);
+            if (menuEl) menuEl.classList.remove('active');
+        });
 
-        const tabKaryawan = document.getElementById('tab-karyawan');
-        if (tabKaryawan) tabKaryawan.style.display = 'none';
-        
-        // Hapus class active
-        document.getElementById('menu-profil').classList.remove('active');
-        document.getElementById('menu-keamanan').classList.remove('active');
-        
-        const menuToko = document.getElementById('menu-toko');
-        if (menuToko) menuToko.classList.remove('active');
-
-        const menuKaryawan = document.getElementById('menu-karyawan');
-        if (menuKaryawan) menuKaryawan.classList.remove('active');
-
-        // Tampilkan yang dipilih
-        document.getElementById('tab-' + tab).style.display = 'block';
-        const selectedMenu = document.getElementById('menu-' + tab);
-        if (selectedMenu) selectedMenu.classList.add('active');
+        const targetTab = document.getElementById('tab-' + tab);
+        if (targetTab) {
+            targetTab.style.display = 'block';
+            const selectedMenu = document.getElementById('menu-' + tab);
+            if (selectedMenu) selectedMenu.classList.add('active');
+        }
     }
 
     function openModalKaryawan() {
-        document.getElementById('modalTambahKaryawan').classList.add('active');
+        const modal = document.getElementById('modalTambahKaryawan');
+        if (modal) modal.classList.add('active');
     }
 
     function closeModalKaryawan() {
-        document.getElementById('modalTambahKaryawan').classList.remove('active');
+        const modal = document.getElementById('modalTambahKaryawan');
+        if (modal) modal.classList.remove('active');
     }
 
-        function switchTab(tab) {
-        // Sembunyikan semua tab
-        document.getElementById('tab-profil').style.display = 'none';
-        document.getElementById('tab-keamanan').style.display = 'none';
-        
-        const tabToko = document.getElementById('tab-toko');
-        if (tabToko) tabToko.style.display = 'none';
-
-        const tabKaryawan = document.getElementById('tab-karyawan');
-        if (tabKaryawan) tabKaryawan.style.display = 'none';
-
-        const tabBackup = document.getElementById('tab-backup');
-        if (tabBackup) tabBackup.style.display = 'none';
-        
-        // Hapus class active
-        document.getElementById('menu-profil').classList.remove('active');
-        document.getElementById('menu-keamanan').classList.remove('active');
-        
-        const menuToko = document.getElementById('menu-toko');
-        if (menuToko) menuToko.classList.remove('active');
-
-        const menuKaryawan = document.getElementById('menu-karyawan');
-        if (menuKaryawan) menuKaryawan.classList.remove('active');
-
-        const menuBackup = document.getElementById('menu-backup');
-        if (menuBackup) menuBackup.classList.remove('active');
-
-        // Tampilkan yang dipilih
-        document.getElementById('tab-' + tab).style.display = 'block';
-        const selectedMenu = document.getElementById('menu-' + tab);
-        if (selectedMenu) selectedMenu.classList.add('active');
+    function confirmHapusKaryawan(form, nama) {
+        showGlobalConfirm(
+            'Hapus Akun Karyawan?',
+            `Yakin ingin menghapus akun "${nama}"? Akun yang sudah pernah menangani transaksi tidak dapat dihapus.`,
+            () => {
+                if (typeof showLoader === 'function') showLoader();
+                form.submit();
+            }
+        );
     }
 
-    // Cek session tab
+    // Cek session tab / error validasi
     @if(session('tab') === 'keamanan' || $errors->hasAny(['current_password', 'new_password']))
         switchTab('keamanan');
-    @elseif(session('tab') === 'toko')
+    @elseif(session('tab') === 'toko' || $errors->updateToko->any())
         switchTab('toko');
-    @elseif(session('tab') === 'karyawan')
+    @elseif(session('tab') === 'karyawan' || $errors->tambahKaryawan->any())
         switchTab('karyawan');
+        @if($errors->tambahKaryawan->any())
+            document.addEventListener('DOMContentLoaded', () => openModalKaryawan());
+        @endif
+    @elseif(session('tab') === 'backup')
+        switchTab('backup');
     @endif
 </script>
 @endpush

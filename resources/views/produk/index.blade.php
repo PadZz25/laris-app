@@ -60,7 +60,7 @@
         <div class="category-group" id="categoryPills">
             <div class="cat-pill active" data-kategori="Semua" onclick="setKategori('Semua', this)">Semua</div>
             @foreach ($kategoriList as $kat)
-                <div class="cat-pill" data-kategori="{{ $kat->nama_kategori }}" onclick="setKategori('{{ $kat->nama_kategori }}', this)">
+                <div class="cat-pill" data-kategori="{{ $kat->nama_kategori }}" onclick="setKategori(this.dataset.kategori, this)">
                     {{ $kat->nama_kategori }}
                 </div>
             @endforeach
@@ -331,7 +331,7 @@
                             <img id="editFotoPreviewImg" src="" alt="Preview" style="display: none;">
                             <input type="file" name="foto_produk" id="editFotoInput" accept="image/jpeg,image/jpg,image/png,image/webp" class="file-input-hidden" onchange="previewFotoEdit(this)">
                         </div>
-                        @error('foto_produk') <div class="field-error">{{ $message }}</div> @enderror
+                        @error('foto_produk', 'editProduk') <div class="field-error">{{ $message }}</div> @enderror
                     </div>
 
                     <div class="form-grid-2col">
@@ -341,7 +341,7 @@
                                 <i class="fa-solid fa-barcode"></i>
                                 <input type="text" name="barcode" id="editBarcode" placeholder="Contoh: BRS-006" required>
                             </div>
-                            @error('barcode') <div class="field-error">{{ $message }}</div> @enderror
+                            @error('barcode', 'editProduk') <div class="field-error">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="form-group">
@@ -353,12 +353,14 @@
                                         <option value="{{ $kat->id_kategori }}">{{ $kat->nama_kategori }}</option>
                                     @endforeach
                                 </select>
+                                @error('id_kategori', 'editProduk') <div class="field-error">{{ $message }}</div> @enderror
                                 <div style="font-size: 10px; margin-top: 4px;">
                                     <a href="#" onclick="switchKategoriModeEdit('new'); return false;" style="color: #429198; font-weight: 700; text-decoration: none;"><i class="fa-solid fa-plus"></i> Atau tambah kategori baru</a>
                                 </div>
                             </div>
                             <div id="editKategoriModeNew" style="display: none;">
                                 <input type="text" name="new_kategori" id="editInputKategoriBaru" placeholder="Misal: Frozen Food">
+                                @error('new_kategori', 'editProduk') <div class="field-error">{{ $message }}</div> @enderror
                                 <div style="font-size: 10px; margin-top: 4px;">
                                     <a href="#" onclick="switchKategoriModeEdit('existing'); return false;" style="color: #64748b; font-weight: 700; text-decoration: none;"><i class="fa-solid fa-arrow-left"></i> Kembali pilih dari daftar</a>
                                 </div>
@@ -369,16 +371,19 @@
                     <div class="form-group">
                         <label>Nama Produk Lengkap <span class="required">*</span></label>
                         <input type="text" name="nama_produk" id="editNamaProduk" placeholder="Masukkan nama produk..." required>
+                        @error('nama_produk', 'editProduk') <div class="field-error">{{ $message }}</div> @enderror
                     </div>
 
                     <div class="form-grid-2col">
                         <div class="form-group">
                             <label>Harga Beli / Modal (Rp) <span class="required">*</span></label>
                             <input type="number" name="harga_beli" id="editHargaBeli" placeholder="0" min="0" step="100" required>
+                            @error('harga_beli', 'editProduk') <div class="field-error">{{ $message }}</div> @enderror
                         </div>
                         <div class="form-group">
                             <label>Harga Jual Kasir (Rp) <span class="required">*</span></label>
                             <input type="number" name="harga_jual" id="editHargaJual" placeholder="0" min="0" step="100" required>
+                            @error('harga_jual', 'editProduk') <div class="field-error">{{ $message }}</div> @enderror
                         </div>
                     </div>
 
@@ -386,6 +391,7 @@
                         <div class="form-group">
                             <label>Jumlah Stok <span class="required">*</span></label>
                             <input type="number" name="stok_sekarang" id="editStok" placeholder="0" min="0" required>
+                            @error('stok_sekarang', 'editProduk') <div class="field-error">{{ $message }}</div> @enderror
                         </div>
                         <div class="form-group">
                             <label>Satuan Barang <span class="required">*</span></label>
@@ -395,12 +401,14 @@
                                     <option value="{{ $sat }}">{{ $sat }}</option>
                                 @endforeach
                             </select>
+                            @error('satuan', 'editProduk') <div class="field-error">{{ $message }}</div> @enderror
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label>Batas Minimal Stok <span class="required">*</span></label>
                         <input type="number" name="min_stok" id="editMinStok" placeholder="5" min="0" required>
+                        @error('min_stok', 'editProduk') <div class="field-error">{{ $message }}</div> @enderror
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -551,7 +559,7 @@
                         <div class="opname-cats" id="opnameCategories">
                             <div class="opname-cat active" data-kat="Semua" onclick="setOpnameKategori('Semua', this)">Semua</div>
                             @foreach ($kategoriList as $kat)
-                                <div class="opname-cat" data-kat="{{ $kat->nama_kategori }}" onclick="setOpnameKategori('{{ $kat->nama_kategori }}', this)">{{ $kat->nama_kategori }}</div>
+                                <div class="opname-cat" data-kat="{{ $kat->nama_kategori }}" onclick="setOpnameKategori(this.dataset.kat, this)">{{ $kat->nama_kategori }}</div>
                             @endforeach
                         </div>
                         <div class="opname-list" id="opnameList"></div>
@@ -665,8 +673,31 @@
         if (e.target === this) closeModalTambah();
     });
 
-    @if ($errors->any())
+    @if ($errors->hasAny(['id_produk', 'stok_fisik']))
+        document.addEventListener('DOMContentLoaded', function () { openModalPenyesuaian(); });
+    @elseif ($errors->any())
         document.addEventListener('DOMContentLoaded', function () { openModalTambah(); });
+    @endif
+
+    @if (session('edit_produk_id'))
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('editBarcode').value      = @json(old('barcode', ''));
+            document.getElementById('editNamaProduk').value   = @json(old('nama_produk', ''));
+            document.getElementById('editHargaBeli').value    = @json(old('harga_beli', ''));
+            document.getElementById('editHargaJual').value    = @json(old('harga_jual', ''));
+            document.getElementById('editStok').value         = @json(old('stok_sekarang', 0));
+            document.getElementById('editMinStok').value      = @json(old('min_stok', 5));
+            document.getElementById('editSatuan').value       = @json(old('satuan', ''));
+            document.getElementById('editSelectKategori').value = @json(old('id_kategori', ''));
+            document.getElementById('editInputKategoriBaru').value = @json(old('new_kategori', ''));
+            @if ($errors->editProduk->has('new_kategori') || old('new_kategori'))
+                switchKategoriModeEdit('new');
+            @else
+                switchKategoriModeEdit('existing');
+            @endif
+            document.getElementById('formEditProduk').action = '/produk/{{ (int) session('edit_produk_id') }}';
+            document.getElementById('modalEditProduk').classList.add('active');
+        });
     @endif
 
     // --- PREVIEW FOTO ---
@@ -740,14 +771,14 @@
     // --- MODAL EDIT PRODUK ---
     function openEditModal(btn) {
         const p = JSON.parse(btn.dataset.produk);
-        document.getElementById('editBarcode').value      = p.barcode || '';
-        document.getElementById('editNamaProduk').value   = p.nama_produk || '';
-        document.getElementById('editHargaBeli').value    = p.harga_beli || '';
-        document.getElementById('editHargaJual').value    = p.harga_jual || '';
-        document.getElementById('editStok').value         = p.stok_sekarang || 0;
-        document.getElementById('editMinStok').value      = p.min_stok || 10;
-        document.getElementById('editSatuan').value       = p.satuan || '';
-        document.getElementById('editSelectKategori').value = p.id_kategori || '';
+        document.getElementById('editBarcode').value        = p.barcode ?? '';
+        document.getElementById('editNamaProduk').value     = p.nama_produk ?? '';
+        document.getElementById('editHargaBeli').value      = p.harga_beli ?? '';
+        document.getElementById('editHargaJual').value      = p.harga_jual ?? '';
+        document.getElementById('editStok').value           = p.stok_sekarang ?? 0;
+        document.getElementById('editMinStok').value        = p.min_stok ?? 10;
+        document.getElementById('editSatuan').value         = p.satuan ?? '';
+        document.getElementById('editSelectKategori').value = p.id_kategori ?? '';
         switchKategoriModeEdit('existing');
         document.getElementById('formEditProduk').action = `/produk/${p.id_produk}`;
 
@@ -861,8 +892,8 @@
             const json = JSON.stringify(kat).replace(/"/g, '&quot;');
             return `
                 <tr>
-                    <td style="font-weight: 700;">${kat.nama_kategori}</td>
-                    <td style="text-align: center;"><span class="badge badge-info">${kat.jumlah_produk} produk</span></td>
+                    <td style="font-weight: 700;">${escapeHtml(kat.nama_kategori)}</td>
+                    <td style="text-align: center;"><span class="badge badge-info">${Number(kat.jumlah_produk)} produk</span></td>
                     <td>
                         <div class="action-btns-cell">
                             <button class="btn-icon" title="Rename Kategori" data-kat="${json}" onclick="openSubModalEditKategori(this)"><i class="fa-solid fa-pen-to-square"></i></button>
@@ -1010,12 +1041,12 @@
             list.innerHTML = `<div class="opname-list-empty"><i class="fa-solid fa-box-open"></i> Produk tidak ditemukan</div>`; return;
         }
         list.innerHTML = filtered.map(p => `
-            <div class="opname-item ${opnameSelectedId === p.id ? 'selected' : ''}" onclick="selectOpnameProduct(${p.id})">
+            <div class="opname-item ${opnameSelectedId === p.id ? 'selected' : ''}" onclick="selectOpnameProduct(${Number(p.id)})">
                 <div style="min-width: 0; flex: 1;">
-                    <div class="opname-item-nama">${p.nama}</div>
-                    <div class="opname-item-meta">${p.barcode || '-'} • ${p.kategori}</div>
+                    <div class="opname-item-nama">${escapeHtml(p.nama)}</div>
+                    <div class="opname-item-meta">${escapeHtml(p.barcode || '-')} • ${escapeHtml(p.kategori)}</div>
                 </div>
-                <div class="opname-item-stok">${p.stok} ${p.satuan || ''}</div>
+                <div class="opname-item-stok">${Number(p.stok)} ${escapeHtml(p.satuan || '')}</div>
             </div>`).join('');
     }
 
@@ -1067,20 +1098,6 @@
             closeModalTambah(); closeEditModal(); closeDeleteModal(); closeModalKategori(); closeModalPenyesuaian(); closeKonfirmasiKategori();
         }
     });
-
-    @if ($errors->hasAny(['id_produk', 'stok_fisik']))
-        document.addEventListener('DOMContentLoaded', function () { openModalPenyesuaian(); });
-    @endif
-    
-    // --- TOAST NOTIFICATION (Hanya dipakai admin) ---
-    function showToast(message, type = 'success') {
-        const container = document.getElementById('toastContainer');
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'}"></i><span>${message}</span>`;
-        container.appendChild(toast);
-        setTimeout(() => { toast.style.animation = 'toastOut 0.3s ease forwards'; setTimeout(() => toast.remove(), 300); }, 3200);
-    }
 
     @endif
 </script>

@@ -1,10 +1,14 @@
+@php
+    $tokoGlobal = \App\Models\Pengaturan::current();
+    $namaTokoGlobal = $tokoGlobal->nama_toko ?? 'Toko Ina';
+@endphp
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Dashboard') - LARIS Toko Ina</title>
+    <title>@yield('title', 'Dashboard') - LARIS {{ $namaTokoGlobal }}</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -25,7 +29,10 @@
     @include('partials.sidebar')
 
     <div class="main-container">
-        @include('partials.header', ['title' => trim($__env->yieldContent('page-title', 'Dashboard'))])
+        @include('partials.header', [
+            'title' => trim($__env->yieldContent('page-title', 'Dashboard')),
+            'namaToko' => $namaTokoGlobal,
+        ])
 
         @if (session('success'))
             <div class="flash-message flash-success">
@@ -94,11 +101,26 @@
             });
         });
 
-        // --- 2. GLOBAL CONFIRM LOGIC ---
+        // --- 2. GLOBAL TOAST NOTIFICATION ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = `toast ${type === 'error' ? 'error' : 'success'}`;
+            const iconClass = type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check';
+            toast.innerHTML = `<i class="fa-solid ${iconClass}"></i><span>${escapeHtml(message)}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'toastOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        // --- 3. GLOBAL CONFIRM LOGIC ---
         let globalConfirmCallback = null;
 
         function showGlobalConfirm(title, message, callback) {
-            document.getElementById('globalConfirmTitle').innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: #dc2626;"></i> ${title}`;
+            document.getElementById('globalConfirmTitle').innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: #dc2626;"></i> ${escapeHtml(title)}`;
             document.getElementById('globalConfirmMessage').innerText = message;
             globalConfirmCallback = callback;
             
@@ -117,9 +139,9 @@
         }
 
         function escapeHtml(text) {
-            if (!text) return '';
+            if (text === null || text === undefined) return '';
             const div = document.createElement('div');
-            div.innerText = text;
+            div.innerText = String(text);
             return div.innerHTML;
         }
     </script>

@@ -15,6 +15,7 @@ class SupplierController extends Controller
         $supplierList = Supplier::orderBy('nama_supplier')->get();
 
         $faktur = Pembelian::with('supplier')
+            ->withCount('detail')
             ->orderByDesc('tanggal')
             ->orderByDesc('id_pembelian')
             ->get();
@@ -67,9 +68,9 @@ class SupplierController extends Controller
             ->with('success', "Supplier \"{$validated['nama_supplier']}\" berhasil ditambahkan!");
     }
 
-        public function updateSupplier(Request $request, $id)
+    public function updateSupplier(Request $request, $id)
     {
-        $validated = $request->validate([
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'nama_supplier'     => ['required', 'string', 'max:255'],
             'nama_sales'        => ['nullable', 'string', 'max:255'],
             'no_telepon'        => ['nullable', 'string', 'max:30'],
@@ -79,6 +80,16 @@ class SupplierController extends Controller
         ], [
             'nama_supplier.required' => 'Nama supplier wajib diisi.',
         ]);
+
+        if ($validator->fails()) {
+            return redirect()
+                ->back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('edit_supplier_id', $id);
+        }
+
+        $validated = $validator->validated();
 
         try {
             // Menggunakan Stored Procedure yang sudah kita buat di awal
@@ -188,6 +199,31 @@ class SupplierController extends Controller
 
         DB::beginTransaction();
         try {
+            // Pastikan pengurangan stok oleh trigger tidak membuat stok produk menjadi minus
+            $detailTotals = DB::table('detail_pembelian')
+                ->select('id_produk', DB::raw('SUM(jumlah) as total_qty'))
+                ->where('id_pembelian', $id)
+                ->groupBy('id_produk')
+                ->get();
+
+            if ($detailTotals->isNotEmpty()) {
+                $produkMap = Produk::whereIn('id_produk', $detailTotals->pluck('id_produk'))
+                    ->lockForUpdate()
+                    ->get()
+                    ->keyBy('id_produk');
+
+                foreach ($detailTotals as $row) {
+                    $produk = $produkMap->get($row->id_produk);
+                    $stokSaatIni = $produk ? (float) $produk->stok_sekarang : 0;
+                    if ($stokSaatIni < (float) $row->total_qty) {
+                        DB::rollBack();
+                        $namaProduk = $produk ? $produk->nama_produk : ('ID #' . $row->id_produk);
+                        return redirect()->route('supplier.index')
+                            ->with('error', "Faktur \"{$nomor}\" tidak bisa dihapus karena sebagian stok \"{$namaProduk}\" sudah terjual/berkurang (stok tersedia: {$stokSaatIni}).");
+                    }
+                }
+            }
+
             // Hapus detail dulu (trigger akan auto-kurangi stok)
             DB::table('detail_pembelian')->where('id_pembelian', $id)->delete();
 

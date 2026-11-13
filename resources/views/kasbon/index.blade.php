@@ -110,7 +110,9 @@
                                 <i class="fa-solid fa-pen"></i>
                             </button>
                             <button class="btn-icon danger" title="Hapus Warga" style="width: 26px; height: 26px; font-size: 11px;"
-                                    onclick="event.stopPropagation(); openHapusWarga({{ $p->id_pelanggan }}, '{{ $p->nama_pelanggan }}')">
+                                    data-id="{{ $p->id_pelanggan }}"
+                                    data-nama="{{ $p->nama_pelanggan }}"
+                                    onclick="event.stopPropagation(); openHapusWarga(this)">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
@@ -184,20 +186,22 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label>Nama Lengkap Warga <span class="required">*</span></label>
-                        <input type="text" name="nama_pelanggan" id="wargaNama" required>
+                        <input type="text" name="nama_pelanggan" id="wargaNama" value="{{ old('nama_pelanggan') }}" required>
+                        @error('nama_pelanggan') <div class="field-error">{{ $message }}</div> @enderror
                     </div>
                     <div class="form-group">
                         <label>Alamat / RT / Dusun</label>
-                        <input type="text" name="alamat" id="wargaAlamat">
+                        <input type="text" name="alamat" id="wargaAlamat" value="{{ old('alamat') }}">
                     </div>
                     <div class="form-group">
                         <label>Nomor Telepon / WhatsApp</label>
                         {{-- ATURAN: Hanya menerima angka --}}
-                        <input type="tel" name="no_telepon" id="wargaTelepon" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="08xxxxxxxxxx">
+                        <input type="tel" name="no_telepon" id="wargaTelepon" value="{{ old('no_telepon') }}" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="08xxxxxxxxxx">
                     </div>
                     <div class="form-group" id="boxKasbonAwal">
                         <label>Nominal Kasbon Awal (Rp)</label>
-                        <input type="number" name="kasbon_awal" id="wargaKasbonAwal" value="0" min="0">
+                        <input type="number" name="kasbon_awal" id="wargaKasbonAwal" value="{{ old('kasbon_awal', 0) }}" min="0">
+                        @error('kasbon_awal') <div class="field-error">{{ $message }}</div> @enderror
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -364,10 +368,10 @@
         box.innerHTML = notaList.map(n => `
             <div class="kasbon-nota-item">
                 <div style="min-width: 0; flex: 1;">
-                    <div class="kasbon-nota-nomor">#${n.nomor_nota}</div>
-                    <div class="kasbon-nota-tanggal">${n.tanggal}</div>
+                    <div class="kasbon-nota-nomor">#${escapeHtml(n.nomor_nota)}</div>
+                    <div class="kasbon-nota-tanggal">${escapeHtml(n.tanggal)}</div>
                 </div>
-                <div class="kasbon-nota-nominal">Rp ${n.total_akhir.toLocaleString('id-ID')}</div>
+                <div class="kasbon-nota-nominal">Rp ${Number(n.total_akhir).toLocaleString('id-ID')}</div>
             </div>
         `).join('');
     }
@@ -397,7 +401,9 @@
         document.getElementById('modalWarga').classList.remove('active');
     }
 
-    function openHapusWarga(id, nama) {
+    function openHapusWarga(btn) {
+        const id = btn.dataset.id;
+        const nama = btn.dataset.nama;
         document.getElementById('hapusNamaWarga').textContent = nama;
         document.getElementById('formHapusWarga').action = `/kasbon/${id}`;
         document.getElementById('modalHapusWarga').classList.add('active');
@@ -446,7 +452,11 @@
         }
     });
 
-    @if ($errors->any())
+    @if ($errors->has('nominal_bayar'))
+        document.addEventListener('DOMContentLoaded', function () {
+            showToast(@json($errors->first('nominal_bayar')), 'error');
+        });
+    @elseif ($errors->hasAny(['nama_pelanggan', 'alamat', 'no_telepon', 'kasbon_awal']))
         document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('modalWarga').classList.add('active');
         });

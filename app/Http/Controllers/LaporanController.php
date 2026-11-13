@@ -107,4 +107,31 @@ class LaporanController extends Controller
         $pdf = Pdf::loadView('laporan.pdf', compact('rekapPenjualan', 'startDate', 'endDate'));
         return $pdf->download('Laporan_Penjualan_'.$startDate.'_sd_'.$endDate.'.pdf');
     }
+
+        public function detailTransaksi($id)
+    {
+        $penjualan = \App\Models\Penjualan::with(['detail.produk', 'pelanggan', 'karyawan'])->findOrFail($id);
+
+        return response()->json([
+            'id_penjualan'  => $penjualan->id_penjualan,
+            'nomor_nota'    => $penjualan->nomor_nota,
+            'tanggal'       => \Carbon\Carbon::parse($penjualan->tanggal)->format('d M Y, H:i'),
+            'kasir'         => $penjualan->karyawan->nama_karyawan ?? '-',
+            'pelanggan'     => $penjualan->pelanggan->nama_pelanggan ?? 'Umum',
+            'total_belanja' => (float) ($penjualan->total_belanja ?? $penjualan->total_akhir),
+            'diskon'        => (float) ($penjualan->diskon ?? 0),
+            'total_akhir'   => (float) $penjualan->total_akhir,
+            'metode_bayar'  => $penjualan->metode_bayar,
+            'status_bayar'  => $penjualan->status_bayar,
+            'items' => $penjualan->detail->map(function ($item) {
+                return [
+                    'nama_produk' => $item->produk->nama_produk ?? '-',
+                    'jumlah'      => (float) $item->jumlah,
+                    'harga_jual'  => (float) $item->harga_jual_saat_itu,
+                    'subtotal'    => (float) $item->subtotal,
+                    'satuan'      => $item->produk->satuan ?? ''
+                ];
+            })
+        ]);
+    }
 }

@@ -36,33 +36,83 @@ class PosController extends Controller
     }
 
     /**
-     * Simpan transaksi penjualan.
+     * Simpan transaksi penjualan secara atomik dengan pra-validasi stok
+     * dan kompensasi rollback jika sp_tambah_item gagal di tengah loop.
      */
-        public function store(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'items'           => 'required|array|min:1',
-            'items.*.id'      => 'required|exists:produk,id_produk',
-            'items.*.qty'     => 'required|numeric|min:1',
+            'items.*.id'      => 'required|integer|exists:produk,id_produk',
+            'items.*.qty'     => 'required|integer|min:1',
             'metode_bayar'    => 'required|in:Tunai,QRIS,Kasbon',
-            'id_pelanggan'    => 'nullable|exists:pelanggan,id_pelanggan',
-            'uang_diterima'   => 'nullable|numeric',
+            'id_pelanggan'    => 'required_if:metode_bayar,Kasbon|nullable|exists:pelanggan,id_pelanggan',
+            'uang_diterima'   => 'nullable|numeric|min:0',
             'kembalian'       => 'nullable|numeric',
+        ], [
+            'id_pelanggan.required_if' => 'Pilih nama warga untuk metode pembayaran Kasbon.',
+            'items.*.qty.integer'      => 'Jumlah item harus berupa bilangan bulat minimal 1.',
         ]);
 
-        $nomorNota = 'INV-' . date('Ymd') . '-' . rand(1000, 9999);
+        // Gabungkan item duplikat per id_produk agar total qty tervalidasi akurat
+        $aggregatedItems = [];
+        foreach ($request->items as $item) {
+            $idProduk = (int) $item['id'];
+            $aggregatedItems[$idProduk] = ($aggregatedItems[$idProduk] ?? 0) + (int) $item['qty'];
+        }
+
+        $produkMap = Produk::whereIn('id_produk', array_keys($aggregatedItems))
+            ->get()
+            ->keyBy('id_produk');
+
+        $totalServer = 0.0;
+        foreach ($aggregatedItems as $idProduk => $qty) {
+            $produk = $produkMap->get($idProduk);
+            if (! $produk) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Produk tidak ditemukan di database.'
+                ], 422);
+            }
+
+            if ((int) $produk->stok_sekarang < $qty) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Stok \"{$produk->nama_produk}\" tidak mencukupi (tersedia: {$produk->stok_sekarang})."
+                ], 422);
+            }
+
+            $totalServer += (float) $produk->harga_jual * $qty;
+        }
 
         $metodeDb = 'tunai';
         $statusBayar = 'lunas';
         $idPelanggan = null;
+        $uangDiterima = 0.0;
+        $kembalian = 0.0;
 
-        if ($request->metode_bayar === 'QRIS') {
+        if ($request->metode_bayar === 'Tunai') {
+            $uangDiterima = (float) ($request->uang_diterima ?? 0);
+            if ($uangDiterima < $totalServer) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Uang yang dibayarkan kurang dari total tagihan!'
+                ], 422);
+            }
+            $kembalian = $uangDiterima - $totalServer;
+        } elseif ($request->metode_bayar === 'QRIS') {
             $metodeDb = 'transfer';
         } elseif ($request->metode_bayar === 'Kasbon') {
             $metodeDb = 'hutang';
             $statusBayar = 'belum_lunas';
-            $idPelanggan = $request->id_pelanggan;
+            $idPelanggan = (int) $request->id_pelanggan;
         }
+
+        do {
+            $nomorNota = 'INV-' . date('Ymd') . '-' . random_int(1000, 9999);
+        } while (Penjualan::where('nomor_nota', $nomorNota)->exists());
+
+        $penjualan = null;
 
         try {
             // 1. Buat Header Penjualan
@@ -76,19 +126,19 @@ class PosController extends Controller
                 'total_akhir'   => 0,
                 'metode_bayar'  => $metodeDb,
                 'status_bayar'  => $statusBayar,
-                'uang_diterima' => $request->uang_diterima ?? 0,
-                'kembalian'     => $request->kembalian ?? 0,
+                'uang_diterima' => $uangDiterima,
+                'kembalian'     => $kembalian,
             ]);
 
             $idPenjualan = $penjualan->id_penjualan;
 
             // 2. Loop Item dan panggil Stored Procedure
             // SP ini otomatis mengurangi stok & menambah total_belanja/akhir
-            foreach ($request->items as $item) {
+            foreach ($aggregatedItems as $idProduk => $qty) {
                 DB::statement('CALL sp_tambah_item(?, ?, ?)', [
                     $idPenjualan,
-                    $item['id'],
-                    $item['qty']
+                    $idProduk,
+                    $qty
                 ]);
             }
 
@@ -98,7 +148,17 @@ class PosController extends Controller
                 'id_penjualan' => $idPenjualan
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            // Hapus detail lebih dulu agar trigger trg_setelah_hapus_item memulihkan stok & kasbon
+            if ($penjualan) {
+                try {
+                    DetailPenjualan::where('id_penjualan', $penjualan->id_penjualan)->delete();
+                    $penjualan->delete();
+                } catch (\Throwable $rollbackException) {
+                    report($rollbackException);
+                }
+            }
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal memproses transaksi: ' . $e->getMessage()

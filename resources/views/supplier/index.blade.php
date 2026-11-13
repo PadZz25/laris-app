@@ -88,7 +88,7 @@
                                     <td style="font-weight: 800;">{{ $f->nomor_pembelian }}</td>
                                     <td>{{ $f->tanggal->format('d M Y') }}</td>
                                     <td>{{ $f->supplier->nama_supplier ?? '-' }}</td>
-                                    <td style="text-align: center;">{{ $f->detail->count() ?? 0 }} jenis</td>
+                                    <td style="text-align: center;">{{ $f->detail_count ?? 0 }} jenis</td>
                                     <td style="text-align: right; font-weight: 800;">
                                         Rp {{ number_format($f->total_pembelian, 0, ',', '.') }}
                                     </td>
@@ -107,7 +107,10 @@
                                         <div class="action-btns-cell">
                                             <button type="button" class="btn-icon danger"
                                                     title="Hapus Faktur"
-                                                    onclick="event.stopPropagation(); hapusFaktur({{ $f->id_pembelian }}, '{{ $f->nomor_pembelian }}', '{{ $f->status_bayar }}')">
+                                                    data-id="{{ $f->id_pembelian }}"
+                                                    data-nomor="{{ $f->nomor_pembelian }}"
+                                                    data-status="{{ $f->status_bayar }}"
+                                                    onclick="event.stopPropagation(); hapusFaktur(this)">
                                                 <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </div>
@@ -229,8 +232,10 @@
                                                 <i class="fa-solid fa-pen"></i>
                                             </button>
                                             {{-- TOMBOL HAPUS --}}
-                                            <button type="button" class="btn-icon danger" title="Hapus Supplier" 
-                                                    onclick="hapusSupplier({{ $sup->id_supplier }}, '{{ $sup->nama_supplier }}')">
+                                            <button type="button" class="btn-icon danger" title="Hapus Supplier"
+                                                    data-id="{{ $sup->id_supplier }}"
+                                                    data-nama="{{ $sup->nama_supplier }}"
+                                                    onclick="hapusSupplier(this)">
                                                 <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </div>
@@ -353,8 +358,8 @@
                     <div class="form-group">
                         <label>Status <span class="required">*</span></label>
                         <select name="status_bayar" id="statusBayar" onchange="toggleJatuhTempo()" required>
-                            <option value="lunas">Lunas</option>
-                            <option value="tempo">Tempo</option>
+                            <option value="lunas" {{ old('status_bayar', 'lunas') === 'lunas' ? 'selected' : '' }}>Lunas</option>
+                            <option value="tempo" {{ old('status_bayar') === 'tempo' ? 'selected' : '' }}>Tempo</option>
                         </select>
                     </div>
 
@@ -387,7 +392,7 @@
                             <div class="cat-pill active" data-kat="Semua" onclick="setPasokanKategori('Semua', this)">Semua</div>
                             @foreach ($kategoriList as $kat)
                                 <div class="cat-pill" data-kat="{{ $kat->nama_kategori }}"
-                                    onclick="setPasokanKategori('{{ $kat->nama_kategori }}', this)">
+                                    onclick="setPasokanKategori(this.dataset.kat, this)">
                                     {{ $kat->nama_kategori }}
                                 </div>
                             @endforeach
@@ -598,7 +603,9 @@
         document.getElementById('modalKelolaSupplier').classList.remove('active');
     }
 
-    function hapusSupplier(id, nama) {
+    function hapusSupplier(btn) {
+        const id = btn.dataset.id;
+        const nama = btn.dataset.nama;
         showGlobalConfirm(
             'Hapus Supplier', 
             `Apakah Anda yakin ingin menghapus supplier "${nama}"? Data riwayat pasokan yang sudah ada tidak akan terhapus.`, 
@@ -620,6 +627,7 @@
                 form.appendChild(csrf);
                 form.appendChild(method);
                 document.body.appendChild(form);
+                if (typeof showLoader === 'function') showLoader();
                 form.submit();
             }
         );
@@ -681,15 +689,15 @@
             const cartQty = inCart ? inCart.qty : 0;
             return `
                 <div class="pasokan-produk-item ${inCart ? 'in-cart' : ''}"
-                     onclick="addToPasokanCart(${p.id})">
+                     onclick="addToPasokanCart(${Number(p.id)})">
                     <div style="min-width:0;flex:1;">
-                        <div class="pasokan-produk-nama">${p.nama}</div>
+                        <div class="pasokan-produk-nama">${escapeHtml(p.nama)}</div>
                         <div class="pasokan-produk-meta">
-                            ${p.barcode || '-'} • ${p.satuan}
-                            ${cartQty > 0 ? ` <span style="color:#16a34a;font-weight:800;">• ${cartQty} di faktur</span>` : ''}
+                            ${escapeHtml(p.barcode || '-')} • ${escapeHtml(p.satuan)}
+                            ${cartQty > 0 ? ` <span style="color:#16a34a;font-weight:800;">• ${Number(cartQty)} di faktur</span>` : ''}
                         </div>
                     </div>
-                    <div class="pasokan-produk-harga">Rp ${p.harga.toLocaleString('id-ID')}</div>
+                    <div class="pasokan-produk-harga">Rp ${Number(p.harga).toLocaleString('id-ID')}</div>
                 </div>
             `;
         }).join('');
@@ -777,11 +785,11 @@
             <div class="pasokan-cart-item">
                 <div class="pasokan-cart-item-header">
                     <div style="min-width:0;flex:1;">
-                        <div class="pasokan-cart-item-nama">${item.nama}</div>
-                        <div class="pasokan-cart-item-meta">${item.barcode || '-'} • ${item.satuan}</div>
+                        <div class="pasokan-cart-item-nama">${escapeHtml(item.nama)}</div>
+                        <div class="pasokan-cart-item-meta">${escapeHtml(item.barcode || '-')} • ${escapeHtml(item.satuan)}</div>
                     </div>
                     <button type="button" class="pasokan-cart-item-remove"
-                            onclick="removeFromPasokanCart(${item.id})">
+                            onclick="removeFromPasokanCart(${Number(item.id)})">
                         <i class="fa-solid fa-times"></i>
                     </button>
                 </div>
@@ -941,19 +949,19 @@
             document.getElementById('sideSupplier').textContent =
                 `${f.nama_supplier}${f.nama_sales !== '-' ? ' — ' + f.nama_sales : ''}`;
             document.getElementById('sideMeta').innerHTML = `
-                <div>📅 ${f.tanggal} • Penerima: ${f.nama_penerima}</div>
-                ${f.keterangan ? `<div>📝 ${f.keterangan}</div>` : ''}
-                ${f.tanggal_jatuh_tempo ? `<div>⏰ Jatuh tempo: ${f.tanggal_jatuh_tempo}</div>` : ''}
-                <div>Status: <strong style="color: ${f.status_bayar === 'lunas' ? '#16a34a' : '#dc2626'};">${f.status_bayar.toUpperCase()}</strong></div>
+                <div>📅 ${escapeHtml(f.tanggal)} • Penerima: ${escapeHtml(f.nama_penerima)}</div>
+                ${f.keterangan ? `<div>📝 ${escapeHtml(f.keterangan)}</div>` : ''}
+                ${f.tanggal_jatuh_tempo ? `<div>⏰ Jatuh tempo: ${escapeHtml(f.tanggal_jatuh_tempo)}</div>` : ''}
+                <div>Status: <strong style="color: ${f.status_bayar === 'lunas' ? '#16a34a' : '#dc2626'};">${escapeHtml(String(f.status_bayar).toUpperCase())}</strong></div>
             `;
 
             document.getElementById('sideItems').innerHTML = data.items.map(it => `
                 <div class="faktur-item">
                     <div style="min-width:0;flex:1;">
-                        <div class="faktur-item-nama">${it.nama_produk}</div>
-                        <div class="faktur-item-qty">${it.jumlah} ${it.satuan} × Rp ${it.harga_beli.toLocaleString('id-ID')}</div>
+                        <div class="faktur-item-nama">${escapeHtml(it.nama_produk)}</div>
+                        <div class="faktur-item-qty">${Number(it.jumlah)} ${escapeHtml(it.satuan)} × Rp ${Number(it.harga_beli).toLocaleString('id-ID')}</div>
                     </div>
-                    <div class="faktur-item-subtotal">Rp ${it.subtotal.toLocaleString('id-ID')}</div>
+                    <div class="faktur-item-subtotal">Rp ${Number(it.subtotal).toLocaleString('id-ID')}</div>
                 </div>
             `).join('') || '<div style="text-align:center;color:#94a3b8;padding:12px;font-size:11px;">Tidak ada item</div>';
 
@@ -969,29 +977,44 @@
 
     function bayarFaktur() {
         if (!currentFakturId || currentFakturStatus !== 'tempo') return;
-        if (!confirm('Yakin ingin melunasi faktur ini?')) return;
-
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/supplier/pasokan/${currentFakturId}/bayar`;
-        form.innerHTML = `<input type="hidden" name="_token" value="${csrfToken}">`;
-        document.body.appendChild(form);
-        form.submit();
+        showGlobalConfirm(
+            'Lunasi Faktur Pasokan?',
+            'Apakah Anda yakin ingin menandai faktur pasokan ini sebagai Lunas?',
+            () => {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/supplier/pasokan/${currentFakturId}/bayar`;
+                form.innerHTML = `<input type="hidden" name="_token" value="${csrfToken}">`;
+                document.body.appendChild(form);
+                if (typeof showLoader === 'function') showLoader();
+                form.submit();
+            }
+        );
     }
 
-    function hapusFaktur(id, nomor, status) {
+    function hapusFaktur(btn) {
+        const id = btn.dataset.id;
+        const nomor = btn.dataset.nomor;
+        const status = btn.dataset.status;
+
         if (status === 'lunas') {
-            alert(`Faktur "${nomor}" sudah lunas. Tidak bisa dihapus.`);
+            showToast(`Faktur "${nomor}" sudah lunas. Tidak bisa dihapus.`, 'error');
             return;
         }
-        if (!confirm(`Yakin hapus faktur "${nomor}"? Stok barang akan dikembalikan.`)) return;
 
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/supplier/pasokan/${id}`;
-        form.innerHTML = `<input type="hidden" name="_token" value="${csrfToken}"><input type="hidden" name="_method" value="DELETE">`;
-        document.body.appendChild(form);
-        form.submit();
+        showGlobalConfirm(
+            'Hapus Faktur Pasokan?',
+            `Yakin hapus faktur "${nomor}"? Stok barang yang berasal dari faktur ini akan dikurangi kembali.`,
+            () => {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/supplier/pasokan/${id}`;
+                form.innerHTML = `<input type="hidden" name="_token" value="${csrfToken}"><input type="hidden" name="_method" value="DELETE">`;
+                document.body.appendChild(form);
+                if (typeof showLoader === 'function') showLoader();
+                form.submit();
+            }
+        );
     }
 
     // ═══ EVENT LISTENERS ═══
@@ -1020,10 +1043,16 @@
         }
     });
 
-    @if ($errors->has('nama_supplier'))
+    @if (session('edit_supplier_id'))
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('modalSupplierTitle').innerHTML = '<i class="fa-solid fa-pen"></i> Edit Data Supplier';
+            document.getElementById('formSupplier').action = '/supplier/{{ (int) session('edit_supplier_id') }}';
+            document.getElementById('formSupplierMethod').value = 'PUT';
+            document.getElementById('modalSupplier').classList.add('active');
+        });
+    @elseif ($errors->has('nama_supplier'))
         document.addEventListener('DOMContentLoaded', () => openModalSupplier());
-    @endif
-    @if ($errors->hasAny(['nomor_pembelian', 'id_supplier', 'items', 'status_bayar']))
+    @elseif ($errors->hasAny(['nomor_pembelian', 'id_supplier', 'items', 'status_bayar', 'tanggal_jatuh_tempo']))
         document.addEventListener('DOMContentLoaded', () => openModalPasokan());
     @endif
 </script>

@@ -87,7 +87,7 @@
             </div>
         </div>
 
-                {{-- CHARTS SECTION (2 Kolom) --}}
+        {{-- CHARTS SECTION (2 Kolom) --}}
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
             
             {{-- KIRI: Tren Omzet --}}
@@ -127,7 +127,7 @@
                         </thead>
                         <tbody>
                             @forelse($rekapPenjualan as $trx)
-                                <tr>
+                                <tr style="cursor: pointer;" onclick="showDetailTransaksi({{ $trx->id_penjualan }})" title="Klik untuk melihat rincian">
                                     <td>
                                         <div style="font-weight: 700;">{{ $trx->nomor_nota }}</div>
                                         <div style="font-size: 9px; color: #64748b;">{{ \Carbon\Carbon::parse($trx->tanggal)->format('d M, H:i') }}</div>
@@ -207,6 +207,73 @@
 
     </div>
 </div>
+
+{{-- MODAL: DETAIL TRANSAKSI (LAPORAN) --}}
+<div class="modal-overlay" id="modalDetailTransaksi">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-receipt"></i> Detail Transaksi</h3>
+            <button type="button" class="btn-close-modal" onclick="closeModalDetail()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            {{-- Info Header --}}
+            <div style="background: #f8fafc; padding: 14px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <div style="font-weight: 800; font-size: 14px;" id="detailNota">-</div>
+                    <div style="font-size: 11px; color: #64748b;" id="detailTanggal">-</div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px; color: #475569;">
+                    <div>Kasir: <strong id="detailKasir" style="color: #0f172a;">-</strong></div>
+                    <div>Pelanggan: <strong id="detailPelanggan" style="color: #0f172a;">-</strong></div>
+                    <div>Metode: <strong id="detailMetode" style="color: #0f172a; text-transform: uppercase;">-</strong></div>
+                    <div>Status: <strong id="detailStatus" style="color: #0f172a;">-</strong></div>
+                </div>
+            </div>
+
+            {{-- Tabel Item --}}
+            <table class="data-table" style="margin-bottom: 16px;">
+                <thead>
+                    <tr>
+                        <th>Produk</th>
+                        <th style="text-align: center;">Qty</th>
+                        <th style="text-align: right;">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody id="detailItemsTbody">
+                    {{-- Diisi JS --}}
+                </tbody>
+            </table>
+
+            {{-- Ringkasan Subtotal, Diskon, Total --}}
+            <div style="border-top: 1px dashed #cbd5e1; padding-top: 10px; margin-bottom: 12px; font-size: 11px; color: #475569; display: flex; flex-direction: column; gap: 4px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Subtotal Belanja</span>
+                    <strong id="detailSubtotal" style="color: #0f172a;">Rp 0</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Diskon</span>
+                    <strong id="detailDiskon" style="color: #16a34a;">Rp 0</strong>
+                </div>
+            </div>
+
+            {{-- Total --}}
+            <div style="background: #0f172a; color: #fff; padding: 14px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 12px; font-weight: 700;">TOTAL AKHIR</span>
+                <span style="font-size: 18px; font-weight: 800;" id="detailTotal">Rp 0</span>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn-cancel" onclick="closeModalDetail()">Tutup</button>
+            <a href="#" id="btnCetakUlang" target="_blank" class="btn-primary" style="text-decoration: none;">
+                <i class="fa-solid fa-print"></i> Cetak Ulang Struk
+            </a>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -254,7 +321,7 @@
     };
     new ApexCharts(document.querySelector("#chartTrenOmzet"), optionsTren).render();
 
-        // --- 3. Grafik Kategori ---
+    // --- 3. Grafik Kategori ---
     var optionsKategori = {
         series: @json($chartKategoriSeries),
         labels: @json($chartKategoriLabels),
@@ -263,7 +330,7 @@
         plotOptions: { 
             pie: { 
                 donut: { 
-                    size: '65%', // Perbesar lubang sedikit (dari 65%)
+                    size: '65%',
                     labels: { 
                         show: true,
                         name: { show: true, fontSize: '11px', color: '#64748b' },
@@ -319,5 +386,63 @@
         tooltip: { y: { formatter: function (val) { return "Rp " + val.toLocaleString('id-ID'); } } }
     };
     new ApexCharts(document.querySelector("#chartMetode"), optionsMetode).render();
+
+    // --- 5. MODAL DETAIL TRANSAKSI ---
+    async function showDetailTransaksi(id) {
+        // Tampilkan modal kosong / loading
+        document.getElementById('detailNota').textContent = 'Memuat...';
+        document.getElementById('detailItemsTbody').innerHTML = '<tr><td colspan="3" style="text-align:center;"><i class="fa-solid fa-spinner fa-spin"></i></td></tr>';
+        document.getElementById('modalDetailTransaksi').classList.add('active');
+
+        try {
+            // Ambil data via AJAX
+            const res = await fetch(`/laporan/transaksi/${id}`, {
+                headers: { 'Accept': 'application/json' }
+            });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+
+            // Isi Header Modal
+            document.getElementById('detailNota').textContent = data.nomor_nota;
+            document.getElementById('detailTanggal').textContent = data.tanggal;
+            document.getElementById('detailKasir').textContent = data.kasir;
+            document.getElementById('detailPelanggan').textContent = data.pelanggan;
+            document.getElementById('detailMetode').textContent = data.metode_bayar;
+            document.getElementById('detailStatus').textContent = data.status_bayar === 'lunas' ? 'LUNAS' : 'BELUM LUNAS';
+            document.getElementById('detailSubtotal').textContent = 'Rp ' + Number(data.total_belanja ?? data.total_akhir).toLocaleString('id-ID');
+            document.getElementById('detailDiskon').textContent = 'Rp ' + Number(data.diskon ?? 0).toLocaleString('id-ID');
+            document.getElementById('detailTotal').textContent = 'Rp ' + Number(data.total_akhir).toLocaleString('id-ID');
+
+            // Isi Tabel Item
+            const tbody = document.getElementById('detailItemsTbody');
+            tbody.innerHTML = '';
+            data.items.forEach(item => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight: 700;">${escapeHtml(item.nama_produk)}</td>
+                        <td style="text-align: center;">${Number(item.jumlah)} ${escapeHtml(item.satuan)}</td>
+                        <td style="text-align: right;">Rp ${Number(item.subtotal).toLocaleString('id-ID')}</td>
+                    </tr>
+                `;
+            });
+
+            // Set Link Cetak Ulang
+            document.getElementById('btnCetakUlang').href = `/kasir/nota/${data.id_penjualan}`;
+
+        } catch (err) {
+            console.error(err);
+            showToast('Gagal memuat detail transaksi.', 'error');
+            closeModalDetail();
+        }
+    }
+
+    function closeModalDetail() {
+        document.getElementById('modalDetailTransaksi').classList.remove('active');
+    }
+
+    // Tutup modal via klik overlay
+    document.getElementById('modalDetailTransaksi').addEventListener('click', function (e) {
+        if (e.target === this) closeModalDetail();
+    });
 </script>
 @endpush

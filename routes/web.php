@@ -69,6 +69,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('/export-excel', 'exportExcel')->name('exportExcel');
             Route::get('/export-pdf', 'exportPdf')->name('exportPdf');
+            Route::get('/transaksi/{id}', 'detailTransaksi')->name('detailTransaksi');
         });
 
         // Modul Pasokan Supplier

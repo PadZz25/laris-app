@@ -1,13 +1,15 @@
-@props(['title' => 'Dashboard'])
+@props(['title' => 'Dashboard', 'namaToko' => null])
+@php
+    $namaTokoDisplay = $namaToko ?? (\App\Models\Pengaturan::current()->nama_toko ?? 'Toko Ina');
+@endphp
 
 <header class="top-header">
     <div class="header-title">
         <h1>{!! $title !!}</h1>
-        <span>Toko Ina</span>
+        <span>{{ $namaTokoDisplay }}</span>
     </div>
 
     <div class="header-widgets">
-        <div class="icon-btn"><i class="fa-regular fa-bell"></i></div>
         <div class="time-pill">
             <div>Waktu</div>
             <div class="time-val" id="live-clock">--:--:-- WIB</div>

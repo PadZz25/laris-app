@@ -1,17 +1,25 @@
+@php
+    $toko = \App\Models\Pengaturan::current();
+    $namaTokoPdf = $toko->nama_toko ?? 'Toko Ina';
+@endphp
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Laporan Penjualan</title>
+    <title>Laporan Penjualan - {{ $namaTokoPdf }}</title>
     <style>
         body { font-family: sans-serif; font-size: 11px; }
-        h2 { text-align: center; }
+        h2 { text-align: center; margin-bottom: 4px; }
+        .store-sub { text-align: center; font-size: 10px; color: #444; margin: 0 0 6px; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { border: 1px solid #000; padding: 6px; text-align: left; }
         th { background-color: #f2f2f2; }
     </style>
 </head>
 <body>
-    <h2>Laporan Penjualan Toko Ina</h2>
+    <h2>Laporan Penjualan {{ $namaTokoPdf }}</h2>
+    @if($toko && ($toko->alamat || $toko->no_telepon))
+        <p class="store-sub">{{ $toko->alamat ?? '' }}{{ ($toko->alamat && $toko->no_telepon) ? ' | Telp: ' : '' }}{{ $toko->no_telepon ?? '' }}</p>
+    @endif
     <p style="text-align: center;">Periode: {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} s/d {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}</p>
     
     <table>

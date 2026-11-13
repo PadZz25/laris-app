@@ -47,6 +47,14 @@ class Produk extends Model
         return $this->hasMany(DetailPenjualan::class, 'id_produk', 'id_produk');
     }
 
+    /**
+     * Relasi: produk muncul di banyak detail_pembelian (ON DELETE RESTRICT).
+     */
+    public function detailPembelian(): HasMany
+    {
+        return $this->hasMany(DetailPembelian::class, 'id_produk', 'id_produk');
+    }
+
     // ─────────────────────────────────────────────
     // SCOPE — query pembantu yang sering dipakai
     // ─────────────────────────────────────────────

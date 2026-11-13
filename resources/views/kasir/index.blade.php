@@ -19,7 +19,7 @@
                 <div class="pos-cats" id="posCats">
                     <div class="cat-pill active" data-kat="Semua" onclick="setKategori('Semua', this)">Semua</div>
                     @foreach ($kategoriList as $kat)
-                        <div class="cat-pill" data-kat="{{ $kat->nama_kategori }}" onclick="setKategori('{{ $kat->nama_kategori }}', this)">
+                        <div class="cat-pill" data-kat="{{ $kat->nama_kategori }}" onclick="setKategori(this.dataset.kat, this)">
                             {{ $kat->nama_kategori }}
                         </div>
                     @endforeach
@@ -162,7 +162,7 @@
                             <div style="font-size: 26px; font-weight: 800; color: #ffffff;" id="modalTotalBayar">Rp 0</div>
                         </div>
                         <div id="labelMetode" style="background: rgba(255,255,255,0.1); color: #ffffff; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; border: 1px solid rgba(255,255,255,0.2);">
-                            Tunai
+                            <i class="fa-solid fa-money-bill-wave"></i> Tunai
                         </div>
                     </div>
                 </div>
@@ -178,162 +178,10 @@
         </div>
     </div>
 
-        {{-- MODAL: PEMBAYARAN POS (SPLIT VIEW) --}}
-    <div class="modal-overlay" id="modalPembayaran">
-        <div class="modal-card pos-modal-card">
-            
-            {{-- Header --}}
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-cash-register"></i> Konfirmasi Rincian Pembayaran</h3>
-                <button type="button" class="btn-close-modal" onclick="closePaymentModal()">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            {{-- Body Split --}}
-            <div class="pos-modal-body">
-                
-                {{-- KIRI: Daftar Barang --}}
-                <div class="pos-modal-left">
-                    <div class="pos-modal-left-header">
-                        <i class="fa-solid fa-list-ul" style="color: #429198;"></i> Rincian Barang
-                    </div>
-                    <div class="pos-modal-left-list">
-                        <table class="pos-table">
-                            <thead>
-                                <tr>
-                                    <th>Produk</th>
-                                    <th style="text-align: center;">Qty</th>
-                                    <th style="text-align: right;">Subtotal</th>
-                                </tr>
-                            </thead>
-                            <tbody id="modalItemList">
-                                {{-- Diisi JS --}}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                {{-- KANAN: Metode & Pembayaran --}}
-                <div class="pos-modal-right">
-                    
-                    {{-- Pilihan Metode --}}
-                    <div>
-                        <div style="font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 10px;">Pilih Metode Pembayaran:</div>
-                        <div class="pos-metode-grid">
-                            <div class="pos-metode-btn active" id="btnMetodeTunai" onclick="setMetode('Tunai')">
-                                <i class="fa-solid fa-money-bill-wave" style="font-size: 20px; margin-bottom: 4px;"></i>
-                                Tunai
-                            </div>
-                            <div class="pos-metode-btn" id="btnMetodeQris" onclick="setMetode('QRIS')">
-                                <i class="fa-solid fa-qrcode" style="font-size: 20px; margin-bottom: 4px;"></i>
-                                QRIS/Bank
-                            </div>
-                            <div class="pos-metode-btn" id="btnMetodeKasbon" onclick="setMetode('Kasbon')">
-                                <i class="fa-solid fa-book" style="font-size: 20px; margin-bottom: 4px;"></i>
-                                Kasbon
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Form Dinamis --}}
-                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 16px;">
-                        
-                        {{-- Tunai --}}
-                        <div id="sectionTunai">
-                            <div class="form-group" style="margin-bottom: 12px;">
-                                <label>Uang Diterima (Rp)</label>
-                                <input type="number" id="inputUangDiterima" class="pos-input-lg" placeholder="0" oninput="hitungKembalian()">
-                            </div>
-                            <div class="form-group">
-                                <label>Uang Kembalian (Rp)</label>
-                                <input type="text" id="inputKembalian" class="pos-input-lg" readonly style="background: #e2e8f0; color: #16a34a; border: none;">
-                            </div>
-                        </div>
-
-                        {{-- QRIS --}}
-                        <div id="sectionQris" style="display: none; text-align: center; padding: 10px 0;">
-                            <div style="font-size: 14px; font-weight: 800; color: #0f172a;"><i class="fa-solid fa-circle-check" style="color: #22c55e;"></i> Pembayaran Non-Tunai</div>
-                            <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Pastikan dana QRIS/Transfer sudah masuk ke rekening toko.</div>
-                        </div>
-
-                        {{-- Kasbon --}}
-                        <div id="sectionKasbon" style="display: none;">
-                            <div class="form-group">
-                                <label>Pilih Warga (Buku Kasbon)</label>
-                                <select id="selectPelanggan" style="font-size: 13px; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;">
-                                    <option value="">-- Pilih Nama Warga --</option>
-                                    @foreach ($pelangganList as $plg)
-                                        <option value="{{ $plg->id_pelanggan }}">{{ $plg->nama_pelanggan }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    {{-- Total Tagihan --}}
-                    <div class="pos-grandtotal-box" style="margin-top: auto;">
-                        <div>
-                            <div style="font-size: 10px; color: #cbd5e1; letter-spacing: 0.5px;">TOTAL TAGIHAN:</div>
-                            <div style="font-size: 26px; font-weight: 800; color: #ffffff;" id="modalTotalBayar">Rp 0</div>
-                        </div>
-                        <div class="pos-modal-badge" id="labelMetode" style="background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.2);">
-                            <i class="fa-solid fa-money-bill-wave"></i> Tunai
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-            {{-- Footer --}}
-            <div class="modal-footer">
-                <button type="button" class="btn-cancel" onclick="closePaymentModal()">Batal</button>
-                <button type="button" class="btn-save" onclick="prosesPembayaran()" style="background: #0284c7; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);">
-                    <i class="fa-solid fa-print"></i> Proses & Cetak Nota
-                </button>
-            </div>
-
-        </div>
-    </div>
-
 @endsection
 
 @push('scripts')
 <script>
-
-        // ═══ NOTIFIKASI TOAST ═══
-    function showToast(message, type = 'success') {
-        const container = document.getElementById('toastContainer');
-        if (!container) return;
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        const iconClass = type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation';
-        toast.innerHTML = `<i class="fa-solid ${iconClass}"></i><span>${message}</span>`;
-        container.appendChild(toast);
-        setTimeout(() => {
-            toast.style.animation = 'toastOut 0.3s ease forwards';
-            setTimeout(() => toast.remove(), 300);
-        }, 3200);
-    }
-
-    // ═══ KONFIRMASI CUSTOM ═══
-    let confirmCallback = null;
-    function showConfirm(title, message, callback) {
-        document.getElementById('konfirmasiTitle').innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: #dc2626;"></i> ${title}`;
-        document.getElementById('konfirmasiMessage').textContent = message;
-        document.getElementById('btnConfirmAction').className = 'btn-danger';
-        confirmCallback = callback;
-        document.getElementById('modalKonfirmasiCustom').classList.add('active');
-    }
-    function closeConfirm() {
-        document.getElementById('modalKonfirmasiCustom').classList.remove('active');
-        confirmCallback = null;
-    }
-    function executeConfirm() {
-        if (confirmCallback) confirmCallback();
-        closeConfirm();
-    }
     // Data dari Controller
     const produkList = @json($produkData);
     
@@ -403,18 +251,21 @@
         }
 
         grid.innerHTML = filtered.map(p => {
-            const imgHtml = p.foto 
-                ? `<img src="${p.foto}" alt="${p.nama}">` 
+            const safeNama = escapeHtml(p.nama);
+            const safeSatuan = escapeHtml(p.satuan);
+            const safeFoto = p.foto ? encodeURI(p.foto) : '';
+            const imgHtml = safeFoto
+                ? `<img src="${safeFoto}" alt="${safeNama}">`
                 : `<i class="fa-solid fa-image"></i>`;
 
             return `
-                <div class="pos-card" onclick="addToCart(${p.id})">
+                <div class="pos-card" onclick="addToCart(${Number(p.id)})">
                     <div class="pos-card-img">
                         ${imgHtml}
                     </div>
-                    <div class="pos-card-title">${p.nama}</div>
-                    <div class="pos-card-price">Rp ${p.harga.toLocaleString('id-ID')}</div>
-                    <div class="pos-card-stok">Stok: ${p.stok} ${p.satuan}</div>
+                    <div class="pos-card-title">${safeNama}</div>
+                    <div class="pos-card-price">Rp ${Number(p.harga).toLocaleString('id-ID')}</div>
+                    <div class="pos-card-stok">Stok: ${Number(p.stok)} ${safeSatuan}</div>
                 </div>
             `;
         }).join('');
@@ -459,11 +310,10 @@
 
     function clearCart() {
         if (cart.length === 0) return;
-        
-        // Ganti confirm() dengan Custom Modal
-        showConfirm(
-            'Kosongkan Keranjang?', 
-            'Semua produk yang dipilih akan dihapus dari keranjang.', 
+
+        showGlobalConfirm(
+            'Kosongkan Keranjang?',
+            'Semua produk yang dipilih akan dihapus dari keranjang.',
             () => {
                 cart = [];
                 saveCart();
@@ -500,13 +350,13 @@
             list.innerHTML += `
                 <div class="pos-cart-item">
                     <div class="pos-cart-item-info">
-                        <div class="pos-cart-item-title">${item.nama}</div>
-                        <div class="pos-cart-item-price">Rp ${item.harga.toLocaleString('id-ID')} x ${item.qty}</div>
+                        <div class="pos-cart-item-title">${escapeHtml(item.nama)}</div>
+                        <div class="pos-cart-item-price">Rp ${Number(item.harga).toLocaleString('id-ID')} x ${Number(item.qty)}</div>
                     </div>
                     <div class="pos-cart-controls">
-                        <button class="btn-qty" onclick="changeQty(${item.id}, -1)">-</button>
-                        <span class="qty-val">${item.qty}</span>
-                        <button class="btn-qty" onclick="changeQty(${item.id}, 1)">+</button>
+                        <button class="btn-qty" onclick="changeQty(${Number(item.id)}, -1)">-</button>
+                        <span class="qty-val">${Number(item.qty)}</span>
+                        <button class="btn-qty" onclick="changeQty(${Number(item.id)}, 1)">+</button>
                     </div>
                 </div>
             `;
@@ -532,9 +382,9 @@
         cart.forEach(item => {
             html += `
                 <tr>
-                    <td style="font-weight: 700;">${item.nama}</td>
-                    <td style="text-align: center; font-weight: 800;">${item.qty}</td>
-                    <td style="text-align: right; font-weight: 800; color: #0f172a;">Rp ${(item.harga * item.qty).toLocaleString('id-ID')}</td>
+                    <td style="font-weight: 700;">${escapeHtml(item.nama)}</td>
+                    <td style="text-align: center; font-weight: 800;">${Number(item.qty)}</td>
+                    <td style="text-align: right; font-weight: 800; color: #0f172a;">Rp ${(Number(item.harga) * Number(item.qty)).toLocaleString('id-ID')}</td>
                 </tr>
             `;
         });
@@ -631,6 +481,7 @@
         const btnProses = document.querySelector('#modalPembayaran .btn-save');
         btnProses.disabled = true;
         btnProses.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+        if (typeof showLoader === 'function') showLoader();
 
         try {
             // 4. Kirim ke Backend
@@ -669,6 +520,7 @@
             console.error(err);
             showToast('Terjadi kesalahan jaringan.', 'error');
         } finally {
+            if (typeof hideLoader === 'function') hideLoader();
             btnProses.disabled = false;
             btnProses.innerHTML = '<i class="fa-solid fa-print"></i> Proses & Cetak Nota';
         }

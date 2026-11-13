@@ -107,7 +107,7 @@ class ProdukController extends Controller
     {
         $produk = Produk::findOrFail($id);
 
-        $validated = $request->validate([
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'barcode'       => ['required', 'string', 'max:255', Rule::unique('produk', 'barcode')->ignore($produk->id_produk, 'id_produk')],
             'nama_produk'   => ['required', 'string', 'max:255'],
             'satuan'        => ['required', 'string', 'max:50'],
@@ -136,6 +136,16 @@ class ProdukController extends Controller
             'new_kategori.unique'           => 'Nama kategori sudah ada. Pilih dari dropdown saja.',
         ]);
 
+        if ($validator->fails()) {
+            return redirect()
+                ->back()
+                ->withErrors($validator, 'editProduk')
+                ->withInput()
+                ->with('edit_produk_id', $produk->id_produk);
+        }
+
+        $validated = $validator->validated();
+
         // Handle kategori baru
         if (!empty($validated['new_kategori'])) {
             $kategoriBaru = KategoriProduk::create([
@@ -150,7 +160,7 @@ class ProdukController extends Controller
             if ($produk->foto_produk && Storage::disk('public')->exists($produk->foto_produk)) {
                 Storage::disk('public')->delete($produk->foto_produk);
             }
-           $validated['foto_produk'] = $this->uploadFotoProduk($request->file('foto_produk'));
+            $validated['foto_produk'] = $this->uploadFotoProduk($request->file('foto_produk'));
         }
 
         $produk->update($validated);
@@ -165,11 +175,11 @@ class ProdukController extends Controller
         $produk = Produk::findOrFail($id);
         $nama = $produk->nama_produk;
 
-        // Cek apakah produk pernah muncul di transaksi penjualan
-        if ($produk->detailPenjualan()->exists()) {
+        // Cek apakah produk pernah muncul di transaksi penjualan atau pembelian (ON DELETE RESTRICT)
+        if ($produk->detailPenjualan()->exists() || $produk->detailPembelian()->exists()) {
             return redirect()
                 ->route('produk.index')
-                ->with('error', "Produk \"{$nama}\" tidak bisa dihapus karena sudah pernah terjual. Ubah stok atau biarkan saja.");
+                ->with('error', "Produk \"{$nama}\" tidak bisa dihapus karena sudah memiliki riwayat penjualan atau pasokan supplier.");
         }
 
         // Hapus foto dari storage
