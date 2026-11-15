@@ -146,5 +146,7 @@ class LarisWorkflowTest extends TestCase
         $this->assertNotFalse($initPos);
         $this->assertLessThan($initPos, $escapePos);
         $this->assertLessThan($initPos, $toastPos);
+        $this->assertStringContainsString('id="posKategori"', $html);
+        $this->assertStringNotContainsString('id="posCats"', $html);
     }
 }

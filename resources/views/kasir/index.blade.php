@@ -10,20 +10,22 @@
         {{-- PANEL KIRI: PRODUK --}}
         <div class="pos-left">
             <div class="pos-filter-card">
-                <div class="pos-search">
+                <div class="search-wrapper pos-search-wrapper">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="posSearch"
+                    <input type="text"
+                           id="posSearch"
+                           class="search-input"
                            placeholder="Cari nama barang / scan barcode..."
                            oninput="renderProduk()">
                 </div>
-                <div class="pos-cats" id="posCats">
-                    <div class="cat-pill active" data-kat="Semua" onclick="setKategori('Semua', this)">Semua</div>
+                <select id="posKategori"
+                        class="filter-select"
+                        onchange="setKategori(this.value)">
+                    <option value="Semua">Semua Kategori</option>
                     @foreach ($kategoriList as $kat)
-                        <div class="cat-pill" data-kat="{{ $kat->nama_kategori }}" onclick="setKategori(this.dataset.kat, this)">
-                            {{ $kat->nama_kategori }}
-                        </div>
+                        <option value="{{ $kat->nama_kategori }}">{{ $kat->nama_kategori }}</option>
                     @endforeach
-                </div>
+                </select>
             </div>
 
             <div class="pos-grid" id="posGrid">
@@ -227,10 +229,8 @@
     }
 
     // ═══ RENDER PRODUK ═══
-    function setKategori(kat, el) {
-        activeCategory = kat;
-        document.querySelectorAll('#posCats .cat-pill').forEach(p => p.classList.remove('active'));
-        el.classList.add('active');
+    function setKategori(kat) {
+        activeCategory = kat || 'Semua';
         renderProduk();
     }
 
@@ -528,6 +528,7 @@
 
     // INIT
     loadCart();
+    activeCategory = document.getElementById('posKategori')?.value || 'Semua';
     renderProduk();
     renderCart();
 </script>

@@ -64,8 +64,7 @@
                        oninput="filterPengeluaran()">
             </div>
             <select id="filterKategori"
-                    class="search-input"
-                    style="border-radius: 10px; padding: 9px 14px; width: 180px;"
+                    class="filter-select"
                     onchange="filterPengeluaran()">
                 <option value="">Semua Kategori</option>
                 @foreach ($kategoriList as $kat)

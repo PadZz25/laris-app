@@ -124,7 +124,6 @@
     padding: 0 14px 10px;
     overflow-x: auto;
     flex-shrink: 0;
-    scrollbar-width: thin;
 }
 
 .opname-cat {
