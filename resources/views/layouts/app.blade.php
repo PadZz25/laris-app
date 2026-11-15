@@ -12,7 +12,22 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/laris.css') }}?v=12">
+    @php
+        $cssFiles = [
+            'css/base.css',
+            'css/components.css',
+            'css/pages/laporan.css',
+            'css/pages/produk.css',
+            'css/pages/pengeluaran.css',
+            'css/pages/kasbon.css',
+            'css/pages/supplier.css',
+            'css/pages/kasir.css',
+            'css/pages/pengaturan.css',
+        ];
+    @endphp
+    @foreach ($cssFiles as $cssFile)
+        <link rel="stylesheet" href="{{ asset($cssFile) }}?v={{ filemtime(public_path($cssFile)) }}">
+    @endforeach
     @stack('styles')
 </head>
 <body>

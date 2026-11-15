@@ -16,7 +16,7 @@
         </div>
         
         @if(auth()->user()->peran === 'admin')
-            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 8px 0;">
+            <hr class="settings-divider">
             <div class="settings-menu-item" id="menu-toko" onclick="switchTab('toko')">
                 <i class="fa-solid fa-store"></i> Informasi Toko
             </div>
@@ -33,50 +33,50 @@
     <div class="settings-content">
         
         {{-- Tab 1: Profil --}}
-        <div id="tab-profil" style="display: block;">
-            <h2 style="font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 20px;">Profil Akun</h2>
+        <div id="tab-profil" class="settings-pane active">
+            <h2 class="settings-title">Profil Akun</h2>
             
-            <form method="POST" action="{{ route('pengaturan.updateProfil') }}" style="max-width: 400px;">
+            <form method="POST" action="{{ route('pengaturan.updateProfil') }}" class="settings-form">
                 @csrf
                 <div class="form-group">
                     <label>Nama Lengkap</label>
                     <input type="text" name="nama_karyawan" value="{{ session('tab') === 'karyawan' ? auth()->user()->nama_karyawan : old('nama_karyawan', auth()->user()->nama_karyawan) }}" required>
                     @error('nama_karyawan') <div class="field-error">{{ $message }}</div> @enderror
                 </div>
-                <div class="form-group" style="margin-top: 14px;">
+                <div class="form-group">
                     <label>Username (Untuk Login)</label>
                     <input type="text" name="username" value="{{ session('tab') === 'karyawan' ? auth()->user()->username : old('username', auth()->user()->username) }}" required>
                     @error('username') <div class="field-error">{{ $message }}</div> @enderror
                 </div>
                 
-                <button type="submit" class="btn-save" style="margin-top: 20px;">
+                <button type="submit" class="btn-save settings-submit-btn">
                     <i class="fa-solid fa-floppy-disk"></i> Simpan Profil
                 </button>
             </form>
         </div>
 
         {{-- Tab 2: Keamanan --}}
-        <div id="tab-keamanan" style="display: none;">
-            <h2 style="font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 20px;">Ganti Password</h2>
+        <div id="tab-keamanan" class="settings-pane">
+            <h2 class="settings-title">Ganti Password</h2>
             
-            <form method="POST" action="{{ route('pengaturan.updatePassword') }}" style="max-width: 400px;">
+            <form method="POST" action="{{ route('pengaturan.updatePassword') }}" class="settings-form">
                 @csrf
                 <div class="form-group">
                     <label>Password Lama <span class="required">*</span></label>
                     <input type="password" name="current_password" required>
                     @error('current_password') <div class="field-error">{{ $message }}</div> @enderror
                 </div>
-                <div class="form-group" style="margin-top: 14px;">
+                <div class="form-group">
                     <label>Password Baru <span class="required">*</span></label>
                     <input type="password" name="new_password" required minlength="6">
                     @error('new_password') <div class="field-error">{{ $message }}</div> @enderror
                 </div>
-                <div class="form-group" style="margin-top: 14px;">
+                <div class="form-group">
                     <label>Ulangi Password Baru <span class="required">*</span></label>
                     <input type="password" name="new_password_confirmation" required minlength="6">
                 </div>
                 
-                <button type="submit" class="btn-save" style="margin-top: 20px;">
+                <button type="submit" class="btn-save settings-submit-btn">
                     <i class="fa-solid fa-key"></i> Perbarui Password
                 </button>
             </form>
@@ -84,62 +84,62 @@
 
         @if(auth()->user()->peran === 'admin')
             {{-- Tab 3: Informasi Toko --}}
-            <div id="tab-toko" style="display: none;">
-                <h2 style="font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 20px;">Informasi Toko</h2>
+            <div id="tab-toko" class="settings-pane">
+                <h2 class="settings-title">Informasi Toko</h2>
                 
                 @php
                     $toko = \App\Models\Pengaturan::current();
                 @endphp
 
-                <form method="POST" action="{{ route('pengaturan.updateToko') }}" enctype="multipart/form-data" style="max-width: 400px;">
+                <form method="POST" action="{{ route('pengaturan.updateToko') }}" enctype="multipart/form-data" class="settings-form">
                     @csrf
                     <div class="form-group">
                         <label>Nama Toko <span class="required">*</span></label>
                         <input type="text" name="nama_toko" value="{{ old('nama_toko', $toko->nama_toko ?? 'TOKO INA') }}" required>
                         @error('nama_toko', 'updateToko') <div class="field-error">{{ $message }}</div> @enderror
                     </div>
-                    <div class="form-group" style="margin-top: 14px;">
+                    <div class="form-group">
                         <label>Alamat Toko <span class="required">*</span></label>
                         <input type="text" name="alamat" value="{{ old('alamat', $toko->alamat ?? 'Desa Wates, Kec. Wates, Blitar') }}" required>
                         @error('alamat', 'updateToko') <div class="field-error">{{ $message }}</div> @enderror
                     </div>
-                    <div class="form-group" style="margin-top: 14px;">
+                    <div class="form-group">
                         <label>No. Telepon / WA <span class="required">*</span></label>
                         <input type="text" name="no_telepon" value="{{ old('no_telepon', $toko->no_telepon ?? '0812-3456-7890') }}" required>
                         @error('no_telepon', 'updateToko') <div class="field-error">{{ $message }}</div> @enderror
                     </div>
                     
-                    <div class="form-group" style="margin-top: 14px;">
+                    <div class="form-group">
                         <label>Logo Toko (Untuk Struk)</label>
                         @if($toko && $toko->logo)
-                            <div style="margin-bottom: 8px;">
-                                <img src="{{ asset('storage/' . $toko->logo) }}" alt="Logo Toko" style="height: 60px; background: #fff; padding: 4px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                            <div class="settings-logo-preview">
+                                <img src="{{ asset('storage/' . $toko->logo) }}" alt="Logo Toko">
                             </div>
                         @endif
-                        <input type="file" name="logo" accept="image/*" style="padding: 8px; border: 1px dashed #cbd5e1; border-radius: 8px;">
-                        <div style="font-size: 10px; color: #64748b; margin-top: 4px;">Biarkan kosong jika tidak ingin mengubah logo.</div>
+                        <input type="file" name="logo" accept="image/*" class="settings-file-input">
+                        <div class="settings-help-text">Biarkan kosong jika tidak ingin mengubah logo.</div>
                         @error('logo', 'updateToko') <div class="field-error">{{ $message }}</div> @enderror
                     </div>
                     
-                    <button type="submit" class="btn-save" style="margin-top: 20px;">
+                    <button type="submit" class="btn-save settings-submit-btn">
                         <i class="fa-solid fa-floppy-disk"></i> Simpan Informasi Toko
                     </button>
                 </form>
             </div>
 
             {{-- Tab 4: Manajemen Karyawan --}}
-            <div id="tab-karyawan" style="display: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2 style="font-size: 18px; font-weight: 800; color: #0f172a;">Manajemen Karyawan</h2>
-                    <button onclick="openModalKaryawan()" class="btn-primary" style="padding: 8px 16px; font-size: 12px;">
+            <div id="tab-karyawan" class="settings-pane">
+                <div class="settings-header-row">
+                    <h2 class="settings-title">Manajemen Karyawan</h2>
+                    <button onclick="openModalKaryawan()" class="btn-primary settings-btn-sm">
                         <i class="fa-solid fa-plus"></i> Tambah Karyawan
                     </button>
                 </div>
 
-                <div class="table-responsive" style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
-                    <table class="data-table" style="font-size: 12px; margin: 0;">
+                <div class="table-responsive settings-table-wrap">
+                    <table class="data-table">
                         <thead>
-                            <tr style="background: #f8fafc;">
+                            <tr>
                                 <th>Nama Lengkap</th>
                                 <th>Username</th>
                                 <th>Peran</th>
@@ -160,7 +160,7 @@
                                 </td>
                                 <td style="text-align: center;">
                                     @if($kar->id_karyawan !== auth()->user()->id_karyawan)
-                                        <form method="POST" action="{{ route('pengaturan.hapusKaryawan', $kar->id_karyawan) }}" style="display: inline-block;">
+                                        <form method="POST" action="{{ route('pengaturan.hapusKaryawan', $kar->id_karyawan) }}" class="settings-inline-form">
                                             @csrf
                                             @method('DELETE')
                                             <button type="button" class="btn-icon danger" title="Hapus"
@@ -170,7 +170,7 @@
                                             </button>
                                         </form>
                                     @else
-                                        <span style="font-size: 10px; color: #94a3b8;">(Akun Anda)</span>
+                                        <span class="settings-self-label">(Akun Anda)</span>
                                     @endif
                                 </td>
                             </tr>
@@ -181,42 +181,42 @@
             </div>
 
             {{-- Tab 5: Backup & Sistem --}}
-            <div id="tab-backup" style="display: none;">
-                <h2 style="font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 20px;">Backup & Sistem</h2>
+            <div id="tab-backup" class="settings-pane">
+                <h2 class="settings-title">Backup & Sistem</h2>
                 
                 {{-- Card Backup --}}
-                <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 20px; background: #f8fafc;">
-                    <h3 style="font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 8px;"><i class="fa-solid fa-download" style="color: #0284c7;"></i> Unduh Backup Database</h3>
-                    <p style="font-size: 11px; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
+                <div class="settings-card highlight">
+                    <h3 class="settings-card-title"><i class="fa-solid fa-download"></i> Unduh Backup Database</h3>
+                    <p class="settings-card-desc">
                         Sangat disarankan untuk mengunduh backup database secara rutin (misal: setiap akhir bulan). File ini berisi seluruh data produk, transaksi, kasbon, dan pengaturan toko Anda.
                     </p>
-                    <a href="{{ route('pengaturan.backup') }}" class="btn-primary" style="text-decoration: none; display: inline-flex; background: #16a34a;">
+                    <a href="{{ route('pengaturan.backup') }}" class="btn-primary btn-backup-download">
                         <i class="fa-solid fa-file-export"></i> Unduh File .SQL Sekarang
                     </a>
                 </div>
 
                 {{-- Card Info Aplikasi --}}
-                <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px;">
-                    <h3 style="font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 8px;"><i class="fa-solid fa-circle-info" style="color: #0284c7;"></i> Informasi Aplikasi</h3>
-                    <table style="font-size: 11px; color: #475569; width: 100%; max-width: 400px; line-height: 2;">
+                <div class="settings-card">
+                    <h3 class="settings-card-title"><i class="fa-solid fa-circle-info"></i> Informasi Aplikasi</h3>
+                    <table class="settings-info-table">
                         <tr>
-                            <td style="font-weight: 700;">Nama Aplikasi</td>
+                            <td>Nama Aplikasi</td>
                             <td>: LARIS (Layanan Aplikasi Ritel & Inventaris Sistem)</td>
                         </tr>
                         <tr>
-                            <td style="font-weight: 700;">Versi</td>
+                            <td>Versi</td>
                             <td>: 1.0.0 (Stable)</td>
                         </tr>
                         <tr>
-                            <td style="font-weight: 700;">Framework</td>
+                            <td>Framework</td>
                             <td>: Laravel 12 & MySQL 8</td>
                         </tr>
                         <tr>
-                            <td style="font-weight: 700;">Pengembang</td>
+                            <td>Pengembang</td>
                             <td>: Tim Pengembang LARIS - Universitas Negeri Malang</td>
                         </tr>
                         <tr>
-                            <td style="font-weight: 700;">Hak Cipta</td>
+                            <td>Hak Cipta</td>
                             <td>: &copy; {{ date('Y') }} {{ $toko->nama_toko ?? 'Toko Ina' }}</td>
                         </tr>
                     </table>
@@ -278,14 +278,14 @@
     function switchTab(tab) {
         ['profil', 'keamanan', 'toko', 'karyawan', 'backup'].forEach(name => {
             const tabEl = document.getElementById('tab-' + name);
-            if (tabEl) tabEl.style.display = 'none';
+            if (tabEl) tabEl.classList.remove('active');
             const menuEl = document.getElementById('menu-' + name);
             if (menuEl) menuEl.classList.remove('active');
         });
 
         const targetTab = document.getElementById('tab-' + tab);
         if (targetTab) {
-            targetTab.style.display = 'block';
+            targetTab.classList.add('active');
             const selectedMenu = document.getElementById('menu-' + tab);
             if (selectedMenu) selectedMenu.classList.add('active');
         }

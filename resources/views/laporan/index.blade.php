@@ -3,61 +3,32 @@
 @section('title', 'Laporan & Omzet')
 @section('page-title', 'Laporan & Omzet')
 
-@push('styles')
-<style>
-    .laporan-wrapper { display: flex; flex-direction: column; gap: 16px; padding-bottom: 24px; }
-    
-    /* Grid KPI responsif */
-    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; }
-    .kpi-card { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-    .kpi-title { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; }
-    .kpi-value { font-size: 22px; font-weight: 800; color: #0f172a; margin-top: 8px; }
-    
-    /* Perbaikan Chart Card */
-    .chart-card { 
-        background: #fff; border-radius: 16px; padding: 20px; 
-        box-shadow: 0 4px 6px rgba(0,0,0,0.02); 
-        height: 100%;
-        min-width: 0; /* SANGAT PENTING: Mencegah chart meluber ke kanan */
-        display: flex;
-        flex-direction: column;
-    }
-    .chart-title { font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-    
-    .filter-bar { background: #fff; border-radius: 16px; padding: 14px 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-    
-    .quick-filter { display: flex; gap: 8px; }
-    .qf-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid #cbd5e1; background: #fff; font-size: 11px; font-weight: 700; color: #475569; cursor: pointer; transition: 0.15s; }
-    .qf-btn:hover, .qf-btn.active { background: #0284c7; color: #fff; border-color: #0284c7; }
-</style>
-@endpush
-
 @section('content')
 <div class="page-scroll">
     <div class="laporan-wrapper">
 
         {{-- FILTER BAR & EXPORT --}}
         <div class="filter-bar">
-            <div style="font-weight: 800; font-size: 13px; color: #0f172a; margin-right: auto;">
-                <i class="fa-solid fa-calendar-days" style="color: #429198;"></i> Periode Laporan
+            <div class="filter-bar-title">
+                <i class="fa-solid fa-calendar-days"></i> Periode Laporan
             </div>
             
-            <form method="GET" action="{{ route('laporan.index') }}" id="formFilter" class="quick-filter" style="align-items: center;">
+            <form method="GET" action="{{ route('laporan.index') }}" id="formFilter" class="quick-filter">
                 <button type="button" class="qf-btn" onclick="setTanggal('hari')">Hari Ini</button>
                 <button type="button" class="qf-btn" onclick="setTanggal('minggu')">Minggu Ini</button>
                 <button type="button" class="qf-btn" onclick="setTanggal('bulan')">Bulan Ini</button>
                 
-                <input type="date" name="start_date" id="startDate" value="{{ $startDate }}" class="search-input" style="width: 130px; border-radius: 8px; padding: 6px 10px; margin-left: 10px;">
-                <span style="font-size: 12px; color: #64748b;">s/d</span>
-                <input type="date" name="end_date" id="endDate" value="{{ $endDate }}" class="search-input" style="width: 130px; border-radius: 8px; padding: 6px 10px;">
-                <button type="submit" class="btn-primary" style="padding: 8px 16px; font-size: 12px; border-radius: 8px;">Terapkan</button>
+                <input type="date" name="start_date" id="startDate" value="{{ $startDate }}" class="search-input filter-date-input start">
+                <span class="filter-date-sep">s/d</span>
+                <input type="date" name="end_date" id="endDate" value="{{ $endDate }}" class="search-input filter-date-input">
+                <button type="submit" class="btn-primary filter-submit-btn">Terapkan</button>
             </form>
 
-            <div style="display: flex; gap: 8px; border-left: 1px solid #e2e8f0; padding-left: 12px;">
-                <a href="{{ route('laporan.exportExcel', ['start_date' => $startDate, 'end_date' => $endDate]) }}" class="btn-secondary" style="background: #16a34a; color: white; border: none; padding: 8px 12px; font-size: 11px;">
+            <div class="filter-export-group">
+                <a href="{{ route('laporan.exportExcel', ['start_date' => $startDate, 'end_date' => $endDate]) }}" class="btn-secondary btn-export-excel">
                     <i class="fa-solid fa-file-excel"></i> Excel
                 </a>
-                <a href="{{ route('laporan.exportPdf', ['start_date' => $startDate, 'end_date' => $endDate]) }}" class="btn-secondary" style="background: #dc2626; color: white; border: none; padding: 8px 12px; font-size: 11px;">
+                <a href="{{ route('laporan.exportPdf', ['start_date' => $startDate, 'end_date' => $endDate]) }}" class="btn-secondary btn-export-pdf">
                     <i class="fa-solid fa-file-pdf"></i> PDF
                 </a>
             </div>
@@ -71,50 +42,50 @@
             </div>
             <div class="kpi-card">
                 <div class="kpi-title">Laba Kotor</div>
-                <div class="kpi-value" style="color: #16a34a;">Rp {{ number_format($labaKotor, 0, ',', '.') }}</div>
+                <div class="kpi-value success">Rp {{ number_format($labaKotor, 0, ',', '.') }}</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-title">Uang Masuk</div>
-                <div class="kpi-value" style="color: #0284c7;">Rp {{ number_format($uangMasuk, 0, ',', '.') }}</div>
+                <div class="kpi-value info">Rp {{ number_format($uangMasuk, 0, ',', '.') }}</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-title">Piutang Baru</div>
-                <div class="kpi-value" style="color: #dc2626;">Rp {{ number_format($piutangBaru, 0, ',', '.') }}</div>
+                <div class="kpi-value danger">Rp {{ number_format($piutangBaru, 0, ',', '.') }}</div>
             </div>
             <div class="kpi-card">
                 <div class="kpi-title">Stok Menipis</div>
-                <div class="kpi-value" style="color: #d97706;">{{ $stokMenipis }} Produk</div>
+                <div class="kpi-value warning">{{ $stokMenipis }} Produk</div>
             </div>
         </div>
 
         {{-- CHARTS SECTION (2 Kolom) --}}
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
+        <div class="laporan-charts-grid">
             
             {{-- KIRI: Tren Omzet --}}
             <div class="chart-card">
-                <div class="chart-title"><i class="fa-solid fa-chart-line" style="color: #0284c7;"></i> Tren Omzet Harian</div>
-                <div id="chartTrenOmzet" style="margin-top: auto; margin-bottom: auto;"></div>
+                <div class="chart-title"><i class="fa-solid fa-chart-line icon-line"></i> Tren Omzet Harian</div>
+                <div id="chartTrenOmzet" class="chart-area-box"></div>
             </div>
 
             {{-- KANAN: Kategori & Metode (Ditumpuk) --}}
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-                <div class="chart-card" style="flex: 1;">
-                    <div class="chart-title"><i class="fa-solid fa-chart-pie" style="color: #8b5cf6;"></i> Kategori Terlaris</div>
-                    <div id="chartKategori" style="display: flex; justify-content: center;"></div>
+            <div class="laporan-charts-side">
+                <div class="chart-card">
+                    <div class="chart-title"><i class="fa-solid fa-chart-pie icon-pie"></i> Kategori Terlaris</div>
+                    <div id="chartKategori" class="chart-donut-box"></div>
                 </div>
-                <div class="chart-card" style="flex: 1;">
-                    <div class="chart-title"><i class="fa-solid fa-wallet" style="color: #f59e0b;"></i> Metode Bayar</div>
-                    <div id="chartMetode" style="display: flex; justify-content: center;"></div>
+                <div class="chart-card">
+                    <div class="chart-title"><i class="fa-solid fa-wallet icon-wallet"></i> Metode Bayar</div>
+                    <div id="chartMetode" class="chart-donut-box"></div>
                 </div>
             </div>
         </div>
 
         {{-- TABLES SECTION (3 Kolom) --}}
-        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px;">
+        <div class="laporan-tables-grid">
             
             {{-- 1. Tabel Rekap Penjualan --}}
-            <div class="table-card" style="height: 350px;">
-                <div style="padding: 16px; border-bottom: 1px solid #e2e8f0; font-weight: 800; font-size: 14px;">Transaksi Terbaru</div>
+            <div class="table-card laporan-table-card">
+                <div class="laporan-table-header">Transaksi Terbaru</div>
                 <div class="table-card-scroll">
                     <table class="data-table">
                         <thead>
@@ -127,13 +98,13 @@
                         </thead>
                         <tbody>
                             @forelse($rekapPenjualan as $trx)
-                                <tr style="cursor: pointer;" onclick="showDetailTransaksi({{ $trx->id_penjualan }})" title="Klik untuk melihat rincian">
+                                <tr class="laporan-trx-row" onclick="showDetailTransaksi({{ $trx->id_penjualan }})" title="Klik untuk melihat rincian">
                                     <td>
-                                        <div style="font-weight: 700;">{{ $trx->nomor_nota }}</div>
-                                        <div style="font-size: 9px; color: #64748b;">{{ \Carbon\Carbon::parse($trx->tanggal)->format('d M, H:i') }}</div>
+                                        <div class="laporan-nota-code">{{ $trx->nomor_nota }}</div>
+                                        <div class="laporan-nota-time">{{ \Carbon\Carbon::parse($trx->tanggal)->format('d M, H:i') }}</div>
                                     </td>
                                     <td>{{ $trx->pelanggan->nama_pelanggan ?? 'Umum' }}</td>
-                                    <td style="font-weight: 800;">Rp {{ number_format($trx->total_akhir, 0, ',', '.') }}</td>
+                                    <td class="laporan-cell-total">Rp {{ number_format($trx->total_akhir, 0, ',', '.') }}</td>
                                     <td>
                                         @if($trx->status_bayar == 'lunas')
                                             <span class="badge badge-safe">Lunas</span>
@@ -143,7 +114,7 @@
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="4" style="text-align: center;">Belum ada transaksi.</td></tr>
+                                <tr><td colspan="4" class="laporan-empty-cell">Belum ada transaksi.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -151,8 +122,8 @@
             </div>
 
             {{-- 2. Tabel Top 5 Produk --}}
-            <div class="table-card" style="height: 350px;">
-                <div style="padding: 16px; border-bottom: 1px solid #e2e8f0; font-weight: 800; font-size: 14px; color: #0284c7;">
+            <div class="table-card laporan-table-card">
+                <div class="laporan-table-header info">
                     <i class="fa-solid fa-fire"></i> 5 Produk Terlaris
                 </div>
                 <div class="table-card-scroll">
@@ -166,11 +137,11 @@
                         <tbody>
                             @forelse($topProduk as $tp)
                                 <tr>
-                                    <td style="font-weight: 700;">{{ $tp->nama_produk }}</td>
-                                    <td style="font-weight: 800; color: #0284c7;">{{ (int)$tp->total_qty }}</td>
+                                    <td class="laporan-cell-bold">{{ $tp->nama_produk }}</td>
+                                    <td class="laporan-cell-info">{{ (int)$tp->total_qty }}</td>
                                 </tr>
                             @empty
-                                <tr><td colspan="2" style="text-align: center;">Belum ada data.</td></tr>
+                                <tr><td colspan="2" class="laporan-empty-cell">Belum ada data.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -178,8 +149,8 @@
             </div>
 
             {{-- 3. Tabel Stok Menipis --}}
-            <div class="table-card" style="height: 350px;">
-                <div style="padding: 16px; border-bottom: 1px solid #e2e8f0; font-weight: 800; font-size: 14px; color: #dc2626;">
+            <div class="table-card laporan-table-card">
+                <div class="laporan-table-header danger">
                     <i class="fa-solid fa-triangle-exclamation"></i> Reorder Stok
                 </div>
                 <div class="table-card-scroll">
@@ -193,11 +164,11 @@
                         <tbody>
                             @forelse($daftarStokMenipis as $prd)
                                 <tr>
-                                    <td style="font-weight: 700;">{{ $prd->nama_produk }}</td>
-                                    <td style="color: #dc2626; font-weight: 800;">{{ $prd->stok_sekarang }} {{ $prd->satuan }}</td>
+                                    <td class="laporan-cell-bold">{{ $prd->nama_produk }}</td>
+                                    <td class="laporan-cell-danger">{{ $prd->stok_sekarang }} {{ $prd->satuan }}</td>
                                 </tr>
                             @empty
-                                <tr><td colspan="2" style="text-align: center;">Semua stok aman.</td></tr>
+                                <tr><td colspan="2" class="laporan-empty-cell">Semua stok aman.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -220,21 +191,21 @@
         
         <div class="modal-body">
             {{-- Info Header --}}
-            <div style="background: #f8fafc; padding: 14px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <div style="font-weight: 800; font-size: 14px;" id="detailNota">-</div>
-                    <div style="font-size: 11px; color: #64748b;" id="detailTanggal">-</div>
+            <div class="laporan-detail-header">
+                <div class="laporan-detail-top">
+                    <div class="laporan-detail-nota" id="detailNota">-</div>
+                    <div class="laporan-detail-date" id="detailTanggal">-</div>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px; color: #475569;">
-                    <div>Kasir: <strong id="detailKasir" style="color: #0f172a;">-</strong></div>
-                    <div>Pelanggan: <strong id="detailPelanggan" style="color: #0f172a;">-</strong></div>
-                    <div>Metode: <strong id="detailMetode" style="color: #0f172a; text-transform: uppercase;">-</strong></div>
-                    <div>Status: <strong id="detailStatus" style="color: #0f172a;">-</strong></div>
+                <div class="laporan-detail-meta">
+                    <div>Kasir: <strong id="detailKasir">-</strong></div>
+                    <div>Pelanggan: <strong id="detailPelanggan">-</strong></div>
+                    <div>Metode: <strong id="detailMetode" class="uppercase">-</strong></div>
+                    <div>Status: <strong id="detailStatus">-</strong></div>
                 </div>
             </div>
 
             {{-- Tabel Item --}}
-            <table class="data-table" style="margin-bottom: 16px;">
+            <table class="data-table laporan-detail-table">
                 <thead>
                     <tr>
                         <th>Produk</th>
@@ -248,27 +219,27 @@
             </table>
 
             {{-- Ringkasan Subtotal, Diskon, Total --}}
-            <div style="border-top: 1px dashed #cbd5e1; padding-top: 10px; margin-bottom: 12px; font-size: 11px; color: #475569; display: flex; flex-direction: column; gap: 4px;">
-                <div style="display: flex; justify-content: space-between;">
+            <div class="laporan-detail-summary">
+                <div class="laporan-detail-summary-row">
                     <span>Subtotal Belanja</span>
-                    <strong id="detailSubtotal" style="color: #0f172a;">Rp 0</strong>
+                    <strong id="detailSubtotal">Rp 0</strong>
                 </div>
-                <div style="display: flex; justify-content: space-between;">
+                <div class="laporan-detail-summary-row">
                     <span>Diskon</span>
-                    <strong id="detailDiskon" style="color: #16a34a;">Rp 0</strong>
+                    <strong id="detailDiskon" class="discount">Rp 0</strong>
                 </div>
             </div>
 
             {{-- Total --}}
-            <div style="background: #0f172a; color: #fff; padding: 14px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 12px; font-weight: 700;">TOTAL AKHIR</span>
-                <span style="font-size: 18px; font-weight: 800;" id="detailTotal">Rp 0</span>
+            <div class="laporan-detail-total-box">
+                <span class="laporan-detail-total-label">TOTAL AKHIR</span>
+                <span class="laporan-detail-total-val" id="detailTotal">Rp 0</span>
             </div>
         </div>
 
         <div class="modal-footer">
             <button type="button" class="btn-cancel" onclick="closeModalDetail()">Tutup</button>
-            <a href="#" id="btnCetakUlang" target="_blank" class="btn-primary" style="text-decoration: none;">
+            <a href="#" id="btnCetakUlang" target="_blank" class="btn-primary">
                 <i class="fa-solid fa-print"></i> Cetak Ulang Struk
             </a>
         </div>
@@ -391,7 +362,7 @@
     async function showDetailTransaksi(id) {
         // Tampilkan modal kosong / loading
         document.getElementById('detailNota').textContent = 'Memuat...';
-        document.getElementById('detailItemsTbody').innerHTML = '<tr><td colspan="3" style="text-align:center;"><i class="fa-solid fa-spinner fa-spin"></i></td></tr>';
+        document.getElementById('detailItemsTbody').innerHTML = '<tr><td colspan="3" class="laporan-empty-cell"><i class="fa-solid fa-spinner fa-spin"></i></td></tr>';
         document.getElementById('modalDetailTransaksi').classList.add('active');
 
         try {
@@ -419,7 +390,7 @@
             data.items.forEach(item => {
                 tbody.innerHTML += `
                     <tr>
-                        <td style="font-weight: 700;">${escapeHtml(item.nama_produk)}</td>
+                        <td class="laporan-cell-bold">${escapeHtml(item.nama_produk)}</td>
                         <td style="text-align: center;">${Number(item.jumlah)} ${escapeHtml(item.satuan)}</td>
                         <td style="text-align: right;">Rp ${Number(item.subtotal).toLocaleString('id-ID')}</td>
                     </tr>

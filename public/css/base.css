@@ -149,7 +149,7 @@ body {
 
 .header-widgets {
     display: flex;
-    align-items: center;
+    align-items: stretch;
     gap: 10px;
 }
 
@@ -176,6 +176,10 @@ body {
     color: #64748b;
     border: 1px solid #e2e8f0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .time-pill .time-val {
@@ -183,6 +187,11 @@ body {
     font-weight: 800;
     color: #0f172a;
     margin: 1px 0;
+}
+
+.time-pill .time-date {
+    font-size: 8px;
+    color: #64748b;
 }
 
 .user-pill {
@@ -208,4 +217,22 @@ body {
     justify-content: center;
     color: #64748b;
     font-size: 12px;
+    flex-shrink: 0;
+}
+
+.user-pill-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.user-pill-role {
+    font-size: 8px;
+    color: #64748b;
+}
+
+.user-pill-name {
+    font-weight: 800;
+    font-size: 10px;
+    color: #0f172a;
 }

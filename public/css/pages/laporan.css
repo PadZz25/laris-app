@@ -1,0 +1,351 @@
+/* ═══════════════════════════════════════════════════════════
+   MODUL LAPORAN & OMZET
+   ═══════════════════════════════════════════════════════════ */
+
+.laporan-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-bottom: 24px;
+}
+
+/* ================= FILTER BAR & EXPORT ================= */
+.filter-bar {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.filter-bar-title {
+    font-weight: 800;
+    font-size: 13px;
+    color: #0f172a;
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-bar-title i {
+    color: #429198;
+}
+
+.quick-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.qf-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+.qf-btn:hover,
+.qf-btn.active {
+    background: #0284c7;
+    color: #ffffff;
+    border-color: #0284c7;
+}
+
+.filter-date-input {
+    width: 130px !important;
+    border-radius: 8px !important;
+    padding: 6px 10px !important;
+}
+
+.filter-date-input.start {
+    margin-left: 10px;
+}
+
+.filter-date-sep {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.filter-submit-btn {
+    padding: 8px 16px;
+    font-size: 12px;
+    border-radius: 8px;
+}
+
+.filter-export-group {
+    display: flex;
+    gap: 8px;
+    border-left: 1px solid #e2e8f0;
+    padding-left: 12px;
+}
+
+.btn-export-excel,
+.btn-export-pdf {
+    color: #ffffff !important;
+    border: none !important;
+    padding: 8px 12px !important;
+    font-size: 11px !important;
+    text-decoration: none;
+}
+
+.btn-export-excel {
+    background: #16a34a !important;
+}
+
+.btn-export-excel:hover {
+    background: #15803d !important;
+}
+
+.btn-export-pdf {
+    background: #dc2626 !important;
+}
+
+.btn-export-pdf:hover {
+    background: #b91c1c !important;
+}
+
+/* ================= KPI CARDS ================= */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 16px;
+}
+
+.kpi-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+}
+
+.kpi-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+.kpi-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-top: 8px;
+}
+
+.kpi-value.success { color: #16a34a; }
+.kpi-value.info { color: #0284c7; }
+.kpi-value.danger { color: #dc2626; }
+.kpi-value.warning { color: #d97706; }
+
+/* ================= CHARTS SECTION ================= */
+.laporan-charts-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+}
+
+.laporan-charts-side {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.chart-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    height: 100%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.laporan-charts-side .chart-card {
+    flex: 1;
+}
+
+.chart-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.chart-title i.icon-line { color: #0284c7; }
+.chart-title i.icon-pie { color: #8b5cf6; }
+.chart-title i.icon-wallet { color: #f59e0b; }
+
+.chart-area-box {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.chart-donut-box {
+    display: flex;
+    justify-content: center;
+}
+
+/* ================= TABLES SECTION ================= */
+.laporan-tables-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 16px;
+}
+
+.laporan-table-card {
+    height: 350px;
+}
+
+.laporan-table-header {
+    padding: 16px;
+    border-bottom: 1px solid #e2e8f0;
+    font-weight: 800;
+    font-size: 14px;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.laporan-table-header.info { color: #0284c7; }
+.laporan-table-header.danger { color: #dc2626; }
+
+.laporan-trx-row {
+    cursor: pointer;
+}
+
+.laporan-nota-code {
+    font-weight: 700;
+}
+
+.laporan-nota-time {
+    font-size: 9px;
+    color: #64748b;
+}
+
+.laporan-cell-bold {
+    font-weight: 700;
+}
+
+.laporan-cell-total {
+    font-weight: 800;
+}
+
+.laporan-cell-info {
+    font-weight: 800;
+    color: #0284c7 !important;
+}
+
+.laporan-cell-danger {
+    font-weight: 800;
+    color: #dc2626 !important;
+}
+
+.laporan-empty-cell {
+    text-align: center !important;
+    color: #64748b !important;
+}
+
+/* ================= MODAL DETAIL TRANSAKSI ================= */
+.laporan-detail-header {
+    background: #f8fafc;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 4px;
+}
+
+.laporan-detail-top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.laporan-detail-nota {
+    font-weight: 800;
+    font-size: 14px;
+    color: #0f172a;
+}
+
+.laporan-detail-date {
+    font-size: 11px;
+    color: #64748b;
+}
+
+.laporan-detail-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    font-size: 11px;
+    color: #475569;
+}
+
+.laporan-detail-meta strong {
+    color: #0f172a;
+}
+
+.laporan-detail-meta .uppercase {
+    text-transform: uppercase;
+}
+
+.laporan-detail-table {
+    margin-bottom: 4px;
+}
+
+.laporan-detail-summary {
+    border-top: 1px dashed #cbd5e1;
+    padding-top: 10px;
+    margin-bottom: 4px;
+    font-size: 11px;
+    color: #475569;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.laporan-detail-summary-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.laporan-detail-summary-row strong {
+    color: #0f172a;
+}
+
+.laporan-detail-summary-row strong.discount {
+    color: #16a34a;
+}
+
+.laporan-detail-total-box {
+    background: #0f172a;
+    color: #ffffff;
+    padding: 14px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.laporan-detail-total-label {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.laporan-detail-total-val {
+    font-size: 18px;
+    font-weight: 800;
+}

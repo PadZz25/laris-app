@@ -13,16 +13,14 @@
         <div class="time-pill">
             <div>Waktu</div>
             <div class="time-val" id="live-clock">--:--:-- WIB</div>
-            <div style="font-size: 8px; color: #64748b;" id="live-date">--</div>
+            <div class="time-date" id="live-date">--</div>
         </div>
 
         <div class="user-pill">
             <div class="user-avatar-mini"><i class="fa-solid fa-user"></i></div>
-            <div>
-                <div style="font-size: 8px; color: #64748b;">{{ ucfirst(auth()->user()->peran) }}</div>
-                <div style="font-weight: 800; font-size: 10px; color: #0f172a;">
-                    {{ auth()->user()->nama_karyawan }}
-                </div>
+            <div class="user-pill-info">
+                <div class="user-pill-role">{{ ucfirst(auth()->user()->peran) }}</div>
+                <div class="user-pill-name">{{ auth()->user()->nama_karyawan }}</div>
             </div>
         </div>
     </div>

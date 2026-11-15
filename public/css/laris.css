@@ -3,12 +3,14 @@
    ═══════════════════════════════════════════════════════════ */
 
 /* Core & Global */
-@import url('base.css');
-@import url('components.css');
+@import url('base.css?v=15');
+@import url('components.css?v=15');
 
 /* Page Specific */
-@import url('pages/produk.css');
-@import url('pages/pengeluaran.css');
-@import url('pages/kasbon.css');
-@import url('pages/supplier.css');
-@import url('pages/kasir.css');
+@import url('pages/laporan.css?v=15');
+@import url('pages/produk.css?v=15');
+@import url('pages/pengeluaran.css?v=15');
+@import url('pages/kasbon.css?v=15');
+@import url('pages/supplier.css?v=15');
+@import url('pages/kasir.css?v=15');
+@import url('pages/pengaturan.css?v=15');
