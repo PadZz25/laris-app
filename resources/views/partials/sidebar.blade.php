@@ -1,7 +1,7 @@
 <aside class="sidebar">
     <div>
         <div class="logo-container">
-            <img src="{{ asset('img/logo-laris.png') }}" alt="LARIS Logo">
+            <img src="{{ asset('img/logo-laris.png') }}?v={{ filemtime(public_path('img/logo-laris.png')) }}" alt="LARIS Logo">
         </div>
 
         <nav class="nav-menu">
