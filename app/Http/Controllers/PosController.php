@@ -14,6 +14,8 @@ class PosController extends Controller
 {
     public function index()
     {
+        Produk::syncFromMediaManifest();
+
         // ... (biarkan kode index yang sudah ada) ...
         $produk = Produk::with('kategori')->where('stok_sekarang', '>', 0)->orderBy('nama_produk')->get();
         $produkData = $produk->map(function ($p) {

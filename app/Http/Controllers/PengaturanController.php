@@ -7,6 +7,7 @@ use App\Models\Pembelian;
 use App\Models\Pengaturan;
 use App\Models\Pengeluaran;
 use App\Models\Penjualan;
+use App\Models\Produk;
 use Intervention\Image\Laravel\Facades\Image;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
@@ -90,8 +91,8 @@ class PengaturanController extends Controller
 
         if ($request->hasFile('logo')) {
             // Hapus logo lama jika ada
-            if ($toko->logo && Storage::disk('public')->exists($toko->logo)) {
-                Storage::disk('public')->delete($toko->logo);
+            if ($toko->logo) {
+                Produk::deletePublicStorageCopy($toko->logo);
             }
             
             // Simpan logo baru ke folder storage/app/public/toko
@@ -99,11 +100,13 @@ class PengaturanController extends Controller
             $filename = 'toko/logo_' . time() . '.webp';
             $image = Image::read($file)->scale(width: 400)->toWebp(80);
             Storage::disk('public')->put($filename, (string) $image);
+            Produk::syncPublicStorageCopy($filename);
             
             $data['logo'] = $filename;
         }
 
         $toko->update($data);
+        Produk::updateMediaManifest();
 
         return back()->with('success', 'Informasi Toko berhasil diperbarui!')->with('tab', 'toko');
     }

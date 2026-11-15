@@ -17,7 +17,9 @@ class ProdukController extends Controller
      */
     public function index()
     {
-            // Load semua produk + relasi kategori (client-side filter)
+        Produk::syncFromMediaManifest();
+
+        // Load semua produk + relasi kategori (client-side filter)
         $produk = Produk::with('kategori')->orderBy('id_produk')->get();
         $kategoriList = KategoriProduk::orderBy('nama_kategori')->get();
 
@@ -97,6 +99,7 @@ class ProdukController extends Controller
         // Simpan produk
         // ─────────────────────────────────────────────
         Produk::create($validated);
+        Produk::updateMediaManifest();
 
         return redirect()
             ->route('produk.index')
@@ -157,13 +160,14 @@ class ProdukController extends Controller
 
         // Handle upload foto baru — kalau ada, hapus yang lama
         if ($request->hasFile('foto_produk')) {
-            if ($produk->foto_produk && Storage::disk('public')->exists($produk->foto_produk)) {
-                Storage::disk('public')->delete($produk->foto_produk);
+            if ($produk->foto_produk) {
+                Produk::deletePublicStorageCopy($produk->foto_produk);
             }
             $validated['foto_produk'] = $this->uploadFotoProduk($request->file('foto_produk'));
         }
 
         $produk->update($validated);
+        Produk::updateMediaManifest();
 
         return redirect()
             ->route('produk.index')
@@ -183,11 +187,12 @@ class ProdukController extends Controller
         }
 
         // Hapus foto dari storage
-        if ($produk->foto_produk && Storage::disk('public')->exists($produk->foto_produk)) {
-            Storage::disk('public')->delete($produk->foto_produk);
+        if ($produk->foto_produk) {
+            Produk::deletePublicStorageCopy($produk->foto_produk);
         }
 
         $produk->delete();
+        Produk::updateMediaManifest();
 
         return redirect()
             ->route('produk.index')
@@ -249,6 +254,7 @@ class ProdukController extends Controller
             ->toWebp(quality: 80);
 
         Storage::disk('public')->put($filename, (string) $image);
+        Produk::syncPublicStorageCopy($filename);
 
         return $filename;
     }

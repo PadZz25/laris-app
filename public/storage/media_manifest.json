@@ -1,0 +1,106 @@
+{
+    "toko": {
+        "nama_toko": "TOKO INA",
+        "alamat": "Desa Wates, Kec. Wates, Blitar",
+        "no_telepon": "0812-3456-7890",
+        "logo": "toko/logo_1794718169.webp"
+    },
+    "produk": [
+        {
+            "id_produk": 1,
+            "barcode": "BRS-001",
+            "nama_produk": "Beras Mentari 5kg",
+            "foto_produk": "produk/prd_6ae97c693bf586.32812183_1793686633.webp"
+        },
+        {
+            "id_produk": 2,
+            "barcode": "MYK-002",
+            "nama_produk": "Minyak Kita 1L",
+            "foto_produk": "produk/prd_6af930fd11b136.38644940_1794715901.webp"
+        },
+        {
+            "id_produk": 3,
+            "barcode": "GLA-003",
+            "nama_produk": "Gula Pasir Gulaku Premium 1kg",
+            "foto_produk": "produk/prd_6ae990708e37d9.53056316_1793691760.webp"
+        },
+        {
+            "id_produk": 4,
+            "barcode": "TLR-004",
+            "nama_produk": "Telur Ayam Negeri 1kg",
+            "foto_produk": "produk/prd_6ae990a12e34f8.65885694_1793691809.webp"
+        },
+        {
+            "id_produk": 5,
+            "barcode": "IND-005",
+            "nama_produk": "Indomie Goreng",
+            "foto_produk": "produk/prd_6af9315c08fe36.42742641_1794715996.webp"
+        },
+        {
+            "id_produk": 6,
+            "barcode": "SNK-006",
+            "nama_produk": "Keripik Tempe Sanan",
+            "foto_produk": "produk/prd_6af93326088759.55367682_1794716454.webp"
+        },
+        {
+            "id_produk": 7,
+            "barcode": "KPI-007",
+            "nama_produk": "Kopi Kapal Api 65g",
+            "foto_produk": "produk/prd_6af933a10fca81.30432400_1794716577.webp"
+        },
+        {
+            "id_produk": 8,
+            "barcode": "SKM-008",
+            "nama_produk": "Susu Frisian Flag Kaleng",
+            "foto_produk": "produk/prd_6af933dce7fb81.55895875_1794716636.webp"
+        },
+        {
+            "id_produk": 9,
+            "barcode": "MIN-009",
+            "nama_produk": "Teh Pucuk Harum 350ml",
+            "foto_produk": "produk/prd_6af934acf1b0d6.92690052_1794716844.webp"
+        },
+        {
+            "id_produk": 10,
+            "barcode": "GRM-010",
+            "nama_produk": "Garam Dapur Cap Kapal",
+            "foto_produk": "produk/prd_6af934fb935835.17709145_1794716923.webp"
+        },
+        {
+            "id_produk": 12,
+            "barcode": "SNL-012",
+            "nama_produk": "Sunlight Jeruk Nipis 650ml",
+            "foto_produk": "produk/prd_6af935e26d20e9.14478204_1794717154.webp"
+        },
+        {
+            "id_produk": 13,
+            "barcode": "ATK-013",
+            "nama_produk": "Buku Tulis Sidu 38 Lembar",
+            "foto_produk": "produk/prd_6af93679952e29.73528675_1794717305.webp"
+        },
+        {
+            "id_produk": 16,
+            "barcode": "NGT-2938",
+            "nama_produk": "Nugget Fiesta Crispy Bubble",
+            "foto_produk": "produk/prd_6abeb1518b29c6.48714579_1790882129.webp"
+        },
+        {
+            "id_produk": 17,
+            "barcode": "KCP-0001",
+            "nama_produk": "Kecap bango 1000ml",
+            "foto_produk": "produk/prd_6ae04bf3771451.52576200_1793084403.webp"
+        },
+        {
+            "id_produk": 21,
+            "barcode": "BT-123456",
+            "nama_produk": "bear brand",
+            "foto_produk": "produk/prd_6af936c1a76060.29861467_1794717377.webp"
+        },
+        {
+            "id_produk": 22,
+            "barcode": "CLMK-123",
+            "nama_produk": "nugget So Nice",
+            "foto_produk": "produk/prd_6af9308b464989.81003870_1794715787.webp"
+        }
+    ]
+}
