@@ -54,7 +54,45 @@ class LarisWorkflowTest extends TestCase
         $this->actingAs($kasir)->put('/produk/1', [])->assertRedirect(route('kasir.index'));
         $this->actingAs($kasir)->delete('/produk/1')->assertRedirect(route('kasir.index'));
         $this->actingAs($kasir)->post('/kategori', [])->assertRedirect(route('kasir.index'));
-        $this->actingAs($kasir)->delete('/kasbon/1')->assertRedirect(route('kasir.index'));
+    }
+
+    public function test_kasir_can_manage_warga_on_kasbon_routes_and_view(): void
+    {
+        $routes = app('router')->getRoutes();
+        $updateMiddleware = $routes->getByName('kasbon.update')->gatherMiddleware();
+        $destroyMiddleware = $routes->getByName('kasbon.destroy')->gatherMiddleware();
+
+        $this->assertContains('auth', $updateMiddleware);
+        $this->assertNotContains('role:admin', $updateMiddleware);
+        $this->assertContains('auth', $destroyMiddleware);
+        $this->assertNotContains('role:admin', $destroyMiddleware);
+
+        $kasir = $this->makeUser('kasir', 2, 'Kasir Toko');
+        $this->actingAs($kasir);
+
+        $warga = new Pelanggan([
+            'nama_pelanggan' => 'Pak Budi',
+            'no_telepon'     => '08123456789',
+            'alamat'         => 'RT 01',
+            'total_hutang'   => 0,
+        ]);
+        $warga->id_pelanggan = 10;
+
+        $html = View::make('kasbon.index', [
+            'errors'    => new \Illuminate\Support\ViewErrorBag(),
+            'pelanggan' => collect([$warga]),
+            'stats'     => [
+                'total_warga'   => 1,
+                'warga_kasbon'  => 0,
+                'warga_bebas'   => 1,
+                'total_piutang' => 0,
+            ],
+        ])->render();
+
+        $this->assertStringContainsString('title="Edit Warga"', $html);
+        $this->assertStringContainsString('title="Hapus Warga"', $html);
+        $this->assertStringContainsString('openEditWarga(this)', $html);
+        $this->assertStringContainsString('openHapusWarga(this)', $html);
     }
 
     public function test_pengaturan_view_hides_backup_and_admin_tabs_for_kasir(): void

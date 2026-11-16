@@ -98,8 +98,7 @@
                             @endif
                         </div>
 
-                        {{-- TOMBOL EDIT & HAPUS (Di kanan, sejajar vertikal) --}}
-                        @if(auth()->user()->peran === 'admin')
+                        {{-- TOMBOL EDIT & HAPUS (Di kanan, sejajar vertikal - Admin & Kasir) --}}
                         <div style="display: flex; flex-direction: column; gap: 6px; flex-shrink: 0;">
                             <button class="btn-icon" title="Edit Warga" style="width: 26px; height: 26px; font-size: 11px;"
                                     data-id="{{ $p->id_pelanggan }}"
@@ -116,7 +115,6 @@
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
-                        @endif
                     </div>
                 @empty
                     <div style="grid-column: span 2;">

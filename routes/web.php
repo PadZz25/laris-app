@@ -43,10 +43,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/nota/{id}', 'printNota')->name('nota');
     });
 
-    // Modul Buku Kasbon
+    // Modul Buku Kasbon (Admin & Kasir)
     Route::prefix('kasbon')->name('kasbon.')->controller(KasbonController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/', 'store')->name('store');
+        Route::put('/{id}', 'update')->name('update');
+        Route::delete('/{id}', 'destroy')->name('destroy');
         Route::get('/{id}/detail', 'detail')->name('detail');
         Route::post('/{id}/bayar', 'bayar')->name('bayar');
     });
@@ -101,12 +103,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/kategori', [KategoriController::class, 'store'])->name('kategori.store');
         Route::put('/kategori/{id}', [KategoriController::class, 'update'])->name('kategori.update');
         Route::delete('/kategori/{id}', [KategoriController::class, 'destroy'])->name('kategori.destroy');
-
-        // Modifikasi Kasbon (Edit & Hapus Warga - Khusus Admin)
-        Route::prefix('kasbon')->name('kasbon.')->controller(KasbonController::class)->group(function () {
-            Route::put('/{id}', 'update')->name('update');
-            Route::delete('/{id}', 'destroy')->name('destroy');
-        });
     });
 
     // ==========================================
