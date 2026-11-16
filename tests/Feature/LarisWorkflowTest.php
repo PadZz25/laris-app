@@ -301,4 +301,17 @@ class LarisWorkflowTest extends TestCase
         $this->assertCount(1, $payload['items']);
         $this->assertSame('Minyak Kita 1L', $payload['items'][0]['nama_produk']);
     }
+
+    public function test_karyawan_seeder_does_not_contain_hardcoded_credentials(): void
+    {
+        $seederContent = file_get_contents(database_path('seeders/KaryawanSeeder.php'));
+
+        $this->assertNotFalse($seederContent);
+        $this->assertStringNotContainsString('password_rahasia', $seederContent);
+        $this->assertStringNotContainsString("'ina'", strtolower($seederContent));
+        $this->assertStringNotContainsString("'kaka'", strtolower($seederContent));
+        $this->assertStringContainsString('Karyawan::exists()', $seederContent);
+        $this->assertStringContainsString('SEED_ADMIN_USERNAME', $seederContent);
+        $this->assertStringContainsString('SEED_ADMIN_PASSWORD', $seederContent);
+    }
 }

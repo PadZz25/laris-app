@@ -64,7 +64,7 @@ Route::middleware('auth')->group(function () {
 
 
     // ==========================================
-    // AKSES KHUSUS ADMIN (Ina)
+    // AKSES KHUSUS ADMIN
     // ==========================================
     Route::middleware('role:admin')->group(function () {
         

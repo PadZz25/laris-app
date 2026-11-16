@@ -222,7 +222,7 @@
                         <input type="checkbox" name="remember" value="1" {{ old('remember') ? 'checked' : '' }}>
                         Ingat Sesi Saya
                     </label>
-                    <a href="#" class="forgot-link" onclick="alert('Silakan hubungi Ibu Ina untuk reset kata sandi.'); return false;">Lupa Sandi?</a>
+                    <a href="#" class="forgot-link" onclick="alert('Silakan hubungi Admin toko untuk reset kata sandi.'); return false;">Lupa Sandi?</a>
                 </div>
 
                 <button type="submit" class="btn-submit-login">
