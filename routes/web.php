@@ -41,6 +41,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/store', 'store')->name('store');
         Route::get('/nota/{id}', 'printNota')->name('nota');
+        Route::get('/laporan', 'laporan')->name('laporan');
+        Route::get('/laporan/transaksi/{id}', 'detailTransaksi')->name('laporan.detail');
     });
 
     // Modul Buku Kasbon (Admin & Kasir)

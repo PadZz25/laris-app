@@ -8,31 +8,13 @@
     <div class="laporan-wrapper">
 
         {{-- FILTER BAR & EXPORT --}}
-        <div class="filter-bar">
-            <div class="filter-bar-title">
-                <i class="fa-solid fa-calendar-days"></i> Periode Laporan
-            </div>
-            
-            <form method="GET" action="{{ route('laporan.index') }}" id="formFilter" class="quick-filter">
-                <button type="button" class="qf-btn" onclick="setTanggal('hari')">Hari Ini</button>
-                <button type="button" class="qf-btn" onclick="setTanggal('minggu')">Minggu Ini</button>
-                <button type="button" class="qf-btn" onclick="setTanggal('bulan')">Bulan Ini</button>
-                
-                <input type="date" name="start_date" id="startDate" value="{{ $startDate }}" class="search-input filter-date-input start">
-                <span class="filter-date-sep">s/d</span>
-                <input type="date" name="end_date" id="endDate" value="{{ $endDate }}" class="search-input filter-date-input">
-                <button type="submit" class="btn-primary filter-submit-btn">Terapkan</button>
-            </form>
-
-            <div class="filter-export-group">
-                <a href="{{ route('laporan.exportExcel', ['start_date' => $startDate, 'end_date' => $endDate]) }}" class="btn-secondary btn-export-excel">
-                    <i class="fa-solid fa-file-excel"></i> Excel
-                </a>
-                <a href="{{ route('laporan.exportPdf', ['start_date' => $startDate, 'end_date' => $endDate]) }}" class="btn-secondary btn-export-pdf">
-                    <i class="fa-solid fa-file-pdf"></i> PDF
-                </a>
-            </div>
-        </div>
+        @include('partials.periode_filter_bar', [
+            'action'      => route('laporan.index'),
+            'startDate'   => $startDate,
+            'endDate'     => $endDate,
+            'filterTitle' => 'Periode Laporan',
+            'showExports' => true,
+        ])
 
         {{-- KPI CARDS (5 Items) --}}
         <div class="kpi-grid">
@@ -179,105 +161,15 @@
     </div>
 </div>
 
-{{-- MODAL: DETAIL TRANSAKSI (LAPORAN) --}}
-<div class="modal-overlay" id="modalDetailTransaksi">
-    <div class="modal-card">
-        <div class="modal-header">
-            <h3><i class="fa-solid fa-receipt"></i> Detail Transaksi</h3>
-            <button type="button" class="btn-close-modal" onclick="closeModalDetail()">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-        
-        <div class="modal-body">
-            {{-- Info Header --}}
-            <div class="laporan-detail-header">
-                <div class="laporan-detail-top">
-                    <div class="laporan-detail-nota" id="detailNota">-</div>
-                    <div class="laporan-detail-date" id="detailTanggal">-</div>
-                </div>
-                <div class="laporan-detail-meta">
-                    <div>Kasir: <strong id="detailKasir">-</strong></div>
-                    <div>Pelanggan: <strong id="detailPelanggan">-</strong></div>
-                    <div>Metode: <strong id="detailMetode" class="uppercase">-</strong></div>
-                    <div>Status: <strong id="detailStatus">-</strong></div>
-                </div>
-            </div>
-
-            {{-- Tabel Item --}}
-            <table class="data-table laporan-detail-table">
-                <thead>
-                    <tr>
-                        <th>Produk</th>
-                        <th style="text-align: center;">Qty</th>
-                        <th style="text-align: right;">Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody id="detailItemsTbody">
-                    {{-- Diisi JS --}}
-                </tbody>
-            </table>
-
-            {{-- Ringkasan Subtotal, Diskon, Total --}}
-            <div class="laporan-detail-summary">
-                <div class="laporan-detail-summary-row">
-                    <span>Subtotal Belanja</span>
-                    <strong id="detailSubtotal">Rp 0</strong>
-                </div>
-                <div class="laporan-detail-summary-row">
-                    <span>Diskon</span>
-                    <strong id="detailDiskon" class="discount">Rp 0</strong>
-                </div>
-            </div>
-
-            {{-- Total --}}
-            <div class="laporan-detail-total-box">
-                <span class="laporan-detail-total-label">TOTAL AKHIR</span>
-                <span class="laporan-detail-total-val" id="detailTotal">Rp 0</span>
-            </div>
-        </div>
-
-        <div class="modal-footer">
-            <button type="button" class="btn-cancel" onclick="closeModalDetail()">Tutup</button>
-            <a href="#" id="btnCetakUlang" target="_blank" class="btn-primary">
-                <i class="fa-solid fa-print"></i> Cetak Ulang Struk
-            </a>
-        </div>
-    </div>
-</div>
+@include('partials.detail_transaksi_modal', [
+    'detailUrlPrefix' => url('/laporan/transaksi'),
+])
 @endsection
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
-    // --- 1. Javascript Filter Cepat ---
-    function setTanggal(tipe) {
-        const today = new Date();
-        let start = new Date();
-        
-        if (tipe === 'minggu') {
-            start.setDate(today.getDate() - today.getDay()); // Mulai hari Minggu
-        } else if (tipe === 'bulan') {
-            start = new Date(today.getFullYear(), today.getMonth(), 1); // Tanggal 1 bulan ini
-        }
-        
-        // Format ke YYYY-MM-DD
-        const formatDate = (date) => {
-            const d = new Date(date);
-            let month = '' + (d.getMonth() + 1);
-            let day = '' + d.getDate();
-            const year = d.getFullYear();
-            if (month.length < 2) month = '0' + month;
-            if (day.length < 2) day = '0' + day;
-            return [year, month, day].join('-');
-        };
-
-        document.getElementById('startDate').value = formatDate(start);
-        document.getElementById('endDate').value = formatDate(today);
-        document.getElementById('formFilter').submit();
-    }
-
-    // --- 2. Grafik Tren Omzet ---
+    // --- 1. Grafik Tren Omzet ---
     var optionsTren = {
         series: [{ name: 'Omzet', data: @json($chartTotals) }],
         chart: { type: 'area', height: 280, toolbar: { show: false }, fontFamily: 'Plus Jakarta Sans, sans-serif' },
@@ -357,63 +249,5 @@
         tooltip: { y: { formatter: function (val) { return "Rp " + val.toLocaleString('id-ID'); } } }
     };
     new ApexCharts(document.querySelector("#chartMetode"), optionsMetode).render();
-
-    // --- 5. MODAL DETAIL TRANSAKSI ---
-    async function showDetailTransaksi(id) {
-        // Tampilkan modal kosong / loading
-        document.getElementById('detailNota').textContent = 'Memuat...';
-        document.getElementById('detailItemsTbody').innerHTML = '<tr><td colspan="3" class="laporan-empty-cell"><i class="fa-solid fa-spinner fa-spin"></i></td></tr>';
-        document.getElementById('modalDetailTransaksi').classList.add('active');
-
-        try {
-            // Ambil data via AJAX
-            const res = await fetch(`/laporan/transaksi/${id}`, {
-                headers: { 'Accept': 'application/json' }
-            });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const data = await res.json();
-
-            // Isi Header Modal
-            document.getElementById('detailNota').textContent = data.nomor_nota;
-            document.getElementById('detailTanggal').textContent = data.tanggal;
-            document.getElementById('detailKasir').textContent = data.kasir;
-            document.getElementById('detailPelanggan').textContent = data.pelanggan;
-            document.getElementById('detailMetode').textContent = data.metode_bayar;
-            document.getElementById('detailStatus').textContent = data.status_bayar === 'lunas' ? 'LUNAS' : 'BELUM LUNAS';
-            document.getElementById('detailSubtotal').textContent = 'Rp ' + Number(data.total_belanja ?? data.total_akhir).toLocaleString('id-ID');
-            document.getElementById('detailDiskon').textContent = 'Rp ' + Number(data.diskon ?? 0).toLocaleString('id-ID');
-            document.getElementById('detailTotal').textContent = 'Rp ' + Number(data.total_akhir).toLocaleString('id-ID');
-
-            // Isi Tabel Item
-            const tbody = document.getElementById('detailItemsTbody');
-            tbody.innerHTML = '';
-            data.items.forEach(item => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td class="laporan-cell-bold">${escapeHtml(item.nama_produk)}</td>
-                        <td style="text-align: center;">${Number(item.jumlah)} ${escapeHtml(item.satuan)}</td>
-                        <td style="text-align: right;">Rp ${Number(item.subtotal).toLocaleString('id-ID')}</td>
-                    </tr>
-                `;
-            });
-
-            // Set Link Cetak Ulang
-            document.getElementById('btnCetakUlang').href = `/kasir/nota/${data.id_penjualan}`;
-
-        } catch (err) {
-            console.error(err);
-            showToast('Gagal memuat detail transaksi.', 'error');
-            closeModalDetail();
-        }
-    }
-
-    function closeModalDetail() {
-        document.getElementById('modalDetailTransaksi').classList.remove('active');
-    }
-
-    // Tutup modal via klik overlay
-    document.getElementById('modalDetailTransaksi').addEventListener('click', function (e) {
-        if (e.target === this) closeModalDetail();
-    });
 </script>
 @endpush

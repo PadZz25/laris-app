@@ -17,8 +17,10 @@ class LaporanController extends Controller
     public function index(Request $request)
     {
         // Filter Periode (Default: 7 hari terakhir)
-        $startDate = $request->input('start_date', Carbon::now()->subDays(6)->format('Y-m-d'));
-        $endDate   = $request->input('end_date', Carbon::now()->format('Y-m-d'));
+        [$startDate, $endDate] = Penjualan::resolveDateRange(
+            $request->input('start_date'),
+            $request->input('end_date')
+        );
 
         // 1. Hitung KPI Utama & Laba Kotor
         $totalOmzet = Penjualan::whereBetween(DB::raw('DATE(tanggal)'), [$startDate, $endDate])->sum('total_akhir');
@@ -89,49 +91,31 @@ class LaporanController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $startDate = $request->input('start_date', Carbon::now()->subDays(6)->format('Y-m-d'));
-        $endDate   = $request->input('end_date', Carbon::now()->format('Y-m-d'));
+        [$startDate, $endDate] = Penjualan::resolveDateRange(
+            $request->input('start_date'),
+            $request->input('end_date')
+        );
         
         return Excel::download(new LaporanPenjualanExport($startDate, $endDate), 'Laporan_Penjualan_'.$startDate.'_sd_'.$endDate.'.xlsx');
     }
 
     public function exportPdf(Request $request)
     {
-        $startDate = $request->input('start_date', Carbon::now()->subDays(6)->format('Y-m-d'));
-        $endDate   = $request->input('end_date', Carbon::now()->format('Y-m-d'));
+        [$startDate, $endDate] = Penjualan::resolveDateRange(
+            $request->input('start_date'),
+            $request->input('end_date')
+        );
 
         $rekapPenjualan = Penjualan::with(['pelanggan', 'karyawan'])
-            ->whereBetween(DB::raw('DATE(tanggal)'), [$startDate, $endDate])
+            ->betweenDates($startDate, $endDate)
             ->orderByDesc('tanggal')->get();
 
         $pdf = Pdf::loadView('laporan.pdf', compact('rekapPenjualan', 'startDate', 'endDate'));
         return $pdf->download('Laporan_Penjualan_'.$startDate.'_sd_'.$endDate.'.pdf');
     }
 
-        public function detailTransaksi($id)
+    public function detailTransaksi($id)
     {
-        $penjualan = \App\Models\Penjualan::with(['detail.produk', 'pelanggan', 'karyawan'])->findOrFail($id);
-
-        return response()->json([
-            'id_penjualan'  => $penjualan->id_penjualan,
-            'nomor_nota'    => $penjualan->nomor_nota,
-            'tanggal'       => \Carbon\Carbon::parse($penjualan->tanggal)->format('d M Y, H:i'),
-            'kasir'         => $penjualan->karyawan->nama_karyawan ?? '-',
-            'pelanggan'     => $penjualan->pelanggan->nama_pelanggan ?? 'Umum',
-            'total_belanja' => (float) ($penjualan->total_belanja ?? $penjualan->total_akhir),
-            'diskon'        => (float) ($penjualan->diskon ?? 0),
-            'total_akhir'   => (float) $penjualan->total_akhir,
-            'metode_bayar'  => $penjualan->metode_bayar,
-            'status_bayar'  => $penjualan->status_bayar,
-            'items' => $penjualan->detail->map(function ($item) {
-                return [
-                    'nama_produk' => $item->produk->nama_produk ?? '-',
-                    'jumlah'      => (float) $item->jumlah,
-                    'harga_jual'  => (float) $item->harga_jual_saat_itu,
-                    'subtotal'    => (float) $item->subtotal,
-                    'satuan'      => $item->produk->satuan ?? ''
-                ];
-            })
-        ]);
+        return response()->json(Penjualan::findOrFail($id)->toDetailPayload());
     }
 }

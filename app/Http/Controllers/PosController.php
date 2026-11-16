@@ -169,6 +169,32 @@ class PosController extends Controller
     }
 
     /**
+     * Halaman Laporan khusus Kasir (hanya berisi riwayat transaksi & cetak ulang struk).
+     */
+    public function laporan(Request $request)
+    {
+        [$startDate, $endDate] = Penjualan::resolveDateRange(
+            $request->input('start_date'),
+            $request->input('end_date')
+        );
+
+        $riwayatTransaksi = Penjualan::with(['pelanggan', 'karyawan'])
+            ->betweenDates($startDate, $endDate)
+            ->orderByDesc('tanggal')
+            ->get();
+
+        return view('kasir.laporan', compact('riwayatTransaksi', 'startDate', 'endDate'));
+    }
+
+    /**
+     * JSON rincian item transaksi untuk modal detail transaksi pada Laporan Kasir.
+     */
+    public function detailTransaksi($id)
+    {
+        return response()->json(Penjualan::findOrFail($id)->toDetailPayload());
+    }
+
+    /**
      * Halaman cetak nota.
      */
     public function printNota($id)

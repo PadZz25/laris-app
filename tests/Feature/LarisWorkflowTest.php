@@ -187,4 +187,118 @@ class LarisWorkflowTest extends TestCase
         $this->assertStringContainsString('id="posKategori"', $html);
         $this->assertStringNotContainsString('id="posCats"', $html);
     }
+
+    public function test_kasir_laporan_routes_and_sidebar_are_properly_configured(): void
+    {
+        $routes = app('router')->getRoutes();
+        $kasirLaporanMiddleware = $routes->getByName('kasir.laporan')->gatherMiddleware();
+        $kasirDetailMiddleware  = $routes->getByName('kasir.laporan.detail')->gatherMiddleware();
+        $adminLaporanMiddleware = $routes->getByName('laporan.index')->gatherMiddleware();
+
+        $this->assertContains('auth', $kasirLaporanMiddleware);
+        $this->assertNotContains('role:admin', $kasirLaporanMiddleware);
+        $this->assertContains('auth', $kasirDetailMiddleware);
+        $this->assertNotContains('role:admin', $kasirDetailMiddleware);
+        $this->assertContains('role:admin', $adminLaporanMiddleware);
+
+        $kasir = $this->makeUser('kasir', 2, 'Kasir Toko');
+        $this->actingAs($kasir);
+        $kasirSidebar = View::make('partials.sidebar')->render();
+        $this->assertStringContainsString(route('kasir.laporan'), $kasirSidebar);
+        $this->assertStringContainsString('Laporan', $kasirSidebar);
+        $this->assertStringNotContainsString('Laporan &amp; Omzet', $kasirSidebar);
+        $this->assertStringNotContainsString(route('laporan.index'), $kasirSidebar);
+
+        $admin = $this->makeUser('admin', 1, 'ina');
+        $this->actingAs($admin);
+        $adminSidebar = View::make('partials.sidebar')->render();
+        $this->assertStringContainsString(route('laporan.index'), $adminSidebar);
+        $this->assertStringContainsString('Laporan &amp; Omzet', $adminSidebar);
+        $this->assertStringNotContainsString(route('kasir.laporan'), $adminSidebar);
+    }
+
+    public function test_kasir_laporan_view_renders_history_transaksi_and_detail_modal(): void
+    {
+        $kasir = $this->makeUser('kasir', 2, 'Kasir Toko');
+        $this->actingAs($kasir);
+
+        $penjualan = new Penjualan([
+            'nomor_nota'    => 'INV-20261116-0001',
+            'tanggal'       => '2026-11-16 10:15:00',
+            'total_belanja' => 50000,
+            'diskon'        => 0,
+            'total_akhir'   => 50000,
+            'metode_bayar'  => 'tunai',
+            'status_bayar'  => 'lunas',
+        ]);
+        $penjualan->id_penjualan = 99;
+        $penjualan->setRelation('karyawan', $kasir);
+        $penjualan->setRelation('pelanggan', new Pelanggan(['nama_pelanggan' => 'Umum']));
+
+        $html = View::make('kasir.laporan', [
+            'errors'           => new \Illuminate\Support\ViewErrorBag(),
+            'riwayatTransaksi' => collect([$penjualan]),
+            'startDate'        => '2026-11-10',
+            'endDate'          => '2026-11-16',
+        ])->render();
+
+        $this->assertStringContainsString('<h1>Laporan</h1>', $html);
+        $this->assertStringContainsString('History Transaksi', $html);
+        $this->assertStringContainsString('INV-20261116-0001', $html);
+        $this->assertStringContainsString('showDetailTransaksi(99)', $html);
+        $this->assertStringContainsString('/kasir/nota/99', $html);
+        $this->assertStringContainsString('id="modalDetailTransaksi"', $html);
+        $this->assertStringContainsString('/kasir/laporan/transaksi', $html);
+
+        // Halaman laporan kasir hanya menampilkan riwayat transaksi, bukan KPI omzet / grafik admin
+        $this->assertStringNotContainsString('Total Omzet', $html);
+        $this->assertStringNotContainsString('Laba Kotor', $html);
+        $this->assertStringNotContainsString('ApexCharts', $html);
+        $this->assertStringNotContainsString('export-excel', $html);
+    }
+
+    public function test_penjualan_date_range_and_detail_payload_helpers(): void
+    {
+        [$start, $end] = Penjualan::resolveDateRange('2026-11-16', '2026-11-10');
+        $this->assertSame('2026-11-10', $start);
+        $this->assertSame('2026-11-16', $end);
+
+        [$fallbackStart, $fallbackEnd] = Penjualan::resolveDateRange('bukan-tanggal', '');
+        $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}$/', $fallbackStart);
+        $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}$/', $fallbackEnd);
+
+        $kasir = $this->makeUser('kasir', 2, 'Kasir Toko');
+        $produk = new Produk(['nama_produk' => 'Minyak Kita 1L', 'satuan' => 'Pouch']);
+        $detail = new DetailPenjualan([
+            'jumlah'              => 2,
+            'harga_jual_saat_itu' => 16000,
+            'subtotal'            => 32000,
+        ]);
+        $detail->setRelation('produk', $produk);
+
+        $penjualan = new Penjualan([
+            'nomor_nota'    => 'INV-20261116-0002',
+            'tanggal'       => '2026-11-16 11:00:00',
+            'total_belanja' => 32000,
+            'diskon'        => 2000,
+            'total_akhir'   => 30000,
+            'metode_bayar'  => 'tunai',
+            'status_bayar'  => 'lunas',
+        ]);
+        $penjualan->id_penjualan = 100;
+        $penjualan->setRelation('karyawan', $kasir);
+        $penjualan->setRelation('pelanggan', new Pelanggan(['nama_pelanggan' => 'Bu Sari']));
+        $penjualan->setRelation('detail', collect([$detail]));
+
+        $payload = $penjualan->toDetailPayload();
+        $this->assertSame(100, $payload['id_penjualan']);
+        $this->assertSame('INV-20261116-0002', $payload['nomor_nota']);
+        $this->assertSame('Kasir Toko', $payload['kasir']);
+        $this->assertSame('Bu Sari', $payload['pelanggan']);
+        $this->assertSame(32000.0, $payload['total_belanja']);
+        $this->assertSame(2000.0, $payload['diskon']);
+        $this->assertSame(30000.0, $payload['total_akhir']);
+        $this->assertCount(1, $payload['items']);
+        $this->assertSame('Minyak Kita 1L', $payload['items'][0]['nama_produk']);
+    }
 }

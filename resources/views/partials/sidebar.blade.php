@@ -5,15 +5,19 @@
         </div>
 
         <nav class="nav-menu">
-            {{-- 1. Laporan & Omzet (Hanya Admin) --}}
+            {{-- 1. Laporan & Omzet (Admin) / Laporan Riwayat Transaksi (Kasir) --}}
             @if(auth()->user()->peran === 'admin')
                 <a href="{{ route('laporan.index') }}" class="nav-item {{ request()->routeIs('laporan.*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-chart-line"></i> Laporan & Omzet
+                    <i class="fa-solid fa-chart-line"></i> Laporan &amp; Omzet
+                </a>
+            @else
+                <a href="{{ route('kasir.laporan') }}" class="nav-item {{ request()->routeIs('kasir.laporan*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-chart-line"></i> Laporan
                 </a>
             @endif
 
             {{-- 2. Kasir (Semua) --}}
-            <a href="{{ route('kasir.index') }}" class="nav-item {{ request()->routeIs('kasir.*') ? 'active' : '' }}">
+            <a href="{{ route('kasir.index') }}" class="nav-item {{ request()->routeIs('kasir.index') || request()->routeIs('kasir.nota') ? 'active' : '' }}">
                 <i class="fa-solid fa-cart-shopping"></i> Kasir
             </a>
 

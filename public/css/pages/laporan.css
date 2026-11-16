@@ -349,3 +349,33 @@
     font-size: 18px;
     font-weight: 800;
 }
+
+/* ================= LAPORAN KASIR (RIWAYAT TRANSAKSI) ================= */
+.table-card-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid #e2e8f0;
+    font-weight: 800;
+    font-size: 14px;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.table-card-header i {
+    color: #429198;
+}
+
+.laporan-hint-text {
+    font-size: 11px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.laporan-hint-text i {
+    color: #429198;
+}
+
