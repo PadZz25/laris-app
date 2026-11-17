@@ -67,7 +67,22 @@
         .form-group label { font-size: 11px; font-weight: 700; color: #0f172a; }
 
         .input-wrapper { position: relative; display: flex; align-items: center; }
-        .input-wrapper i { position: absolute; left: 14px; color: #64748b; font-size: 14px; }
+        .input-wrapper .input-icon { position: absolute; left: 14px; color: #64748b; font-size: 14px; pointer-events: none; }
+
+        .btn-toggle-password {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            color: #64748b;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-toggle-password:hover { color: #0f172a; }
 
         .input-wrapper input {
             width: 100%; padding: 12px 14px 12px 42px;
@@ -75,6 +90,7 @@
             outline: none; font-size: 12px; color: #0f172a;
             transition: all 0.2s;
         }
+        .input-wrapper input.input-password-field { padding-right: 45px; }
 
         .input-wrapper input:focus {
             border-color: #429198;
@@ -172,16 +188,20 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('login') }}">
+            <form method="POST" action="{{ route('login') }}" id="loginForm" autocomplete="on">
                 @csrf
 
                 <div class="form-group">
-                    <label>Username Kasir</label>
+                    <label for="username">Username</label>
                     <div class="input-wrapper">
-                        <i class="fa-regular fa-user"></i>
+                        <i class="fa-regular fa-user input-icon"></i>
                         <input
                             type="text"
+                            id="username"
                             name="username"
+                            autocomplete="username"
+                            autocapitalize="none"
+                            spellcheck="false"
                             placeholder="Masukkan username..."
                             value="{{ old('username') }}"
                             class="@error('username') error @enderror"
@@ -192,28 +212,31 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Kata Sandi</label>
-                    <div class="input-wrapper" style="position: relative;">
+                    <label for="input-password">Kata Sandi</label>
+                    <div class="input-wrapper">
                         {{-- Ikon Gembok --}}
-                        <i class="fa-solid fa-lock"></i>
+                        <i class="fa-solid fa-lock input-icon"></i>
                         
                         {{-- Input Password --}}
                         <input
                             type="password"
                             name="password"
                             id="input-password"
+                            autocomplete="current-password"
                             placeholder="••••••••"
-                            class="@error('password') error @enderror"
-                            style="padding-right: 45px;"
+                            class="input-password-field @error('password') error @enderror"
                             required
                         >
                         
-                        {{-- Ikon Mata (Pastikan ada pointer-events: auto) --}}
-                        <i class="fa-regular fa-eye" 
-                           id="toggle-password-icon" 
-                           onclick="togglePassword()" 
-                           style="position: absolute; right: 15px; left: auto; cursor: pointer; color: #64748b; z-index: 999; pointer-events: auto;">
-                        </i>
+                        {{-- Tombol Lihat Password --}}
+                        <button type="button"
+                                class="btn-toggle-password"
+                                id="toggle-password-btn"
+                                onclick="togglePassword()"
+                                tabindex="-1"
+                                aria-label="Tampilkan atau sembunyikan kata sandi">
+                            <i class="fa-regular fa-eye" id="toggle-password-icon"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -251,6 +274,11 @@
                 icon.classList.add('fa-eye');
             }
         }
+
+        // Pastikan tipe field kembali menjadi password saat submit agar password manager mengenali kredensial
+        document.getElementById('loginForm').addEventListener('submit', function () {
+            document.getElementById('input-password').type = 'password';
+        });
     </script>
 </body>
 </html>

@@ -314,4 +314,17 @@ class LarisWorkflowTest extends TestCase
         $this->assertStringContainsString('SEED_ADMIN_USERNAME', $seederContent);
         $this->assertStringContainsString('SEED_ADMIN_PASSWORD', $seederContent);
     }
+
+    public function test_login_page_uses_standard_password_manager_autocomplete_attributes(): void
+    {
+        $response = $this->get('/login');
+
+        $response->assertStatus(200);
+        $response->assertSee('autocomplete="on"', false);
+        $response->assertSee('for="username"', false);
+        $response->assertSee('id="username"', false);
+        $response->assertSee('autocomplete="username"', false);
+        $response->assertSee('for="input-password"', false);
+        $response->assertSee('autocomplete="current-password"', false);
+    }
 }
