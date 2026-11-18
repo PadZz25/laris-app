@@ -39,13 +39,13 @@
             <form method="POST" action="{{ route('pengaturan.updateProfil') }}" class="settings-form">
                 @csrf
                 <div class="form-group">
-                    <label>Nama Lengkap</label>
-                    <input type="text" name="nama_karyawan" value="{{ session('tab') === 'karyawan' ? auth()->user()->nama_karyawan : old('nama_karyawan', auth()->user()->nama_karyawan) }}" required>
+                    <label for="profil-nama-karyawan">Nama Lengkap</label>
+                    <input type="text" id="profil-nama-karyawan" name="nama_karyawan" autocomplete="name" value="{{ session('tab') === 'karyawan' ? auth()->user()->nama_karyawan : old('nama_karyawan', auth()->user()->nama_karyawan) }}" required>
                     @error('nama_karyawan') <div class="field-error">{{ $message }}</div> @enderror
                 </div>
                 <div class="form-group">
-                    <label>Username (Untuk Login)</label>
-                    <input type="text" name="username" value="{{ session('tab') === 'karyawan' ? auth()->user()->username : old('username', auth()->user()->username) }}" required>
+                    <label for="profil-username">Username (Untuk Login)</label>
+                    <input type="text" id="profil-username" name="username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" value="{{ session('tab') === 'karyawan' ? auth()->user()->username : old('username', auth()->user()->username) }}" required>
                     @error('username') <div class="field-error">{{ $message }}</div> @enderror
                 </div>
                 
@@ -62,18 +62,18 @@
             <form method="POST" action="{{ route('pengaturan.updatePassword') }}" class="settings-form">
                 @csrf
                 <div class="form-group">
-                    <label>Password Lama <span class="required">*</span></label>
-                    <input type="password" name="current_password" required>
+                    <label for="current_password">Password Lama <span class="required">*</span></label>
+                    <input type="password" id="current_password" name="current_password" autocomplete="current-password" required>
                     @error('current_password') <div class="field-error">{{ $message }}</div> @enderror
                 </div>
                 <div class="form-group">
-                    <label>Password Baru <span class="required">*</span></label>
-                    <input type="password" name="new_password" required minlength="6">
+                    <label for="new_password">Password Baru <span class="required">*</span></label>
+                    <input type="password" id="new_password" name="new_password" autocomplete="new-password" required minlength="6">
                     @error('new_password') <div class="field-error">{{ $message }}</div> @enderror
                 </div>
                 <div class="form-group">
-                    <label>Ulangi Password Baru <span class="required">*</span></label>
-                    <input type="password" name="new_password_confirmation" required minlength="6">
+                    <label for="new_password_confirmation">Ulangi Password Baru <span class="required">*</span></label>
+                    <input type="password" id="new_password_confirmation" name="new_password_confirmation" autocomplete="new-password" required minlength="6">
                 </div>
                 
                 <button type="submit" class="btn-save settings-submit-btn">
@@ -239,18 +239,18 @@
             @csrf
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Nama Lengkap <span class="required">*</span></label>
-                    <input type="text" name="nama_karyawan" value="{{ session('tab') === 'karyawan' ? old('nama_karyawan') : '' }}" required>
+                    <label for="tambah-nama-karyawan">Nama Lengkap <span class="required">*</span></label>
+                    <input type="text" id="tambah-nama-karyawan" name="nama_karyawan" value="{{ session('tab') === 'karyawan' ? old('nama_karyawan') : '' }}" required>
                     @error('nama_karyawan', 'tambahKaryawan') <div class="field-error">{{ $message }}</div> @enderror
                 </div>
                 <div class="form-group">
-                    <label>Username (Untuk Login) <span class="required">*</span></label>
-                    <input type="text" name="username" value="{{ session('tab') === 'karyawan' ? old('username') : '' }}" required>
+                    <label for="tambah-username">Username (Untuk Login) <span class="required">*</span></label>
+                    <input type="text" id="tambah-username" name="username" autocapitalize="none" autocorrect="off" spellcheck="false" value="{{ session('tab') === 'karyawan' ? old('username') : '' }}" required>
                     @error('username', 'tambahKaryawan') <div class="field-error">{{ $message }}</div> @enderror
                 </div>
                 <div class="form-group">
-                    <label>Password <span class="required">*</span></label>
-                    <input type="password" name="password" minlength="6" required>
+                    <label for="tambah-password">Password <span class="required">*</span></label>
+                    <input type="password" id="tambah-password" name="password" autocomplete="new-password" minlength="6" required>
                     @error('password', 'tambahKaryawan') <div class="field-error">{{ $message }}</div> @enderror
                 </div>
                 <div class="form-group">

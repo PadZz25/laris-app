@@ -340,27 +340,51 @@
             return;
         }
 
-        list.innerHTML = "";
         let subtotal = 0;
 
-        cart.forEach(item => {
+        const cartRows = cart.map(item => {
             const totalItem = item.harga * item.qty;
             subtotal += totalItem;
 
-            list.innerHTML += `
-                <div class="pos-cart-item">
-                    <div class="pos-cart-item-info">
-                        <div class="pos-cart-item-title">${escapeHtml(item.nama)}</div>
-                        <div class="pos-cart-item-price">Rp ${Number(item.harga).toLocaleString('id-ID')} x ${Number(item.qty)}</div>
-                    </div>
-                    <div class="pos-cart-controls">
-                        <button class="btn-qty" onclick="changeQty(${Number(item.id)}, -1)">-</button>
-                        <span class="qty-val">${Number(item.qty)}</span>
-                        <button class="btn-qty" onclick="changeQty(${Number(item.id)}, 1)">+</button>
-                    </div>
-                </div>
-            `;
+            const row = document.createElement('div');
+            row.className = 'pos-cart-item';
+
+            const info = document.createElement('div');
+            info.className = 'pos-cart-item-info';
+
+            const title = document.createElement('div');
+            title.className = 'pos-cart-item-title';
+            title.textContent = item.nama ?? '';
+
+            const price = document.createElement('div');
+            price.className = 'pos-cart-item-price';
+            price.textContent = `Rp ${Number(item.harga).toLocaleString('id-ID')} x ${Number(item.qty)}`;
+
+            info.replaceChildren(title, price);
+
+            const controls = document.createElement('div');
+            controls.className = 'pos-cart-controls';
+
+            const btnMinus = document.createElement('button');
+            btnMinus.className = 'btn-qty';
+            btnMinus.textContent = '-';
+            btnMinus.addEventListener('click', () => changeQty(Number(item.id), -1));
+
+            const qtyVal = document.createElement('span');
+            qtyVal.className = 'qty-val';
+            qtyVal.textContent = String(Number(item.qty));
+
+            const btnPlus = document.createElement('button');
+            btnPlus.className = 'btn-qty';
+            btnPlus.textContent = '+';
+            btnPlus.addEventListener('click', () => changeQty(Number(item.id), 1));
+
+            controls.replaceChildren(btnMinus, qtyVal, btnPlus);
+            row.replaceChildren(info, controls);
+            return row;
         });
+
+        list.replaceChildren(...cartRows);
 
         document.getElementById('sumSubtotal').textContent = `Rp ${subtotal.toLocaleString('id-ID')}`;
         document.getElementById('sumTotal').textContent = `Rp ${subtotal.toLocaleString('id-ID')}`;

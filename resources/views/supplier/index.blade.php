@@ -906,7 +906,7 @@
         }
 
         const container = document.getElementById('pasokanItemsHidden');
-        container.innerHTML = '';
+        container.replaceChildren();
 
         pasokanCart.forEach((item, idx) => {
             const inputs = [

@@ -96,16 +96,25 @@
             document.getElementById('detailTotal').textContent = 'Rp ' + Number(data.total_akhir).toLocaleString('id-ID');
 
             const tbody = document.getElementById('detailItemsTbody');
-            tbody.innerHTML = '';
-            data.items.forEach(item => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td class="laporan-cell-bold">${escapeHtml(item.nama_produk)}</td>
-                        <td style="text-align: center;">${Number(item.jumlah)} ${escapeHtml(item.satuan)}</td>
-                        <td style="text-align: right;">Rp ${Number(item.subtotal).toLocaleString('id-ID')}</td>
-                    </tr>
-                `;
+            const rows = data.items.map(item => {
+                const tr = document.createElement('tr');
+
+                const tdName = document.createElement('td');
+                tdName.className = 'laporan-cell-bold';
+                tdName.textContent = item.nama_produk ?? '';
+
+                const tdQty = document.createElement('td');
+                tdQty.style.textAlign = 'center';
+                tdQty.textContent = `${Number(item.jumlah)} ${item.satuan ?? ''}`;
+
+                const tdSubtotal = document.createElement('td');
+                tdSubtotal.style.textAlign = 'right';
+                tdSubtotal.textContent = `Rp ${Number(item.subtotal).toLocaleString('id-ID')}`;
+
+                tr.replaceChildren(tdName, tdQty, tdSubtotal);
+                return tr;
             });
+            tbody.replaceChildren(...rows);
 
             document.getElementById('btnCetakUlang').href = `/kasir/nota/${encodeURIComponent(data.id_penjualan)}`;
         } catch (err) {
