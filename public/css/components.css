@@ -124,6 +124,12 @@
     max-width: 100%;
 }
 
+.search-wrapper.search-wrapper-flex {
+    flex: 1;
+    width: auto;
+    min-width: 180px;
+}
+
 .search-wrapper i {
     position: absolute;
     left: 14px;

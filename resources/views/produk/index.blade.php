@@ -47,7 +47,7 @@
      ═══════════════════════════════════════════ --}}
 <section class="control-card">
     <div class="control-left">
-        <div class="search-wrapper">
+        <div class="search-wrapper search-wrapper-flex">
             <i class="fa-solid fa-magnifying-glass"></i>
             <input
                 type="text"
@@ -57,14 +57,14 @@
                 oninput="filterProduk()"
             >
         </div>
-        <div class="category-group" id="categoryPills">
-            <div class="cat-pill active" data-kategori="Semua" onclick="setKategori('Semua', this)">Semua</div>
+        <select id="filterKategoriProduk"
+                class="filter-select"
+                onchange="setKategori(this.value)">
+            <option value="Semua">Semua Kategori</option>
             @foreach ($kategoriList as $kat)
-                <div class="cat-pill" data-kategori="{{ $kat->nama_kategori }}" onclick="setKategori(this.dataset.kategori, this)">
-                    {{ $kat->nama_kategori }}
-                </div>
+                <option value="{{ $kat->nama_kategori }}">{{ $kat->nama_kategori }}</option>
             @endforeach
-        </div>
+        </select>
     </div>
 
     {{-- KHUSUS ADMIN: Tombol Tambah & Opname --}}
@@ -182,6 +182,13 @@
                         </td>
                     </tr>
                 @endforelse
+                @if($produk->isNotEmpty())
+                    <tr id="noMatchProdukRow" style="display: none;">
+                        <td colspan="{{ auth()->user()->peran === 'admin' ? 9 : 8 }}" style="text-align: center; color: #64748b; padding: 24px;">
+                            Produk tidak ditemukan.
+                        </td>
+                    </tr>
+                @endif
             </tbody>
         </table>
     </div>
@@ -626,10 +633,8 @@
     // ═══════════════════════════════════════════
     let activeKategori = 'Semua';
 
-    function setKategori(kategori, el) {
-        activeKategori = kategori;
-        document.querySelectorAll('#categoryPills .cat-pill').forEach(p => p.classList.remove('active'));
-        el.classList.add('active');
+    function setKategori(kategori) {
+        activeKategori = kategori || 'Semua';
         filterProduk();
     }
 
@@ -654,7 +659,15 @@
         });
 
         document.getElementById('visibleCount').textContent = visible;
+
+        const noMatchRow = document.getElementById('noMatchProdukRow');
+        if (noMatchRow) {
+            noMatchRow.style.display = visible === 0 ? '' : 'none';
+        }
     }
+
+    activeKategori = document.getElementById('filterKategoriProduk')?.value || 'Semua';
+    filterProduk();
 
     // ═══════════════════════════════════════════
     // JAVASCRIPT KHUSUS ADMIN (Modal, AJAX, Form)

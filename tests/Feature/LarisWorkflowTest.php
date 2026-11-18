@@ -327,4 +327,43 @@ class LarisWorkflowTest extends TestCase
         $response->assertSee('for="input-password"', false);
         $response->assertSee('autocomplete="current-password"', false);
     }
+
+    public function test_produk_view_uses_kasir_style_search_and_category_select(): void
+    {
+        $kasir = $this->makeUser('kasir', 2, 'Kasir Toko');
+        $this->actingAs($kasir);
+
+        $kategori = new \App\Models\KategoriProduk(['nama_kategori' => 'Sembako']);
+        $kategori->id_kategori = 1;
+
+        $produk = new Produk([
+            'nama_produk'   => 'Beras Mentari 5kg',
+            'barcode'       => 'BRS-001',
+            'satuan'        => 'Sak',
+            'harga_beli'    => 62000,
+            'harga_jual'    => 68000,
+            'stok_sekarang' => 10,
+            'min_stok'      => 5,
+        ]);
+        $produk->id_produk = 1;
+        $produk->setRelation('kategori', $kategori);
+
+        $html = View::make('produk.index', [
+            'errors'       => new \Illuminate\Support\ViewErrorBag(),
+            'produk'       => collect([$produk]),
+            'kategoriList' => collect([$kategori]),
+            'stats'        => [
+                'total_jenis'  => 1,
+                'stok_menipis' => 0,
+                'stok_habis'   => 0,
+                'total_aset'   => 620000,
+            ],
+        ])->render();
+
+        $this->assertStringContainsString('search-wrapper search-wrapper-flex', $html);
+        $this->assertStringContainsString('id="filterKategoriProduk"', $html);
+        $this->assertStringContainsString('class="filter-select"', $html);
+        $this->assertStringNotContainsString('id="categoryPills"', $html);
+        $this->assertStringContainsString('<option value="Sembako">Sembako</option>', $html);
+    }
 }

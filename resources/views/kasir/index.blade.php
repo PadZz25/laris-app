@@ -10,7 +10,7 @@
         {{-- PANEL KIRI: PRODUK --}}
         <div class="pos-left">
             <div class="pos-filter-card">
-                <div class="search-wrapper pos-search-wrapper">
+                <div class="search-wrapper search-wrapper-flex">
                     <i class="fa-solid fa-magnifying-glass"></i>
                     <input type="text"
                            id="posSearch"
