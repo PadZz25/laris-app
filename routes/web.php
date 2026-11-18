@@ -17,6 +17,13 @@ use Illuminate\Support\Facades\Route;
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:5,1'); // Tambah proteksi brute-force
 
+// Fallback jika user me-refresh / membuka GET /logout langsung di browser
+Route::get('/logout', function () {
+    return auth()->check()
+        ? redirect('/')
+        : redirect()->route('login');
+});
+
 // Smart Redirect untuk halaman utama
 Route::get('/', function () {
     if (auth()->check()) {

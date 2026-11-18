@@ -366,4 +366,52 @@ class LarisWorkflowTest extends TestCase
         $this->assertStringNotContainsString('id="categoryPills"', $html);
         $this->assertStringContainsString('<option value="Sembako">Sembako</option>', $html);
     }
+
+    public function test_reverse_proxy_https_headers_and_logout_419_recovery(): void
+    {
+        // 1. Uji deteksi HTTPS di balik reverse proxy (mis. DomCloud/Nginx)
+        $proxyResponse = $this->withHeaders([
+            'Host'              => 'larisapp.domcloud.dev',
+            'X-Forwarded-Host'  => 'larisapp.domcloud.dev',
+            'X-Forwarded-Proto' => 'https',
+            'X-Forwarded-Port'  => '443',
+        ])->get('/login');
+
+        $proxyResponse->assertStatus(200);
+        $proxyResponse->assertSee('action="https://larisapp.domcloud.dev/login"', false);
+
+        // 2. Uji GET /logout aman redirect ke login / home (bukan 405 Method Not Allowed)
+        $this->get('/logout')->assertRedirect(route('login'));
+
+        // 3. Uji penanganan TokenMismatchException (419) pada POST /logout dan /login
+        $handler = app(\Illuminate\Contracts\Debug\ExceptionHandler::class);
+        $tokenEx = new \Illuminate\Session\TokenMismatchException('CSRF token mismatch.');
+
+        // Kasus A: sesi sudah habis (guest) saat klik Logout
+        $guestLogoutReq = \Illuminate\Http\Request::create('/logout', 'POST');
+        $guestLogoutReq->setLaravelSession(app('session.store'));
+        $guestRes = $handler->render($guestLogoutReq, $tokenEx);
+        $this->assertSame(302, $guestRes->getStatusCode());
+        $this->assertStringContainsString('/login', (string) $guestRes->headers->get('Location'));
+
+        // Kasus B: masih login & klik Logout dari origin yang sama namun token kedaluwarsa
+        $kasir = $this->makeUser('kasir', 2, 'Kasir Toko');
+        $this->actingAs($kasir);
+        $authLogoutReq = \Illuminate\Http\Request::create('https://larisapp.domcloud.dev/logout', 'POST', [], [], [], [
+            'HTTP_ORIGIN' => 'https://larisapp.domcloud.dev',
+            'HTTPS'       => 'on',
+        ]);
+        $authLogoutReq->setLaravelSession(app('session.store'));
+        $authRes = $handler->render($authLogoutReq, $tokenEx);
+        $this->assertSame(302, $authRes->getStatusCode());
+        $this->assertStringContainsString('/login', (string) $authRes->headers->get('Location'));
+        $this->assertNull(auth()->user());
+
+        // Kasus C: 419 pada POST /login diarahkan kembali ke halaman login dengan pesan error
+        $loginReq = \Illuminate\Http\Request::create('/login', 'POST', ['username' => 'ina']);
+        $loginReq->setLaravelSession(app('session.store'));
+        $loginRes = $handler->render($loginReq, $tokenEx);
+        $this->assertSame(302, $loginRes->getStatusCode());
+        $this->assertStringContainsString('/login', (string) $loginRes->headers->get('Location'));
+    }
 }
