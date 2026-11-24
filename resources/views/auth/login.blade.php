@@ -72,10 +72,12 @@
 
         .btn-toggle-password {
             position: absolute;
-            right: 12px;
+            right: 0;
+            width: 44px;
+            height: 44px;
             background: none;
             border: none;
-            padding: 4px;
+            border-radius: 8px;
             cursor: pointer;
             color: #64748b;
             font-size: 14px;
@@ -84,6 +86,11 @@
             justify-content: center;
         }
         .btn-toggle-password:hover { color: #0f172a; }
+        .btn-toggle-password:focus-visible {
+            outline: 2px solid #429198;
+            outline-offset: -2px;
+            color: #0f172a;
+        }
 
         .input-wrapper input {
             width: 100%; padding: 12px 14px 12px 42px;
@@ -91,6 +98,7 @@
             outline: none; font-size: 12px; color: #0f172a;
             transition: all 0.2s;
         }
+        .input-wrapper input::placeholder { color: #64748b; opacity: 1; }
         .input-wrapper input.input-password-field { padding-right: 45px; }
 
         .input-wrapper input:focus {
@@ -215,28 +223,23 @@
                 <div class="form-group">
                     <label for="input-password">Kata Sandi</label>
                     <div class="input-wrapper">
-                        {{-- Ikon Gembok --}}
-                        <i class="fa-solid fa-lock input-icon"></i>
-                        
-                        {{-- Input Password --}}
+                        <i class="fa-solid fa-lock input-icon" aria-hidden="true"></i>
                         <input
                             type="password"
                             name="password"
                             id="input-password"
                             autocomplete="current-password"
-                            placeholder="••••••••"
+                            placeholder="Masukkan kata sandi..."
                             class="input-password-field @error('password') error @enderror"
                             required
                         >
-                        
-                        {{-- Tombol Lihat Password --}}
                         <button type="button"
                                 class="btn-toggle-password"
                                 id="toggle-password-btn"
                                 onclick="togglePassword()"
-                                tabindex="-1"
+                                aria-pressed="false"
                                 aria-label="Tampilkan atau sembunyikan kata sandi">
-                            <i class="fa-regular fa-eye" id="toggle-password-icon"></i>
+                            <i class="fa-regular fa-eye" id="toggle-password-icon" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>
@@ -264,21 +267,19 @@
         function togglePassword() {
             const input = document.getElementById('input-password');
             const icon = document.getElementById('toggle-password-icon');
+            const btn = document.getElementById('toggle-password-btn');
+            const isHidden = input.type === 'password';
 
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
+            input.type = isHidden ? 'text' : 'password';
+            icon.classList.toggle('fa-eye', !isHidden);
+            icon.classList.toggle('fa-eye-slash', isHidden);
+            btn.setAttribute('aria-pressed', String(isHidden));
         }
 
         // Pastikan tipe field kembali menjadi password saat submit agar password manager mengenali kredensial
         document.getElementById('loginForm').addEventListener('submit', function () {
             document.getElementById('input-password').type = 'password';
+            document.getElementById('toggle-password-btn').setAttribute('aria-pressed', 'false');
         });
     </script>
 </body>

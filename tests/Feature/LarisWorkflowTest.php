@@ -326,6 +326,10 @@ class LarisWorkflowTest extends TestCase
         $response->assertSee('autocomplete="username"', false);
         $response->assertSee('for="input-password"', false);
         $response->assertSee('autocomplete="current-password"', false);
+        $response->assertSee('placeholder="Masukkan kata sandi..."', false);
+        $response->assertDontSee('placeholder="••••••••"', false);
+        $response->assertSee('aria-pressed="false"', false);
+        $response->assertDontSee('tabindex="-1"', false);
     }
 
     public function test_produk_view_uses_kasir_style_search_and_category_select(): void
